@@ -19,9 +19,9 @@ export const createApplication = createServerFn({ method: 'POST' })
   })
 
 export const updateApplication = createServerFn({ method: 'POST' })
-  .inputValidator((input: { id: number; data: Record<string, unknown> }) => input)
   .handler(async ({ data }) => {
-    return db.update(data.id, data.data)
+    const { id, ...fields } = data as { id: number } & Record<string, unknown>
+    return db.update(id, fields)
   })
 
 export const deleteApplication = createServerFn({ method: 'POST' })
