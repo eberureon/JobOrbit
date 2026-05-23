@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { Download, Save } from 'lucide-react'
+import { Skeleton } from '../../ui/skeleton'
 import { useToast } from '../../../hooks/use-toast'
 import { getCv, upsertCv } from '../../../lib/server/cv.functions'
 import type { InsertCv, Cv } from '../../../db/schema'
@@ -18,47 +19,6 @@ type FormFields = {
   experience: string
   education: string
   links: string
-}
-
-function parseList(text: string): string[] {
-  return text
-    .split('\n')
-    .map((l) => l.trim())
-    .filter(Boolean)
-}
-
-function safeParseJson(text: string): string[] {
-  try {
-    const v = JSON.parse(text)
-    return Array.isArray(v) ? v.map(String) : []
-  } catch {
-    return []
-  }
-}
-
-function buildMarkdown(values: FormFields, skills: string[], links: string[]): string {
-  const lines: string[] = []
-  lines.push(`# ${values.full_name || 'Your Name'}`)
-  if (values.headline) lines.push(`### ${values.headline}`)
-  const contactBits = [values.email, values.phone, values.location].filter(Boolean)
-  if (contactBits.length) lines.push(contactBits.join(' · '))
-  lines.push('')
-  if (values.summary) {
-    lines.push('## Summary', '', values.summary, '')
-  }
-  if (skills.length) {
-    lines.push('## Skills', '', skills.map((s) => `- ${s}`).join('\n'), '')
-  }
-  if (values.experience) {
-    lines.push('## Experience', '', values.experience, '')
-  }
-  if (values.education) {
-    lines.push('## Education', '', values.education, '')
-  }
-  if (links.length) {
-    lines.push('## Links', '', links.map((l) => `- ${l}`).join('\n'), '')
-  }
-  return lines.join('\n')
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -384,8 +344,46 @@ export function CVPage() {
             <span className='text-xs text-muted-foreground font-mono-num'>live</span>
           </div>
           <div className='p-6 pt-0'>
-            {isLoading ? (
-              <div className='text-sm text-muted-foreground'>Loading...</div>
+              {isLoading ? (
+              <div className='font-sans space-y-5'>
+                <div className='border-b border-border pb-4 space-y-2'>
+                  <Skeleton className='h-3 w-28' />
+                  <Skeleton className='h-6 w-48' />
+                  <Skeleton className='h-4 w-64' />
+                  <Skeleton className='h-3 w-72' />
+                </div>
+                <div className='space-y-2'>
+                  <Skeleton className='h-3 w-16' />
+                  <Skeleton className='h-4 w-full' />
+                  <Skeleton className='h-4 w-3/4' />
+                </div>
+                <div className='space-y-2'>
+                  <Skeleton className='h-3 w-12' />
+                  <div className='flex flex-wrap gap-1.5'>
+                    <Skeleton className='h-5 w-16 rounded' />
+                    <Skeleton className='h-5 w-20 rounded' />
+                    <Skeleton className='h-5 w-14 rounded' />
+                    <Skeleton className='h-5 w-24 rounded' />
+                    <Skeleton className='h-5 w-18 rounded' />
+                  </div>
+                </div>
+                <div className='space-y-2'>
+                  <Skeleton className='h-3 w-20' />
+                  <Skeleton className='h-4 w-full' />
+                  <Skeleton className='h-4 w-5/6' />
+                  <Skeleton className='h-4 w-4/5' />
+                </div>
+                <div className='space-y-2'>
+                  <Skeleton className='h-3 w-16' />
+                  <Skeleton className='h-4 w-2/3' />
+                  <Skeleton className='h-4 w-3/5' />
+                </div>
+                <div className='space-y-2'>
+                  <Skeleton className='h-3 w-12' />
+                  <Skeleton className='h-3 w-64' />
+                  <Skeleton className='h-3 w-48' />
+                </div>
+              </div>
             ) : (
               <CVPreview values={values} skills={skillsList} links={linksList} />
             )}

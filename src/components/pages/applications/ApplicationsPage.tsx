@@ -21,6 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../../ui/dropdown-menu'
+import { Skeleton } from '../../ui/skeleton'
 import { useToast } from '../../../hooks/use-toast'
 import { StatusBadge } from '../../StatusBadge'
 import { ApplicationDialog } from './ApplicationDialog'
@@ -206,8 +207,27 @@ export function ApplicationsPage() {
       <Card className="card-hairline overflow-hidden">
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="p-8 text-center text-muted-foreground text-sm">
-              Loading…
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
+                    <th className="px-4 py-3 font-medium">Company</th>
+                    <th className="px-4 py-3 font-medium">Role</th>
+                    <th className="px-4 py-3 font-medium">Status</th>
+                    <th className="px-4 py-3 font-medium">Applied</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <tr key={i} className="border-b border-border/40">
+                      <td className="px-4 py-3"><Skeleton className="h-4 w-28" /></td>
+                      <td className="px-4 py-3"><Skeleton className="h-4 w-36" /></td>
+                      <td className="px-4 py-3"><Skeleton className="h-5 w-16 rounded-full" /></td>
+                      <td className="px-4 py-3"><Skeleton className="h-4 w-16" /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           ) : filtered.length === 0 ? (
             <div className="p-12 text-center">
