@@ -1,56 +1,102 @@
-import { Link, useLocation } from '@tanstack/react-router'
-import { Briefcase, FileText, LayoutDashboard, Menu, PanelLeftClose, PanelLeftOpen, X } from 'lucide-react'
-import { useState } from 'react'
-import { ThemeToggle } from './ThemeToggle'
+import { Link, useLocation } from "@tanstack/react-router";
+import {
+  Briefcase,
+  FileText,
+  LayoutDashboard,
+  Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
+  X,
+} from "lucide-react";
+import { useState } from "react";
+import { ThemeToggle } from "./ThemeToggle";
 
 const NAV = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, activeOptions: { exact: true } },
-  { to: '/applications', label: 'Applications', icon: Briefcase },
-  { to: '/cv', label: 'CV', icon: FileText },
-]
+  {
+    to: "/",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    activeOptions: { exact: true },
+  },
+  { to: "/applications", label: "Applications", icon: Briefcase },
+  { to: "/cv", label: "CV", icon: FileText },
+];
 
 function Logo({ collapsed }: { collapsed?: boolean }) {
   return (
-    <div className="flex items-center gap-2" aria-label="JobOrbit">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="text-foreground shrink-0">
-        <rect x="3" y="3" width="18" height="18" rx="4" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M8 8v4a4 4 0 0 0 8 0V8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <div className={`flex items-center ${!collapsed ? "gap-2" : "gap-0"}`}>
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-hidden="true"
+        className="text-foreground shrink-0"
+        aria-label="JobOrbit"
+      >
+        <rect
+          x="3"
+          y="3"
+          width="18"
+          height="18"
+          rx="4"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M8 8v4a4 4 0 0 0 8 0V8"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
         <circle cx="18" cy="6" r="2" fill="hsl(var(--primary))" />
       </svg>
-      <span className={`font-semibold tracking-tight text-foreground text-base transition-opacity duration-200 ${collapsed ? 'opacity-0 w-0 overflow-hidden' : ''}`}>
+      <span
+        className={`font-semibold tracking-tight text-foreground text-base transition-opacity duration-200 ${collapsed ? "opacity-0 w-0 overflow-hidden inline-block whitespace-nowrap" : ""}`}
+      >
         Job<span className="text-primary">Orbit</span>
       </span>
     </div>
-  )
+  );
 }
 
-function NavLinks({ collapsed, onNavigate }: { collapsed?: boolean; onNavigate?: () => void }) {
-  const { pathname } = useLocation()
+function NavLinks({
+  collapsed,
+  onNavigate,
+}: {
+  collapsed?: boolean;
+  onNavigate?: () => void;
+}) {
+  const { pathname } = useLocation();
   return (
-    <nav className="flex flex-col gap-0.5 p-3">
+    <nav className={`flex flex-col gap-0.5 ${collapsed ? "p-2" : "p-3"}`}>
       {NAV.map((item) => {
         const isActive =
-          item.to === '/' ? pathname === '/' : pathname.startsWith(item.to)
-        const Icon = item.icon
+          item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
+        const Icon = item.icon;
         return (
           <Link
             key={item.to}
             to={item.to}
             activeOptions={item.activeOptions}
             onClick={onNavigate}
-            className={`group relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+            className={`group relative flex items-center rounded-md py-2 text-sm font-medium transition-colors ${
+              collapsed ? "justify-center" : "gap-3 px-3"
+            } ${
               isActive
-                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-            } ${collapsed ? 'justify-center px-0' : ''}`}
+                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
             title={collapsed ? item.label : undefined}
           >
             <Icon
               className={`h-4 w-4 shrink-0 ${
-                isActive ? 'text-primary' : 'text-muted-foreground'
+                isActive ? "text-primary" : "text-muted-foreground"
               }`}
             />
-            <span className={`transition-opacity duration-200 ${collapsed ? 'opacity-0 w-0 overflow-hidden' : ''}`}>
+            <span
+              className={`transition-opacity duration-200 ${collapsed ? "opacity-0 w-0 overflow-hidden inline-block whitespace-nowrap" : ""}`}
+            >
               {item.label}
             </span>
             {isActive && !collapsed && (
@@ -60,17 +106,17 @@ function NavLinks({ collapsed, onNavigate }: { collapsed?: boolean; onNavigate?:
               <span className="absolute right-0 h-4 w-1 rounded-full bg-primary" />
             )}
           </Link>
-        )
+        );
       })}
     </nav>
-  )
+  );
 }
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const collapsed = !sidebarOpen
+  const collapsed = !sidebarOpen;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -82,27 +128,39 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           className="rounded-md border border-border p-2"
           aria-label="Toggle menu"
         >
-          {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          {mobileOpen ? (
+            <X className="h-4 w-4" />
+          ) : (
+            <Menu className="h-4 w-4" />
+          )}
         </button>
       </div>
 
       <div className="flex">
         <aside
           className={`hidden md:flex md:flex-col md:fixed md:inset-y-0 border-r border-sidebar-border bg-sidebar transition-[width] duration-200 ease-in-out ${
-            collapsed ? 'w-14' : 'w-60'
+            collapsed ? "w-14" : "w-60"
           }`}
         >
-          <div className="flex items-center justify-between px-4 py-4 border-b border-sidebar-border">
+          <div
+            className={`flex items-center border-b border-sidebar-border ${collapsed ? "flex-col gap-3 p-2" : "justify-between p-4"}`}
+          >
             <Logo collapsed={collapsed} />
-            <div className="flex items-center gap-1">
+            <div
+              className={`flex items-center ${collapsed ? "flex-col gap-3" : "gap-1"}`}
+            >
               <ThemeToggle />
               <button
                 type="button"
                 onClick={() => setSidebarOpen((v) => !v)}
                 className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 transition-colors"
-                aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
               >
-                {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+                {collapsed ? (
+                  <PanelLeftOpen className="h-4 w-4" />
+                ) : (
+                  <PanelLeftClose className="h-4 w-4" />
+                )}
               </button>
             </div>
           </div>
@@ -117,7 +175,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
         <main
           className={`flex-1 min-h-screen min-w-0 overflow-x-hidden transition-[padding] duration-200 ease-in-out ${
-            collapsed ? 'md:pl-14' : 'md:pl-60'
+            collapsed ? "md:pl-14" : "md:pl-60"
           }`}
         >
           <div className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto min-w-0">
@@ -126,5 +184,5 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </main>
       </div>
     </div>
-  )
+  );
 }
