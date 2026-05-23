@@ -1,5 +1,6 @@
 import {
   HeadContent,
+  Link,
   Outlet,
   Scripts,
   createRootRouteWithContext,
@@ -18,7 +19,7 @@ interface MyRouterContext {
   queryClient: QueryClient
 }
 
-const THEME_INIT_SCRIPT = `(function(){try{document.documentElement.classList.add('dark');document.documentElement.style.colorScheme='dark';}catch(e){}})();`
+const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('theme');if(t==='light'){document.documentElement.classList.remove('dark');document.documentElement.dataset.theme='light';document.documentElement.style.colorScheme='light';}else{document.documentElement.classList.add('dark');document.documentElement.dataset.theme='dark';document.documentElement.style.colorScheme='dark';}}catch(e){}})();`
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: () => ({
@@ -32,6 +33,21 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     ],
   }),
   shellComponent: RootDocument,
+  notFoundComponent: () => (
+    <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
+      <div className="text-6xl font-mono-num text-muted-foreground/30 font-semibold">404</div>
+      <h1 className="mt-4 text-xl font-semibold text-foreground">Page not found</h1>
+      <p className="mt-2 text-sm text-muted-foreground max-w-sm">
+        This page doesn't exist or was moved.
+      </p>
+      <Link
+        to="/"
+        className="mt-6 inline-flex items-center gap-2 rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:opacity-90 transition-opacity"
+      >
+        Back to dashboard
+      </Link>
+    </div>
+  ),
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {

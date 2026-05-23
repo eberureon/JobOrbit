@@ -119,7 +119,7 @@ function Dashboard() {
           </div>
           <div className="p-5 pt-2">
             <div className="h-64" data-testid="chart-timeline">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height={256}>
                 <AreaChart data={stats?.timeline ?? []}>
                   <defs>
                     <linearGradient id="g-timeline" x1="0" y1="0" x2="0" y2="1">
@@ -169,7 +169,7 @@ function Dashboard() {
               {pieData.length === 0 ? (
                 <div className="w-full text-center text-sm text-muted-foreground">No data yet</div>
               ) : (
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height={256}>
                   <PieChart>
                     <Pie data={pieData} dataKey="value" nameKey="name" innerRadius={48} outerRadius={80} paddingAngle={2} stroke="hsl(var(--card))" strokeWidth={2}>
                       {pieData.map((entry) => (
