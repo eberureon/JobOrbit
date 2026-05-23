@@ -110,7 +110,7 @@ export function ApplicationsPage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await deleteApplication({ id })
+      await deleteApplication({ data: { id } })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['applications'] })
