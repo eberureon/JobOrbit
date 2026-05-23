@@ -50,13 +50,13 @@ import {
 } from '../components/ui/dropdown-menu'
 import { useToast } from '../hooks/use-toast'
 import { StatusBadge } from '../components/StatusBadge'
+import { APPLICATION_STATUSES } from '../types'
+import type { ApplicationStatus } from '../types'
 import {
-  APPLICATION_STATUSES,
   insertApplicationSchema,
 } from '../db/schema'
 import type {
   Application,
-  ApplicationStatus,
   InsertApplication,
 } from '../db/schema'
 import {

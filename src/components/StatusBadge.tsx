@@ -1,4 +1,4 @@
-import type { ApplicationStatus } from '../db/schema'
+import type { ApplicationStatus } from '../types'
 
 const STATUS_VAR: Record<ApplicationStatus, string> = {
   Applied: '--status-applied',

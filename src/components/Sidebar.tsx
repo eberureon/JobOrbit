@@ -1,7 +1,6 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   Briefcase,
-  FileText,
   LayoutDashboard,
   Menu,
   PanelLeftClose,
@@ -19,7 +18,6 @@ const NAV = [
     activeOptions: { exact: true },
   },
   { to: "/applications", label: "Applications", icon: Briefcase },
-  { to: "/cv", label: "CV", icon: FileText },
 ];
 
 function Logo({ collapsed }: { collapsed?: boolean }) {

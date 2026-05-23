@@ -2,17 +2,11 @@ import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
 import { sql } from 'drizzle-orm'
 import { createInsertSchema } from 'drizzle-zod'
 import { z } from 'zod'
+import { APPLICATION_STATUSES } from '../types'
+import type { ApplicationStatus } from '../types'
 
-export const APPLICATION_STATUSES = [
-  'Applied',
-  'Interview',
-  'Offer',
-  'Rejected',
-  'Accepted',
-  'Withdrawn',
-] as const
-
-export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number]
+export { APPLICATION_STATUSES }
+export type { ApplicationStatus }
 
 export const applications = sqliteTable('applications', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -81,19 +75,3 @@ export const insertCvSchema = createInsertSchema(cv)
 
 export type InsertCv = z.infer<typeof insertCvSchema>
 export type Cv = typeof cv.$inferSelect
-
-export type Stats = {
-  total: number
-  last7Days: number
-  last30Days: number
-  statusBreakdown: Record<ApplicationStatus, number>
-  funnel: {
-    applied: number
-    interview: number
-    offer: number
-    accepted: number
-    rejected: number
-  }
-  timeline: { date: string; count: number }[]
-  topCompanies: { company: string; count: number }[]
-}

@@ -148,7 +148,7 @@
   --popover: 222 40% 9%;
   --popover-foreground: 210 20% 96%;
   --primary: 158 80% 50%;
-  --primary-foreground: 222 47% 6%;
+  --primary-foreground: 0 0% 100%;
   --primary-border: 158 80% 50%;
   --secondary: 222 25% 14%;
   --secondary-foreground: 210 20% 96%;
@@ -156,7 +156,7 @@
   --muted: 222 20% 14%;
   --muted-foreground: 215 15% 60%;
   --accent: 265 75% 65%;
-  --accent-foreground: 222 47% 6%;
+  --accent-foreground: 0 0% 100%;
   --destructive: 0 70% 55%;
   --destructive-foreground: 0 0% 100%;
   --destructive-border: 0 70% 55%;
@@ -174,7 +174,7 @@
   --sidebar-accent: 222 30% 14%;
   --sidebar-accent-foreground: 210 20% 96%;
   --sidebar-primary: 158 80% 50%;
-  --sidebar-primary-foreground: 222 47% 6%;
+  --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-ring: 158 80% 50%;
 
   /* Status badge colors */
@@ -223,7 +223,7 @@
     --popover: 222 40% 9%;
     --popover-foreground: 210 20% 96%;
     --primary: 158 80% 50%;
-    --primary-foreground: 222 47% 6%;
+    --primary-foreground: 0 0% 100%;
     --primary-border: 158 80% 50%;
     --secondary: 222 25% 14%;
     --secondary-foreground: 210 20% 96%;
@@ -231,7 +231,7 @@
     --muted: 222 20% 14%;
     --muted-foreground: 215 15% 60%;
     --accent: 265 75% 65%;
-    --accent-foreground: 222 47% 6%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
     --destructive-border: 0 70% 55%;
@@ -249,7 +249,7 @@
     --sidebar-accent: 222 30% 14%;
     --sidebar-accent-foreground: 210 20% 96%;
     --sidebar-primary: 158 80% 50%;
-    --sidebar-primary-foreground: 222 47% 6%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-ring: 158 80% 50%;
 
     /* Status badge colors */
