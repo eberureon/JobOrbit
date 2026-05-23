@@ -85,6 +85,50 @@ skills:
 - SQLite API patterns: use `.all()` for list queries, `.get()` for single-row, `.run()` for delete, `.returning().get()` for insert/update (supported by drizzle-orm + better-sqlite3).
 - Build verified: `bun --bun run build` compiles successfully (client + SSR).
 
+## TDD Progress
+
+### Structure
+- **Pure functions**: `src/lib/stats.ts` (computeStats), `src/lib/stats.test.ts`
+- **Raw CRUD** (bypasses createServerFn): `src/lib/db/applications.ts`, `src/lib/db/applications.test.ts`
+- **Route components**: `src/routes/-index.test.tsx` (Dashboard), `src/routes/-applications.test.tsx` (pending)
+- **Shared types**: `src/types.ts` (APPLICATION_STATUSES, ApplicationStatus, Stats)
+- **Test infra**: `src/test/setup.ts` (in-memory SQLite), `src/test/test-utils.tsx` (QueryClientProvider wrapper)
+
+### Patterns
+- Raw CRUD extracted from createServerFn wrappers so DB logic is testable in node without TanStack Start runtime
+- Component tests mock server functions via `vi.hoisted` + `vi.mock`, wrap with `QueryClientProvider` (retry: false)
+- Use `findAllByText` with `length >= 1` to handle React 19 StrictMode double-renders in jsdom
+- Test files prefixed `-` to exclude from TanStack Router route scanning (`routeFileIgnorePrefix: "-"`)
+- In-memory SQLite (`DATABASE_URL=:memory:`) with `afterEach` table truncation
+
+### Test Suite (34 tests, all passing)
+| File | Tests | Status |
+|------|-------|--------|
+| `src/lib/stats.test.ts` | 6 | PASS |
+| `src/lib/db/applications.test.ts` | 10 | PASS |
+| `src/routes/-index.test.tsx` | 5 | PASS |
+| `src/routes/-applications.test.tsx` | 13 | PASS |
+
+### Relevant Files
+- `src/lib/stats.ts` — pure computeStats function
+- `src/lib/stats.test.ts` — 6 tests (empty, counts, breakdown, funnel, timeline, top companies)
+- `src/lib/db/applications.ts` — raw CRUD (listAll, getById, insert, update, remove, stats)
+- `src/lib/db/applications.test.ts` — 10 tests (ordering, partial update, validation, nonexistent IDs)
+- `src/lib/server/applications.functions.ts` — createServerFn wrappers delegating to db/applications.ts
+- `src/routes/-index.test.tsx` — 5 tests (title, stat cards, funnel, top companies, recent apps) — imports `DashboardPage` from components
+- `src/routes/-applications.test.tsx` — 13 tests (title, counts, empty state, table render, badges, edit/delete buttons, sort buttons, no-match filter, dialog open from edit/add) — imports `ApplicationsPage` from components
+- `src/components/pages/applications/ApplicationDialog.tsx` — extracted from 696-line route, props `open`/`onOpenChange`/`editing`
+- `src/components/pages/applications/ApplicationsPage.tsx` — full applications page component (moved out of route file)
+- `src/components/pages/applications/index.ts` — barrel export (ApplicationDialog, ApplicationsPage)
+- `src/components/pages/dashboard/DashboardPage.tsx` — full dashboard component (moved out of route file)
+- `src/components/pages/dashboard/index.ts` — barrel export (DashboardPage)
+- Route files (`src/routes/index.tsx`, `src/routes/applications.tsx`) are thin — only route definition + component import, no exports other than `Route`
+- `src/test/setup.ts` — DATABASE_URL=:memory:, afterEach truncation
+- `src/test/test-utils.tsx` — QueryClientProvider (retry: false)
+- `src/types.ts` — shared domain types
+- `src/db/schema.ts` — drizzle schema, re-exports types
+- `src/components/StatusBadge.tsx` — imports ApplicationStatus from types.ts
+
 ## Agent skills
 
 ### Issue tracker
