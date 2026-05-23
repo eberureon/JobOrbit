@@ -20,7 +20,6 @@
   "chosenAddOns": [
     "neon",
     "drizzle",
-    "sentry",
     "better-auth",
     "tanstack-query",
     "table",
