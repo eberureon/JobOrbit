@@ -1,6 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   Briefcase,
+  FileText,
   LayoutDashboard,
   Menu,
   PanelLeftClose,
@@ -8,6 +9,7 @@ import {
   X,
 } from "lucide-react";
 import { useState } from "react";
+import { Logo } from "./Logo";
 import { ThemeToggle } from "./ThemeToggle";
 
 const NAV = [
@@ -18,45 +20,8 @@ const NAV = [
     activeOptions: { exact: true },
   },
   { to: "/applications", label: "Applications", icon: Briefcase },
+  { to: "/cv", label: "CV", icon: FileText },
 ];
-
-function Logo({ collapsed }: { collapsed?: boolean }) {
-  return (
-    <div className={`flex items-center ${!collapsed ? "gap-2" : "gap-0"}`}>
-      <svg
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        aria-hidden="true"
-        className="text-foreground shrink-0"
-        aria-label="JobOrbit"
-      >
-        <rect
-          x="3"
-          y="3"
-          width="18"
-          height="18"
-          rx="4"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        />
-        <path
-          d="M8 8v4a4 4 0 0 0 8 0V8"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-        <circle cx="18" cy="6" r="2" fill="hsl(var(--primary))" />
-      </svg>
-      <span
-        className={`font-semibold tracking-tight text-foreground text-base transition-opacity duration-200 ${collapsed ? "opacity-0 w-0 overflow-hidden inline-block whitespace-nowrap" : ""}`}
-      >
-        Job<span className="text-primary">Orbit</span>
-      </span>
-    </div>
-  );
-}
 
 function NavLinks({
   collapsed,
