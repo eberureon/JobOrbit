@@ -84,3 +84,17 @@ skills:
 - Removed PostgreSQL/Neon migration: switched from `pgTable`/`serial` to `sqliteTable`/`integer` with autoIncrement. Deleted `neon-vite-plugin.ts`, `src/db.ts`, removed `@neondatabase/serverless`, `pg`, `@types/pg`, `vite-plugin-neon-new`. Drizzle Kit dialect set to `sqlite`.
 - SQLite API patterns: use `.all()` for list queries, `.get()` for single-row, `.run()` for delete, `.returning().get()` for insert/update (supported by drizzle-orm + better-sqlite3).
 - Build verified: `bun --bun run build` compiles successfully (client + SSR).
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked on GitHub. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default labels (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context repo. See `docs/agents/domain.md`.
