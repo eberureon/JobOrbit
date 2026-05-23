@@ -1,4 +1,5 @@
-import type { Application, Stats, ApplicationStatus } from '../types'
+import type { Application } from '../db/schema'
+import type { Stats, ApplicationStatus } from '../types'
 
 export function computeStats(rows: Application[]): Stats {
   const now = new Date()
