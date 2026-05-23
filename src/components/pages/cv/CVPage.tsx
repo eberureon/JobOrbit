@@ -4,7 +4,8 @@ import { useForm } from 'react-hook-form'
 import { Download, Save } from 'lucide-react'
 import { useToast } from '../../../hooks/use-toast'
 import { getCv, upsertCv } from '../../../lib/server/cv.functions'
-import type { InsertCv, Cv } from '../../db/schema'
+import type { InsertCv, Cv } from '../../../db/schema'
+import { parseList, safeParseJson, buildMarkdown } from '../../../lib/cv'
 
 type FormFields = {
   full_name: string
@@ -278,6 +279,7 @@ export function CVPage() {
                   <label htmlFor='cv-name' className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>Full name</label>
                   <input
                     id='cv-name'
+                    data-testid='input-cv-name'
                     {...form.register('full_name')}
                     className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
                   />
