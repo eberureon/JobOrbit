@@ -1,146 +1,248 @@
-# JobOrbit — Self-Hosted Job Application Tracker
+Welcome to your new TanStack Start app! 
 
-A private, self-hosted, single-user job application tracker. Track applications, monitor your pipeline funnel, and manage your CV — all in one open-source app. Your data lives on your machine in a single SQLite file.
+# Getting Started
 
-![JobOrbit dashboard preview](./screenshot.png)
-
-## Features
-
-- **Dashboard** — Total/7-day/30-day counts, status breakdown donut, applications-over-time chart, success-rate funnel with percentages, top companies, and a recent applications list.
-- **Applications** — Full CRUD list with search, multi-select status filters, sorting, and a rich create/edit dialog (company, role, location, status, applied date, salary, source, job URL, notes).
-- **CV** — Single-page CV editor with live preview and one-click Markdown export.
-- **Dark techy UI** — Restrained dark theme inspired by Linear / Vercel, with monospace numerals, hairline gradient borders, and subtle dot-grid accents.
-- **Self-hosted & private** — No accounts, no telemetry, no cloud. Just run it locally.
-- **Single-file storage** — Drizzle ORM + SQLite (better-sqlite3). Back up `data.db` to back up everything.
-
-## Tech Stack
-
-- **Frontend:** React 18 · Vite · Tailwind CSS v3 · shadcn/ui · Recharts · wouter (hash routing) · TanStack Query
-- **Backend:** Node.js · Express 5
-- **Database:** SQLite via `better-sqlite3` + Drizzle ORM
-- **Validation:** Zod + drizzle-zod
-- **Forms:** react-hook-form + zod resolvers
-
-## Getting Started
-
-Requirements: Node.js 20+ and bun.
+To run this application:
 
 ```bash
-git clone <this-repo>
-cd joborbit
-npm install
-npm run dev
+bun install
+bun --bun run dev
 ```
 
-The app starts on **http://localhost:5000**. Open in your browser. Tables are auto-created on first run.
+# Building For Production
 
-## Production
+To build this application for production:
 
 ```bash
-npm run build
-npm start          # NODE_ENV=production node dist/index.cjs
+bun --bun run build
 ```
 
-Static frontend bundles live in `dist/public`. The server listens on port 5000 by default.
+## Testing
 
-## Docker (recommended for self-hosting)
-
-A production-ready `Dockerfile` and `docker-compose.yml` are included.
+This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
 
 ```bash
-cp .env.example .env       # optional — adjust PORT and TZ
-docker compose up -d       # build image and start in background
-docker compose logs -f     # follow logs
+bun --bun run test
 ```
 
-Then open **http://localhost:3000** (change `PORT` in `.env` to use a different host port).
+## Styling
 
-**What you get out of the box:**
+This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
 
-- Multi-stage build → small runtime image (~150 MB), only production deps included.
-- Runs as the non-root `node` user with `no-new-privileges`, dropped capabilities, and a read-only root filesystem (`/tmp` mounted as tmpfs).
-- Data persists in the named Docker volume **`job-tracker-data`** (mounted at `/data` inside the container).
-- Container `HEALTHCHECK` hits `/api/health` every 30 seconds.
-- Bound to `127.0.0.1` by default — edit the `ports` mapping in `docker-compose.yml` if you want LAN/WAN access (put it behind a reverse proxy like Caddy or Traefik for TLS).
-- Resource limits: 1 CPU, 512 MB RAM. JSON log rotation at 10 MB × 3 files.
-- `restart: unless-stopped` so it survives reboots.
+### Removing Tailwind CSS
 
-**Common commands:**
+If you prefer not to use Tailwind CSS:
+
+1. Remove the demo pages in `src/routes/demo/`
+2. Replace the Tailwind import in `src/styles.css` with your own styles
+3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
+4. Uninstall the packages: `bun install @tailwindcss/vite tailwindcss -D`
+
+## Linting & Formatting
+
+This project uses [Biome](https://biomejs.dev/) for linting and formatting. The following scripts are available:
+
 
 ```bash
-docker compose up -d --build       # rebuild after pulling code changes
-docker compose down                # stop (data is preserved)
-docker compose down -v             # stop AND delete the data volume (destructive)
-docker volume inspect job-tracker-data    # find the volume on the host
+bun --bun run lint
+bun --bun run format
+bun --bun run check
 ```
 
-**Backup the database:**
+
+## Setting up Neon
+
+When running the `dev` command, `vite-plugin-neon-new` will identify there is not a database setup. It will then create and seed a claimable database.
+
+It is the same process as [Neon Launchpad](https://neon.new).
+
+> [!IMPORTANT]  
+> Claimable databases expire in 72 hours.
+
+
+## Setting up Better Auth
+
+1. Generate and set the `BETTER_AUTH_SECRET` environment variable in your `.env.local`:
+
+   ```bash
+   bunx --bun @better-auth/cli secret
+   ```
+
+2. Visit the [Better Auth documentation](https://www.better-auth.com) to unlock the full potential of authentication in your app.
+
+### Adding a Database (Optional)
+
+Better Auth can work in stateless mode, but to persist user data, add a database:
+
+```typescript
+// src/lib/auth.ts
+import { betterAuth } from "better-auth";
+import { Pool } from "pg";
+
+export const auth = betterAuth({
+  database: new Pool({
+    connectionString: process.env.DATABASE_URL,
+  }),
+  // ... rest of config
+});
+```
+
+Then run migrations:
 
 ```bash
-docker run --rm -v job-tracker-data:/data -v "$PWD":/backup alpine \
-  tar czf /backup/job-tracker-backup-$(date +%F).tar.gz -C /data .
+bunx --bun @better-auth/cli migrate
 ```
 
-**Restore:**
 
-```bash
-docker run --rm -v job-tracker-data:/data -v "$PWD":/backup alpine \
-  sh -c "cd /data && tar xzf /backup/job-tracker-backup-YYYY-MM-DD.tar.gz"
+
+## Routing
+
+This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
+
+### Adding A Route
+
+To add a new route to your application just add a new file in the `./src/routes` directory.
+
+TanStack will automatically generate the content of the route file for you.
+
+Now that you have two routes you can use a `Link` component to navigate between them.
+
+### Adding Links
+
+To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
+
+```tsx
+import { Link } from "@tanstack/react-router";
 ```
 
-## Data
+Then anywhere in your JSX you can use it like so:
 
-All data is stored in a single SQLite file. By default it's **`data.db`** at the project root (with `data.db-wal` and `data.db-shm` companion files due to WAL journaling).
-
-Under Docker the file lives at `/data/data.db` inside the container, persisted in the `job-tracker-data` volume.
-
-The location is configurable via environment variables:
-
-- `DATA_DIR` — directory the database file lives in (default: project root, `/data` in Docker).
-- `DATABASE_FILE` — full path override; takes precedence over `DATA_DIR`.
-
-To back up: copy the `data.db` file. To reset: delete it and restart the server.
-
-The schema is auto-created on startup — no migrations needed for self-hosters. To inspect the schema, see `shared/schema.ts`.
-
-## API
-
-The backend exposes a simple JSON REST API:
-
-| Method | Path                    | Description                         |
-| ------ | ----------------------- | ----------------------------------- |
-| GET    | `/api/applications`     | List all applications               |
-| POST   | `/api/applications`     | Create application                  |
-| GET    | `/api/applications/:id` | Get one application                 |
-| PATCH  | `/api/applications/:id` | Update application                  |
-| DELETE | `/api/applications/:id` | Delete application                  |
-| GET    | `/api/stats`            | Dashboard stats (counts, funnel, …) |
-| GET    | `/api/cv`               | Get CV (singleton, auto-created)    |
-| PUT    | `/api/cv`               | Upsert CV                           |
-| GET    | `/api/health`           | Healthcheck (used by Docker)        |
-
-## Project Structure
-
-```
-job-tracker/
-├── client/                 # Vite + React frontend
-│   └── src/
-│       ├── pages/          # Dashboard, Applications, CV, NotFound
-│       ├── components/     # Sidebar, Logo, StatusBadge, shadcn ui/
-│       └── lib/queryClient.ts
-├── server/                 # Express backend
-│   ├── index.ts            # entry point
-│   ├── routes.ts           # API routes
-│   └── storage.ts          # Drizzle SQLite storage
-├── shared/
-│   └── schema.ts           # Drizzle tables + Zod schemas + types
-└── data.db                 # SQLite (created at first run)
+```tsx
+<Link to="/about">About</Link>
 ```
 
-## License
+This will create a link that will navigate to the `/about` route.
 
-MIT — see [LICENSE](./LICENSE). Use it, fork it, host it on your own server.
+More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
 
----
+### Using A Layout
 
-Built as a self-hosted, single-user tool. No analytics, no third-party calls. Your job search stays yours.
+In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
+
+Here is an example layout that includes a header:
+
+```tsx
+import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
+
+export const Route = createRootRoute({
+  head: () => ({
+    meta: [
+      { charSet: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { title: 'My App' },
+    ],
+  }),
+  shellComponent: ({ children }) => (
+    <html lang="en">
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        <header>
+          <nav>
+            <Link to="/">Home</Link>
+            <Link to="/about">About</Link>
+          </nav>
+        </header>
+        {children}
+        <Scripts />
+      </body>
+    </html>
+  ),
+})
+```
+
+More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
+
+## Server Functions
+
+TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
+
+```tsx
+import { createServerFn } from '@tanstack/react-start'
+
+const getServerTime = createServerFn({
+  method: 'GET',
+}).handler(async () => {
+  return new Date().toISOString()
+})
+
+// Use in a component
+function MyComponent() {
+  const [time, setTime] = useState('')
+  
+  useEffect(() => {
+    getServerTime().then(setTime)
+  }, [])
+  
+  return <div>Server time: {time}</div>
+}
+```
+
+## API Routes
+
+You can create API routes by using the `server` property in your route definitions:
+
+```tsx
+import { createFileRoute } from '@tanstack/react-router'
+import { json } from '@tanstack/react-start'
+
+export const Route = createFileRoute('/api/hello')({
+  server: {
+    handlers: {
+      GET: () => json({ message: 'Hello, World!' }),
+    },
+  },
+})
+```
+
+## Data Fetching
+
+There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
+
+For example:
+
+```tsx
+import { createFileRoute } from '@tanstack/react-router'
+
+export const Route = createFileRoute('/people')({
+  loader: async () => {
+    const response = await fetch('https://swapi.dev/api/people')
+    return response.json()
+  },
+  component: PeopleComponent,
+})
+
+function PeopleComponent() {
+  const data = Route.useLoaderData()
+  return (
+    <ul>
+      {data.results.map((person) => (
+        <li key={person.name}>{person.name}</li>
+      ))}
+    </ul>
+  )
+}
+```
+
+Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
+
+# Demo files
+
+Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
+
+# Learn More
+
+You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
+
+For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
