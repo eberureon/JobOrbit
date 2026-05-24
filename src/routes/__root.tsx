@@ -1,11 +1,6 @@
 import { Toast as ToastPrimitive } from "@base-ui/react/toast";
 import type { QueryClient } from "@tanstack/react-query";
-import {
-  createRootRouteWithContext,
-  HeadContent,
-  Link,
-  Scripts,
-} from "@tanstack/react-router";
+import { createRootRouteWithContext, HeadContent, Link, Scripts } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { AppLayout } from "~/components/Sidebar";
@@ -30,12 +25,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   shellComponent: RootDocument,
   notFoundComponent: () => (
     <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
-      <div className="text-6xl font-mono-num text-muted-foreground/30 font-semibold">
-        404
-      </div>
-      <h1 className="mt-4 text-xl font-semibold text-foreground">
-        Page not found
-      </h1>
+      <div className="text-6xl font-mono-num text-muted-foreground/30 font-semibold">404</div>
+      <h1 className="mt-4 text-xl font-semibold text-foreground">Page not found</h1>
       <p className="mt-2 text-sm text-muted-foreground max-w-sm">
         This page doesn't exist or was moved.
       </p>
@@ -81,12 +72,11 @@ function Devtools() {
     if (!import.meta.env.DEV) return;
     let mounted = true;
     const load = async () => {
-      const [{ TanStackDevtools }, { TanStackRouterDevtoolsPanel }, query] =
-        await Promise.all([
-          import("@tanstack/react-devtools"),
-          import("@tanstack/react-router-devtools"),
-          import("../integrations/tanstack-query/devtools"),
-        ]);
+      const [{ TanStackDevtools }, { TanStackRouterDevtoolsPanel }, query] = await Promise.all([
+        import("@tanstack/react-devtools"),
+        import("@tanstack/react-router-devtools"),
+        import("../integrations/tanstack-query/devtools"),
+      ]);
       if (!mounted) return;
       setNode(
         <TanStackDevtools

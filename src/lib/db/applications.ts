@@ -1,11 +1,7 @@
 import { desc, eq } from "drizzle-orm";
 import { db } from "~/db/index.ts";
 import type { InsertApplication } from "~/db/schema.ts";
-import {
-  applications,
-  insertApplicationSchema,
-  statusHistory,
-} from "~/db/schema.ts";
+import { applications, insertApplicationSchema, statusHistory } from "~/db/schema.ts";
 import { computeStats } from "~/lib/stats.ts";
 import type { Stats } from "~/lib/types.ts";
 import { deleteByApplicationId, insertEntry } from "./status-history.ts";

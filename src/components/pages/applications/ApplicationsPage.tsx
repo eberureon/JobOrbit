@@ -73,15 +73,9 @@ export function ApplicationsPage() {
   });
 
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<Set<ApplicationStatus>>(
-    new Set(),
-  );
-  const [sortKey, setSortKey] = useState<SortKey>(
-    sortFromDefault(settings.defaultSort)[0],
-  );
-  const [sortDir, setSortDir] = useState<"asc" | "desc">(
-    sortFromDefault(settings.defaultSort)[1],
-  );
+  const [statusFilter, setStatusFilter] = useState<Set<ApplicationStatus>>(new Set());
+  const [sortKey, setSortKey] = useState<SortKey>(sortFromDefault(settings.defaultSort)[0]);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">(sortFromDefault(settings.defaultSort)[1]);
   const [page, setPage] = useState(0);
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -96,15 +90,11 @@ export function ApplicationsPage() {
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(
-        (a) =>
-          a.company.toLowerCase().includes(q) ||
-          a.role.toLowerCase().includes(q),
+        (a) => a.company.toLowerCase().includes(q) || a.role.toLowerCase().includes(q),
       );
     }
     if (statusFilter.size > 0) {
-      list = list.filter((a) =>
-        statusFilter.has(a.status as ApplicationStatus),
-      );
+      list = list.filter((a) => statusFilter.has(a.status as ApplicationStatus));
     }
     list.sort((a, b) => {
       const av = (a as any)[sortKey];
@@ -123,10 +113,7 @@ export function ApplicationsPage() {
   const pageSize = settings.pageSize;
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const safePage = Math.min(page, totalPages - 1);
-  const paginated = filtered.slice(
-    safePage * pageSize,
-    (safePage + 1) * pageSize,
-  );
+  const paginated = filtered.slice(safePage * pageSize, (safePage + 1) * pageSize);
 
   function toggleStatus(s: ApplicationStatus) {
     setStatusFilter((prev) => {
@@ -171,10 +158,11 @@ export function ApplicationsPage() {
   const importMutation = useMutation({
     mutationFn: async (file: File) => {
       const text = await file.text();
-      const { data, errors: parseErrors } = Papa.parse<Record<string, string>>(
-        text,
-        { header: true, skipEmptyLines: true, dynamicTyping: false },
-      );
+      const { data, errors: parseErrors } = Papa.parse<Record<string, string>>(text, {
+        header: true,
+        skipEmptyLines: true,
+        dynamicTyping: false,
+      });
 
       const today = new Date().toISOString().slice(0, 10);
       const rowErrors: { row: number; reason: string }[] = [];
@@ -288,9 +276,7 @@ export function ApplicationsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">
-            Applications
-          </h1>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">Applications</h1>
           <p className="text-sm text-muted-foreground mt-1">
             <span className="font-mono-num" data-testid="text-app-count">
               {filtered.length}
@@ -487,9 +473,7 @@ export function ApplicationsPage() {
                       </th>
                       <th className="px-4 py-3 font-medium">Salary</th>
                       <th className="px-4 py-3 font-medium">Source</th>
-                      <th className="px-4 py-3 font-medium text-right">
-                        Actions
-                      </th>
+                      <th className="px-4 py-3 font-medium text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -506,9 +490,7 @@ export function ApplicationsPage() {
                         <td className="px-4 py-3 text-foreground font-medium max-w-52">
                           {a.company}
                         </td>
-                        <td className="px-4 py-3 text-foreground/90 max-w-52">
-                          {a.role}
-                        </td>
+                        <td className="px-4 py-3 text-foreground/90 max-w-52">{a.role}</td>
                         <td className="px-4 py-3 text-muted-foreground">
                           {a.location || "\u2014"}
                         </td>
@@ -523,9 +505,7 @@ export function ApplicationsPage() {
                         <td className="px-4 py-3 font-mono-num text-foreground/90 text-xs">
                           {a.salary || "\u2014"}
                         </td>
-                        <td className="px-4 py-3 text-muted-foreground">
-                          {a.source || "\u2014"}
-                        </td>
+                        <td className="px-4 py-3 text-muted-foreground">{a.source || "\u2014"}</td>
                         <td
                           className="px-4 py-3 text-right"
                           onClick={(e) => e.stopPropagation()}
@@ -572,40 +552,28 @@ export function ApplicationsPage() {
                         <StatusBadge status={a.status} />
                       </p>
                       <p className="text-foreground font-medium">{a.company}</p>
-                      <p className="text-foreground/90 text-sm mt-0.5">
-                        {a.role}
-                      </p>
+                      <p className="text-foreground/90 text-sm mt-0.5">{a.role}</p>
                       <div className="space-y-1 text-xs font-mono-num text-muted-foreground mt-2">
                         <p>
-                          <span className="text-muted-foreground/50">
-                            Date Aplied:{" "}
-                          </span>
+                          <span className="text-muted-foreground/50">Date Aplied: </span>
                           {new Intl.DateTimeFormat(locale, {
                             dateStyle: "medium",
                           }).format(new Date(a.applied_date))}
                         </p>
                         {a.location && (
                           <p>
-                            <span className="text-muted-foreground/50">
-                              Location:
-                            </span>{" "}
-                            {a.location}
+                            <span className="text-muted-foreground/50">Location:</span> {a.location}
                           </p>
                         )}
                         {a.salary && (
                           <p>
-                            <span className="text-muted-foreground/50">
-                              Salary:
-                            </span>{" "}
+                            <span className="text-muted-foreground/50">Salary:</span>{" "}
                             <span className="font-mono-num">{a.salary}</span>
                           </p>
                         )}
                         {a.source && (
                           <p>
-                            <span className="text-muted-foreground/50">
-                              Source:
-                            </span>{" "}
-                            {a.source}
+                            <span className="text-muted-foreground/50">Source:</span> {a.source}
                           </p>
                         )}
                         {a.job_url && (
@@ -646,10 +614,7 @@ export function ApplicationsPage() {
       </Card>
 
       {totalPages > 1 && (
-        <div
-          className="flex items-center justify-center gap-2"
-          data-testid="pagination"
-        >
+        <div className="flex items-center justify-center gap-2" data-testid="pagination">
           <Button
             variant="outline"
             size="sm"
@@ -692,21 +657,14 @@ export function ApplicationsPage() {
         editing={editing}
       />
 
-      <AlertDialog
-        open={deleteId !== null}
-        onOpenChange={(o) => !o && setDeleteId(null)}
-      >
+      <AlertDialog open={deleteId !== null} onOpenChange={(o) => !o && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this application?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This can't be undone.
-            </AlertDialogDescription>
+            <AlertDialogDescription>This can't be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel data-testid="button-cancel-delete">
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel data-testid="button-cancel-delete">Cancel</AlertDialogCancel>
             <AlertDialogAction
               data-testid="button-confirm-delete"
               onClick={() => deleteId && deleteMutation.mutate(deleteId)}

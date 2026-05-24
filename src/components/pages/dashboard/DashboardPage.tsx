@@ -4,10 +4,7 @@ import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { StatusBadge, statusColor } from "~/components/StatusBadge";
 import { Skeleton } from "~/components/ui/skeleton";
 import type { Application } from "~/db/schema";
-import {
-  getStats,
-  listApplications,
-} from "~/lib/server/applications.functions";
+import { getStats, listApplications } from "~/lib/server/applications.functions";
 import type { ApplicationStatus, Stats } from "~/lib/types";
 import { getEffectiveLocale, useSettings } from "~/lib/use-settings";
 import { FunnelRow } from "./FunnelRow";
@@ -108,36 +105,24 @@ export function DashboardPage() {
           <div className="p-5 pb-2">
             <div className="text-sm font-medium text-foreground">
               Applications Over Time
-              <span className="ml-2 text-xs font-normal text-muted-foreground">
-                Last 90 days
-              </span>
+              <span className="ml-2 text-xs font-normal text-muted-foreground">Last 90 days</span>
             </div>
           </div>
           <div className="px-5 pb-5 pt-0">
-            <TimelineChart
-              data={stats?.timeline ?? []}
-              loading={statsLoading}
-            />
+            <TimelineChart data={stats?.timeline ?? []} loading={statsLoading} />
           </div>
         </div>
 
         <div className="rounded-xl border border-card-border bg-card card-hairline">
           <div className="p-5 pb-2">
-            <div className="text-sm font-medium text-foreground">
-              Status Breakdown
-            </div>
+            <div className="text-sm font-medium text-foreground">Status Breakdown</div>
           </div>
           <div className="p-5 pt-2">
-            <div
-              className="h-64 flex items-center justify-center"
-              data-testid="chart-status"
-            >
+            <div className="h-64 flex items-center justify-center" data-testid="chart-status">
               {statsLoading ? (
                 <Skeleton className="w-40 h-40 rounded-full" />
               ) : pieData.length === 0 ? (
-                <div className="w-full text-center text-sm text-muted-foreground">
-                  No data yet
-                </div>
+                <div className="w-full text-center text-sm text-muted-foreground">No data yet</div>
               ) : (
                 <ResponsiveContainer width="100%" height={256}>
                   <PieChart>
@@ -247,10 +232,7 @@ export function DashboardPage() {
                 />
                 <div className="pt-3 border-t border-border text-xs flex items-center justify-between text-muted-foreground">
                   <span>Rejected</span>
-                  <span
-                    className="font-mono-num text-foreground"
-                    data-testid="funnel-rejected"
-                  >
+                  <span className="font-mono-num text-foreground" data-testid="funnel-rejected">
                     {stats?.funnel.rejected ?? 0}
                   </span>
                 </div>
@@ -261,9 +243,7 @@ export function DashboardPage() {
 
         <div className="rounded-xl border border-card-border bg-card card-hairline">
           <div className="p-5 pb-3">
-            <div className="text-sm font-medium text-foreground">
-              Top Companies
-            </div>
+            <div className="text-sm font-medium text-foreground">Top Companies</div>
           </div>
           <div className="p-5 pt-0">
             {statsLoading ? (
@@ -292,18 +272,11 @@ export function DashboardPage() {
                       data-testid={`top-company-${c.company}`}
                     >
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-foreground truncate pr-2">
-                          {c.company}
-                        </span>
-                        <span className="font-mono-num text-muted-foreground">
-                          {c.count}
-                        </span>
+                        <span className="text-foreground truncate pr-2">{c.company}</span>
+                        <span className="font-mono-num text-muted-foreground">{c.count}</span>
                       </div>
                       <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                        <div
-                          className="h-full bg-primary"
-                          style={{ width: `${pct}%` }}
-                        />
+                        <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
                       </div>
                     </div>
                   );
@@ -316,9 +289,7 @@ export function DashboardPage() {
 
       <div className="rounded-xl border border-card-border bg-card card-hairline">
         <div className="p-5 pb-3">
-          <div className="text-sm font-medium text-foreground">
-            Recent Applications
-          </div>
+          <div className="text-sm font-medium text-foreground">Recent Applications</div>
         </div>
         <div className="p-5 pt-0">
           {statsLoading ? (
@@ -334,10 +305,7 @@ export function DashboardPage() {
                 </thead>
                 <tbody>
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <tr
-                      key={i}
-                      className="border-b border-border/40 last:border-0"
-                    >
+                    <tr key={i} className="border-b border-border/40 last:border-0">
                       <td className="py-2.5 pr-3">
                         <Skeleton className="h-4 w-28" />
                       </td>
@@ -377,12 +345,8 @@ export function DashboardPage() {
                       className="border-b border-border/40 last:border-0"
                       data-testid={`recent-row-${a.id}`}
                     >
-                      <td className="py-2.5 pr-3 text-foreground">
-                        {a.company}
-                      </td>
-                      <td className="py-2.5 pr-3 text-muted-foreground">
-                        {a.role}
-                      </td>
+                      <td className="py-2.5 pr-3 text-foreground">{a.company}</td>
+                      <td className="py-2.5 pr-3 text-muted-foreground">{a.role}</td>
                       <td className="py-2.5 pr-3">
                         <StatusBadge status={a.status} />
                       </td>

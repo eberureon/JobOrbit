@@ -4,11 +4,9 @@ import { insertApplicationSchema } from "~/db/schema.ts";
 import * as db from "~/lib/db/applications.ts";
 import { listByApplicationId } from "~/lib/db/status-history.ts";
 
-export const listApplications = createServerFn({ method: "GET" }).handler(
-  async () => {
-    return db.listAll();
-  },
-);
+export const listApplications = createServerFn({ method: "GET" }).handler(async () => {
+  return db.listAll();
+});
 
 export const getApplication = createServerFn({ method: "GET" })
   .inputValidator((data: { id: number }) => data)

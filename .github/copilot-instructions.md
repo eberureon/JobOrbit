@@ -1,4 +1,5 @@
 <!-- rtk-instructions v2 -->
+
 # RTK — Token-Optimized CLI
 
 **rtk** is a CLI proxy that filters and compresses command outputs, saving 60-90% tokens.
@@ -24,4 +25,5 @@ rtk gain --history    # Per-command savings history
 rtk discover          # Find missed rtk opportunities
 rtk proxy <cmd>       # Run raw (no filtering) but track usage
 ```
+
 <!-- /rtk-instructions -->

@@ -114,9 +114,7 @@ function loadSettings(): Settings {
 function saveSettings(settings: Settings) {
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-    window.dispatchEvent(
-      new CustomEvent(SETTINGS_CHANGED, { detail: settings }),
-    );
+    window.dispatchEvent(new CustomEvent(SETTINGS_CHANGED, { detail: settings }));
   } catch {}
 }
 

@@ -34,12 +34,7 @@ export function upsertResume(data: InsertResume) {
     updated_at: new Date().toISOString(),
   };
   if (existing) {
-    return db
-      .update(resume)
-      .set(payload)
-      .where(eq(resume.id, 1))
-      .returning()
-      .get();
+    return db.update(resume).set(payload).where(eq(resume.id, 1)).returning().get();
   }
   const fullData = insertResumeSchema.parse(data);
   return db

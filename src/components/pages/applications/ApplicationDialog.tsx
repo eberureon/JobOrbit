@@ -28,11 +28,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
-import type {
-  Application,
-  InsertApplication,
-  StatusHistory,
-} from "~/db/schema";
+import type { Application, InsertApplication, StatusHistory } from "~/db/schema";
 import { insertApplicationSchema } from "~/db/schema";
 import { useToast } from "~/hooks/use-toast";
 import {
@@ -126,18 +122,13 @@ export function ApplicationDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            {editing ? "Edit Application" : "Add Application"}
-          </DialogTitle>
+          <DialogTitle>{editing ? "Edit Application" : "Add Application"}</DialogTitle>
           <DialogDescription>
             Track a new job application with company, role, status and notes.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
-            className="space-y-4"
-          >
+          <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -146,11 +137,7 @@ export function ApplicationDialog({
                   <FormItem>
                     <FormLabel>Company *</FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        data-testid="input-company"
-                        placeholder="Acme Inc."
-                      />
+                      <Input {...field} data-testid="input-company" placeholder="Acme Inc." />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -163,11 +150,7 @@ export function ApplicationDialog({
                   <FormItem>
                     <FormLabel>Role *</FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        data-testid="input-role"
-                        placeholder="Senior Engineer"
-                      />
+                      <Input {...field} data-testid="input-role" placeholder="Senior Engineer" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -204,11 +187,7 @@ export function ApplicationDialog({
                       </FormControl>
                       <SelectContent>
                         {APPLICATION_STATUSES.map((s) => (
-                          <SelectItem
-                            key={s}
-                            value={s}
-                            data-testid={`option-status-${s}`}
-                          >
+                          <SelectItem key={s} value={s} data-testid={`option-status-${s}`}>
                             {s}
                           </SelectItem>
                         ))}
@@ -225,11 +204,7 @@ export function ApplicationDialog({
                   <FormItem>
                     <FormLabel>Applied Date</FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        type="date"
-                        data-testid="input-applied-date"
-                      />
+                      <Input {...field} type="date" data-testid="input-applied-date" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -276,11 +251,7 @@ export function ApplicationDialog({
                   <FormItem>
                     <FormLabel>Job URL</FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        data-testid="input-job-url"
-                        placeholder="https://…"
-                      />
+                      <Input {...field} data-testid="input-job-url" placeholder="https://…" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -312,10 +283,7 @@ export function ApplicationDialog({
                 </h4>
                 <div className="space-y-1.5">
                   {history.map((entry) => (
-                    <div
-                      key={entry.id}
-                      className="flex items-center gap-2 text-sm flex-wrap"
-                    >
+                    <div key={entry.id} className="flex items-center gap-2 text-sm flex-wrap">
                       <span className="font-mono-num text-xs text-muted-foreground shrink-0">
                         {new Intl.DateTimeFormat("de-DE", {
                           dateStyle: "medium",
@@ -325,9 +293,7 @@ export function ApplicationDialog({
                       {entry.old_status ? (
                         <>
                           <StatusBadge status={entry.old_status} />
-                          <span className="text-muted-foreground/50">
-                            &rarr;
-                          </span>
+                          <span className="text-muted-foreground/50">&rarr;</span>
                           <StatusBadge status={entry.new_status} />
                         </>
                       ) : (
@@ -352,11 +318,7 @@ export function ApplicationDialog({
                 disabled={mutation.isPending}
                 data-testid="button-submit-application"
               >
-                {mutation.isPending
-                  ? "Saving…"
-                  : editing
-                    ? "Save changes"
-                    : "Add application"}
+                {mutation.isPending ? "Saving…" : editing ? "Save changes" : "Add application"}
               </Button>
             </DialogFooter>
           </form>

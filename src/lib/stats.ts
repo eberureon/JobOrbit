@@ -4,8 +4,7 @@ import type { ApplicationStatus, Stats } from "./types";
 export function computeStats(rows: Application[]): Stats {
   const now = new Date();
   const dayMs = 24 * 60 * 60 * 1000;
-  const startOfDay = (d: Date) =>
-    new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
   const today = startOfDay(now);
 
   let last7 = 0;
@@ -33,9 +32,7 @@ export function computeStats(rows: Application[]): Stats {
   }
 
   const advancedFromInterview =
-    statusBreakdown.Interview +
-    statusBreakdown.Offer +
-    statusBreakdown.Accepted;
+    statusBreakdown.Interview + statusBreakdown.Offer + statusBreakdown.Accepted;
   const reachedOffer = statusBreakdown.Offer + statusBreakdown.Accepted;
   const funnel = {
     applied: rows.length,

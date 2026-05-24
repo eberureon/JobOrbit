@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { insert as insertApp } from "./applications";
-import {
-  deleteByApplicationId,
-  insertEntry,
-  listByApplicationId,
-} from "./status-history";
+import { deleteByApplicationId, insertEntry, listByApplicationId } from "./status-history";
 
 const validApp = {
   company: "Acme Inc",

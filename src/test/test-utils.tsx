@@ -7,20 +7,18 @@ import { SettingsProvider } from "~/lib/use-settings";
 const ToastProvider = Toast.Provider;
 
 export function createWrapper() {
-	const queryClient = new QueryClient({
-		defaultOptions: {
-			queries: { retry: false },
-		},
-	});
-	return function Wrapper({ children }: { children: ReactNode }) {
-		return (
-			<QueryClientProvider client={queryClient}>
-				<SettingsProvider>
-					<ToastProvider toastManager={toastManager}>
-						{children}
-					</ToastProvider>
-				</SettingsProvider>
-			</QueryClientProvider>
-		);
-	};
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  });
+  return function Wrapper({ children }: { children: ReactNode }) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <SettingsProvider>
+          <ToastProvider toastManager={toastManager}>{children}</ToastProvider>
+        </SettingsProvider>
+      </QueryClientProvider>
+    );
+  };
 }

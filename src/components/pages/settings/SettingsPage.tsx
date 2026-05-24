@@ -81,9 +81,7 @@ function SettingRow({
     <div className="flex items-center justify-between gap-4 py-3">
       <div className="space-y-0.5">
         <Label className="text-sm font-medium text-foreground">{label}</Label>
-        {description && (
-          <p className="text-xs text-muted-foreground">{description}</p>
-        )}
+        {description && <p className="text-xs text-muted-foreground">{description}</p>}
       </div>
       <div className="shrink-0">{children}</div>
     </div>
@@ -111,12 +109,10 @@ export function SettingsPage() {
             <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_var(--primary)/0.7]" />
             settings
           </div>
-          <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
-            Settings
-          </h1>
+          <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">Settings</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Customize how JobOrbit looks and behaves. All settings are stored
-            locally on this device.
+            Customize how JobOrbit looks and behaves. All settings are stored locally on this
+            device.
           </p>
         </div>
       </div>
@@ -126,28 +122,16 @@ export function SettingsPage() {
           <h2 className="text-sm font-semibold text-foreground">Appearance</h2>
         </div>
         <div className="px-6 pb-2">
-          <SettingRow
-            label="Theme"
-            description="Choose your preferred color scheme"
-          >
-            <ThemeSelector
-              value={settings.theme}
-              onChange={(theme) => update({ theme })}
-            />
+          <SettingRow label="Theme" description="Choose your preferred color scheme">
+            <ThemeSelector value={settings.theme} onChange={(theme) => update({ theme })} />
           </SettingRow>
         </div>
         <div className="px-6">
           <Separator />
         </div>
         <div className="px-6 pb-6 pt-2">
-          <SettingRow
-            label="Locale"
-            description="Used for number formatting and translations"
-          >
-            <Select
-              value={settings.locale}
-              onValueChange={(locale) => update({ locale })}
-            >
+          <SettingRow label="Locale" description="Used for number formatting and translations">
+            <Select value={settings.locale} onValueChange={(locale) => update({ locale })}>
               <SelectTrigger className="w-48">
                 <SelectValue />
               </SelectTrigger>
@@ -165,20 +149,13 @@ export function SettingsPage() {
 
       <div className="rounded-xl border border-card-border bg-card card-hairline">
         <div className="px-6 pt-6 pb-2">
-          <h2 className="text-sm font-semibold text-foreground">
-            Applications
-          </h2>
+          <h2 className="text-sm font-semibold text-foreground">Applications</h2>
         </div>
         <div className="px-6 pb-2">
-          <SettingRow
-            label="Default sort"
-            description="How applications are ordered"
-          >
+          <SettingRow label="Default sort" description="How applications are ordered">
             <Select
               value={settings.defaultSort}
-              onValueChange={(defaultSort) =>
-                update({ defaultSort: defaultSort as SortOrder })
-              }
+              onValueChange={(defaultSort) => update({ defaultSort: defaultSort as SortOrder })}
             >
               <SelectTrigger className="w-40">
                 <SelectValue />
@@ -223,10 +200,7 @@ export function SettingsPage() {
             label="Ask before deleting"
             description="Show a confirmation dialog before deleting an application"
           >
-            <Switch
-              checked={settings.askBeforeDelete}
-              onCheckedChange={handleDeleteToggle}
-            />
+            <Switch checked={settings.askBeforeDelete} onCheckedChange={handleDeleteToggle} />
           </SettingRow>
         </div>
       </div>
@@ -236,8 +210,8 @@ export function SettingsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Disable delete confirmation?</AlertDialogTitle>
             <AlertDialogDescription>
-              When turned off, applications will be deleted immediately without
-              asking for confirmation. This action cannot be undone.
+              When turned off, applications will be deleted immediately without asking for
+              confirmation. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -12,11 +12,7 @@ export function listByApplicationId(applicationId: number) {
     .all() as StatusHistory[];
 }
 
-export function insertEntry(
-  applicationId: number,
-  newStatus: string,
-  oldStatus: string | null,
-) {
+export function insertEntry(applicationId: number, newStatus: string, oldStatus: string | null) {
   return db
     .insert(statusHistory)
     .values({
@@ -29,7 +25,5 @@ export function insertEntry(
 }
 
 export function deleteByApplicationId(applicationId: number) {
-  db.delete(statusHistory)
-    .where(eq(statusHistory.application_id, applicationId))
-    .run();
+  db.delete(statusHistory).where(eq(statusHistory.application_id, applicationId)).run();
 }

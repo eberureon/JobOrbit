@@ -2,13 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Download, Save } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "~/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
@@ -31,13 +25,7 @@ type FormFields = {
   links: string;
 };
 
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
       <h3 className="text-xs uppercase tracking-widest text-muted-foreground font-mono-num mb-2">
@@ -205,18 +193,14 @@ export function ResumePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">
-            Resume
-          </h1>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">Resume</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Curate your resume content. Stored locally in your SQLite database.
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() =>
-              exportMarkdown(values, skillsList, linksList, buildMarkdown)
-            }
+            onClick={() => exportMarkdown(values, skillsList, linksList, buildMarkdown)}
             className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium border border-[var(--button-outline)] shadow-xs active:shadow-none min-h-9 px-4 py-2 hover-elevate"
           >
             <Download className="h-4 w-4" />
@@ -264,10 +248,7 @@ export function ResumePage() {
                       <FormItem>
                         <FormLabel>Headline</FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="Senior Frontend Engineer"
-                            {...field}
-                          />
+                          <Input placeholder="Senior Frontend Engineer" {...field} />
                         </FormControl>
                       </FormItem>
                     )}
@@ -397,9 +378,7 @@ export function ResumePage() {
                         <Textarea
                           rows={4}
                           className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono-num text-xs"
-                          placeholder={
-                            "https://github.com/you\nhttps://linkedin.com/in/you"
-                          }
+                          placeholder={"https://github.com/you\nhttps://linkedin.com/in/you"}
                           {...field}
                         />
                       </FormControl>
@@ -414,9 +393,7 @@ export function ResumePage() {
         <div className="rounded-xl border bg-card border-card-border text-card-foreground shadow-sm card-hairline lg:sticky lg:top-6 h-fit">
           <div className="flex flex-row items-center justify-between space-y-0 p-6 pb-3">
             <div className="text-sm font-medium">Preview</div>
-            <span className="text-xs text-muted-foreground font-mono-num">
-              live
-            </span>
+            <span className="text-xs text-muted-foreground font-mono-num">live</span>
           </div>
           <div className="p-6 pt-0">
             {isLoading ? (
@@ -460,11 +437,7 @@ export function ResumePage() {
                 </div>
               </div>
             ) : (
-              <ResumePreview
-                values={values}
-                skills={skillsList}
-                links={linksList}
-              />
+              <ResumePreview values={values} skills={skillsList} links={linksList} />
             )}
           </div>
         </div>

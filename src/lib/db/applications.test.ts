@@ -1,12 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  bulkInsert,
-  getById,
-  insert,
-  listAll,
-  remove,
-  update,
-} from "./applications";
+import { bulkInsert, getById, insert, listAll, remove, update } from "./applications";
 import { listByApplicationId } from "./status-history";
 
 const validApp = {
