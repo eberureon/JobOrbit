@@ -1,22 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-	ArrowUpDown,
-	ChevronRight,
-	Filter,
-	Plus,
-	Search,
-	X,
-} from "lucide-react";
+import { ArrowUpDown, Filter, Plus, Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
-import type { Application } from "../../../db/schema";
-import { useToast } from "../../../hooks/use-toast";
-import {
-	deleteApplication,
-	listApplications,
-} from "../../../lib/server/applications.functions";
-import type { ApplicationStatus } from "../../../types";
-import { APPLICATION_STATUSES } from "../../../types";
-import { StatusBadge } from "../../StatusBadge";
+import { StatusBadge } from "@/components/StatusBadge";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -26,9 +11,9 @@ import {
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
-} from "../../ui/alert-dialog";
-import { Button } from "../../ui/button";
-import { Card, CardContent } from "../../ui/card";
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
@@ -36,9 +21,17 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "../../ui/dropdown-menu";
-import { Input } from "../../ui/input";
-import { Skeleton } from "../../ui/skeleton";
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { Application } from "@/db/schema";
+import { useToast } from "@/hooks/use-toast";
+import {
+	deleteApplication,
+	listApplications,
+} from "@/lib/server/applications.functions";
+import type { ApplicationStatus } from "@/types";
+import { APPLICATION_STATUSES } from "@/types";
 import { ApplicationDialog } from "./ApplicationDialog";
 import { RowActions } from "./RowActions";
 
@@ -256,15 +249,15 @@ export function ApplicationsPage() {
 						</div>
 					) : (
 						<>
-							<div className="hidden md:block overflow-x-auto">
+							<div className="hidden lg:block overflow-x-auto">
 								<table className="w-full text-sm">
 									<thead>
 										<tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
 											<th className="px-4 py-3 font-medium">
-												{/* className="inline-flex items-center gap-1 hover:text-foreground" */}
 												<Button
-													size="sm"
 													variant="ghost"
+													size="sm"
+													className="uppercase"
 													onClick={() => toggleSort("company")}
 													data-testid="sort-company"
 												>
@@ -340,6 +333,7 @@ export function ApplicationsPage() {
 												<td
 													className="px-4 py-3 text-right"
 													onClick={(e) => e.stopPropagation()}
+													onKeyDown={(e) => e.stopPropagation()}
 												>
 													<RowActions
 														id={a.id}
@@ -357,10 +351,8 @@ export function ApplicationsPage() {
 								</table>
 							</div>
 
-							<div className="block md:hidden divide-y divide-border/40">
+							<div className="block lg:hidden divide-y divide-border/40">
 								{filtered.map((a) => {
-									const hasDetails =
-										a.location || a.salary || a.source || a.job_url;
 									return (
 										<div
 											key={a.id}
@@ -370,22 +362,79 @@ export function ApplicationsPage() {
 												setEditing(a);
 												setDialogOpen(true);
 											}}
+											onKeyDown={(e) => {
+												if (e.key === "Enter" || e.key === " ") {
+													e.preventDefault();
+													setEditing(a);
+													setDialogOpen(true);
+												}
+											}}
+											role="button"
+											tabIndex={0}
 										>
-											<div className="text-foreground font-medium">
-												{a.company}
-											</div>
-											<div className="text-foreground/90 text-sm mt-0.5">
+											<p className="text-foreground font-medium">{a.company}</p>
+											<p className="text-foreground/90 text-sm mt-0.5">
 												{a.role}
-											</div>
-											<div className="text-xs font-mono-num text-muted-foreground mt-2">
-												{a.applied_date}
-											</div>
-											<div className="mt-1.5">
+											</p>
+											<p className="mt-1.5">
 												<StatusBadge status={a.status} />
+											</p>
+											<div className="space-y-1 text-xs font-mono-num text-muted-foreground mt-2">
+												<p>
+													<span className="text-muted-foreground/50">
+														Date Aplied:{" "}
+													</span>
+													{new Intl.DateTimeFormat("de-DE", {
+														dateStyle: "medium",
+													}).format(new Date(a.applied_date))}
+												</p>
+												{a.location && (
+													<p>
+														<span className="text-muted-foreground/50">
+															Location:
+														</span>{" "}
+														{a.location}
+													</p>
+												)}
+												{a.salary && (
+													<p>
+														<span className="text-muted-foreground/50">
+															Salary:
+														</span>{" "}
+														<span className="font-mono-num">
+															{new Intl.NumberFormat("de-DE", {
+																style: "currency",
+																currency: "EUR",
+															}).format(a.salary)}
+														</span>
+													</p>
+												)}
+												{a.source && (
+													<p>
+														<span className="text-muted-foreground/50">
+															Source:
+														</span>{" "}
+														{a.source}
+													</p>
+												)}
+												{a.job_url && (
+													<p>
+														<a
+															href={a.job_url}
+															target="_blank"
+															rel="noopener noreferrer"
+															className="text-primary hover:underline"
+														>
+															View job posting &rarr;
+														</a>
+													</p>
+												)}
 											</div>
-											<div
+											<button
 												className="flex items-center gap-1 mt-2"
 												onClick={(e) => e.stopPropagation()}
+												onKeyDown={(e) => e.stopPropagation()}
+												type="button"
 											>
 												<RowActions
 													id={a.id}
@@ -396,58 +445,7 @@ export function ApplicationsPage() {
 													}}
 													onDelete={() => setDeleteId(a.id)}
 												/>
-											</div>
-											{hasDetails && (
-												<details
-													className="mt-2 group"
-													onClick={(e) => e.stopPropagation()}
-												>
-													<summary className="text-xs text-muted-foreground/70 cursor-pointer hover:text-foreground select-none list-none flex items-center gap-1">
-														<ChevronRight className="h-3 w-3 transition-transform group-open:rotate-90" />
-														Show details
-													</summary>
-													<div className="mt-2 space-y-1 text-xs text-muted-foreground pl-4">
-														{a.location && (
-															<div>
-																<span className="text-muted-foreground/50">
-																	Location:
-																</span>{" "}
-																{a.location}
-															</div>
-														)}
-														{a.salary && (
-															<div>
-																<span className="text-muted-foreground/50">
-																	Salary:
-																</span>{" "}
-																<span className="font-mono-num">
-																	{a.salary}
-																</span>
-															</div>
-														)}
-														{a.source && (
-															<div>
-																<span className="text-muted-foreground/50">
-																	Source:
-																</span>{" "}
-																{a.source}
-															</div>
-														)}
-														{a.job_url && (
-															<div>
-																<a
-																	href={a.job_url}
-																	target="_blank"
-																	rel="noopener noreferrer"
-																	className="text-primary hover:underline"
-																>
-																	View job posting &rarr;
-																</a>
-															</div>
-														)}
-													</div>
-												</details>
-											)}
+											</button>
 										</div>
 									);
 								})}
