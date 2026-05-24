@@ -3,7 +3,7 @@ import { db } from "~/db/index.ts";
 import type { InsertApplication } from "~/db/schema.ts";
 import { applications, insertApplicationSchema } from "~/db/schema.ts";
 import { computeStats } from "~/lib/stats.ts";
-import type { Stats } from "~/types.ts";
+import type { Stats } from "~/lib/types.ts";
 import { deleteByApplicationId, insertEntry } from "./status-history.ts";
 
 export function listAll() {

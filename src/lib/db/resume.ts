@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
-import { db } from "../../db/index.ts";
-import type { InsertResume } from "../../db/schema.ts";
-import { insertResumeSchema, resume } from "../../db/schema.ts";
+import { db } from "~/db/index.ts";
+import type { InsertResume } from "~/db/schema.ts";
+import { insertResumeSchema, resume } from "~/db/schema.ts";
 
 const EMPTY_RESUME = {
   full_name: "",

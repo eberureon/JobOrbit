@@ -1,3 +1,4 @@
+import { Toast as ToastPrimitive } from "@base-ui/react/toast";
 import type { QueryClient } from "@tanstack/react-query";
 import {
   createRootRouteWithContext,
@@ -7,7 +8,6 @@ import {
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
-import { Toast as ToastPrimitive } from "@base-ui/react/toast";
 import { AppLayout } from "~/components/Sidebar";
 import { Toaster } from "~/components/ui/toaster";
 import { toastManager } from "~/hooks/use-toast";
@@ -16,8 +16,6 @@ import appCss from "~/styles.css?url";
 interface MyRouterContext {
   queryClient: QueryClient;
 }
-
-const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('theme');if(t==='light'){document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';}else if(t==='dark'){document.documentElement.classList.add('dark');document.documentElement.style.colorScheme='dark';}else{var p=window.matchMedia('(prefers-color-scheme:dark)');if(p.matches){document.documentElement.classList.add('dark');document.documentElement.style.colorScheme='dark';}else{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';}}}catch(e){}})();`;
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: () => ({
@@ -54,7 +52,6 @@ function RootDocument({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} /> */}
         <HeadContent />
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere] bg-background text-foreground">

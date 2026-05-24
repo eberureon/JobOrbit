@@ -30,9 +30,9 @@ import {
   deleteApplication,
   listApplications,
 } from "~/lib/server/applications.functions";
-import type { ApplicationStatus } from "~/types";
-import { APPLICATION_STATUSES } from "~/types";
 import { useSettings } from "~/lib/use-settings";
+import type { ApplicationStatus } from "~/lib/types";
+import { APPLICATION_STATUSES } from "~/lib/types";
 import { ApplicationDialog } from "./ApplicationDialog";
 import { RowActions } from "./RowActions";
 
@@ -450,7 +450,7 @@ export function ApplicationsPage() {
                             setEditing(a);
                             setDialogOpen(true);
                           }}
-                           onDelete={() => handleDelete(a.id)}
+                          onDelete={() => handleDelete(a.id)}
                         />
                       </div>
                     </div>

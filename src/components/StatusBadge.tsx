@@ -1,4 +1,4 @@
-import type { ApplicationStatus } from "../types";
+import type { ApplicationStatus } from "~/lib/types";
 
 const STATUS_VAR: Record<ApplicationStatus, string> = {
 	Applied: "--status-applied",
