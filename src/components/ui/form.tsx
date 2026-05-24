@@ -1,10 +1,21 @@
 import * as React from "react";
-import type * as LabelPrimitive from "@radix-ui/react-label";
-import { Slot } from "@radix-ui/react-slot";
 import { Controller, FormProvider, useFormContext } from "react-hook-form";
 import type { ControllerProps, FieldPath, FieldValues } from "react-hook-form";
 
 import { cn } from "../../lib/utils";
+
+function Slot({
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode }) {
+  if (React.isValidElement(children)) {
+    return React.cloneElement(children, {
+      ...props,
+      ...(children.props as Record<string, unknown>),
+    });
+  }
+  return null;
+}
 import { Label } from "./label";
 
 const Form = FormProvider;
@@ -79,8 +90,8 @@ const FormItem = React.forwardRef<
 FormItem.displayName = "FormItem";
 
 const FormLabel = React.forwardRef<
-	React.ElementRef<typeof LabelPrimitive.Root>,
-	React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
+	HTMLLabelElement,
+	React.ComponentProps<typeof Label>
 >(({ className, ...props }, ref) => {
 	const { error, formItemId } = useFormField();
 
@@ -96,15 +107,14 @@ const FormLabel = React.forwardRef<
 FormLabel.displayName = "FormLabel";
 
 const FormControl = React.forwardRef<
-	React.ElementRef<typeof Slot>,
-	React.ComponentPropsWithoutRef<typeof Slot>
+	HTMLDivElement,
+	React.HTMLAttributes<HTMLDivElement>
 >(({ ...props }, ref) => {
 	const { error, formItemId, formDescriptionId, formMessageId } =
 		useFormField();
 
 	return (
 		<Slot
-			ref={ref}
 			id={formItemId}
 			aria-describedby={
 				!error

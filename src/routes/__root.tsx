@@ -7,8 +7,10 @@ import {
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
+import { Toast as ToastPrimitive } from "@base-ui/react/toast";
 import { AppLayout } from "~/components/Sidebar";
 import { Toaster } from "~/components/ui/toaster";
+import { toastManager } from "~/hooks/use-toast";
 import appCss from "~/styles.css?url";
 
 interface MyRouterContext {
@@ -56,8 +58,10 @@ function RootDocument({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere] bg-background text-foreground">
-        <AppLayout>{children}</AppLayout>
-        <Toaster />
+        <ToastPrimitive.Provider toastManager={toastManager}>
+          <AppLayout>{children}</AppLayout>
+          <Toaster />
+        </ToastPrimitive.Provider>
         <Devtools />
         <Scripts />
       </body>
