@@ -20,6 +20,7 @@ import {
   listApplications,
 } from "~/lib/server/applications.functions";
 import type { ApplicationStatus, Stats } from "~/lib/types";
+import { getEffectiveLocale, useSettings } from "~/lib/use-settings";
 
 const STATUS_ORDER: ApplicationStatus[] = [
   "Applied",
@@ -114,6 +115,9 @@ export function DashboardPage() {
     queryKey: ["applications"],
     queryFn: () => listApplications(),
   });
+
+  const { settings } = useSettings();
+  const locale = getEffectiveLocale(settings);
 
   const recent = apps.slice(0, 5);
 
@@ -539,7 +543,9 @@ export function DashboardPage() {
                         <StatusBadge status={a.status} />
                       </td>
                       <td className="py-2.5 font-mono-num text-muted-foreground text-xs">
-                        {a.applied_date}
+                        {new Intl.DateTimeFormat(locale, {
+                          dateStyle: "medium",
+                        }).format(new Date(a.applied_date))}
                       </td>
                     </tr>
                   ))}

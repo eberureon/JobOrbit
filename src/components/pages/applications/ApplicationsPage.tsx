@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowUpDown, Filter, Plus, Search, Upload, X } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
+import { ArrowUpDown, ChevronLeft, ChevronRight, Filter, Plus, Search, Upload, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Papa from "papaparse";
-import type { ApplicationStatus } from "~/lib/types";
+import type { ApplicationStatus, SortOrder } from "~/lib/types";
 import { APPLICATION_STATUSES } from "~/lib/types";
 import { insertApplicationSchema } from "~/db/schema";
 import {
@@ -35,11 +35,19 @@ import { Input } from "~/components/ui/input";
 import { Skeleton } from "~/components/ui/skeleton";
 import type { Application } from "~/db/schema";
 import { useToast } from "~/hooks/use-toast";
-import { useSettings } from "~/lib/use-settings";
+import { getEffectiveLocale, useSettings } from "~/lib/use-settings";
 import { ApplicationDialog } from "./ApplicationDialog";
 import { RowActions } from "./RowActions";
 
 type SortKey = "applied_date" | "company" | "status";
+
+function sortFromDefault(d: SortOrder): [SortKey, "asc" | "desc"] {
+  switch (d) {
+    case "newest": return ["applied_date", "desc"];
+    case "a-z": return ["company", "asc"];
+    case "follow-up": return ["status", "asc"];
+  }
+}
 
 export function ApplicationsPage() {
   const queryClient = useQueryClient();
@@ -56,13 +64,20 @@ export function ApplicationsPage() {
   const [statusFilter, setStatusFilter] = useState<Set<ApplicationStatus>>(
     new Set(),
   );
-  const [sortKey, setSortKey] = useState<SortKey>("applied_date");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [sortKey, setSortKey] = useState<SortKey>(
+    sortFromDefault(settings.defaultSort)[0],
+  );
+  const [sortDir, setSortDir] = useState<"asc" | "desc">(
+    sortFromDefault(settings.defaultSort)[1],
+  );
+  const [page, setPage] = useState(0);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Application | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const locale = getEffectiveLocale(settings);
 
   const filtered = useMemo(() => {
     let list = [...apps];
@@ -88,6 +103,13 @@ export function ApplicationsPage() {
     });
     return list;
   }, [apps, search, statusFilter, sortKey, sortDir]);
+
+  useEffect(() => { setPage(0); }, [search, statusFilter, sortKey, sortDir]);
+
+  const pageSize = settings.pageSize;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const safePage = Math.min(page, totalPages - 1);
+  const paginated = filtered.slice(safePage * pageSize, (safePage + 1) * pageSize);
 
   function toggleStatus(s: ApplicationStatus) {
     setStatusFilter((prev) => {
@@ -255,6 +277,11 @@ export function ApplicationsPage() {
               {filtered.length}
             </span>{" "}
             of {apps.length} shown
+            {apps.length > pageSize && (
+              <span className="ml-2 text-muted-foreground/60">
+                &middot; Page {safePage + 1} of {totalPages}
+              </span>
+            )}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -447,7 +474,7 @@ export function ApplicationsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filtered.map((a) => (
+                    {paginated.map((a) => (
                       <tr
                         key={a.id}
                         data-testid={`row-application-${a.id}`}
@@ -470,7 +497,7 @@ export function ApplicationsPage() {
                           <StatusBadge status={a.status} />
                         </td>
                         <td className="px-4 py-3 font-mono-num text-muted-foreground text-xs">
-                          {new Intl.DateTimeFormat("de-DE", {
+                          {new Intl.DateTimeFormat(locale, {
                             dateStyle: "medium",
                           }).format(new Date(a.applied_date))}
                         </td>
@@ -502,7 +529,7 @@ export function ApplicationsPage() {
               </div>
 
               <div className="block lg:hidden divide-y divide-border/40">
-                {filtered.map((a) => {
+                {paginated.map((a) => {
                   return (
                     <div
                       key={a.id}
@@ -534,7 +561,7 @@ export function ApplicationsPage() {
                           <span className="text-muted-foreground/50">
                             Date Aplied:{" "}
                           </span>
-                          {new Intl.DateTimeFormat("de-DE", {
+                          {new Intl.DateTimeFormat(locale, {
                             dateStyle: "medium",
                           }).format(new Date(a.applied_date))}
                         </p>
@@ -551,7 +578,7 @@ export function ApplicationsPage() {
                             <span className="text-muted-foreground/50">
                               Salary:
                             </span>{" "}
-                            <span className="font-mono-num">){a.salary}</span>
+                            <span className="font-mono-num">{a.salary}</span>
                           </p>
                         )}
                         {a.source && (
@@ -598,6 +625,44 @@ export function ApplicationsPage() {
           )}
         </CardContent>
       </Card>
+
+      {totalPages > 1 && (
+        <div
+          className="flex items-center justify-center gap-2"
+          data-testid="pagination"
+        >
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={safePage === 0}
+            onClick={() => setPage(safePage - 1)}
+            data-testid="button-page-prev"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <Button
+              key={i}
+              variant={i === safePage ? "default" : "outline"}
+              size="sm"
+              className="min-w-[2rem]"
+              onClick={() => setPage(i)}
+              data-testid={`button-page-${i + 1}`}
+            >
+              {i + 1}
+            </Button>
+          ))}
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={safePage >= totalPages - 1}
+            onClick={() => setPage(safePage + 1)}
+            data-testid="button-page-next"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
 
       <ApplicationDialog
         open={dialogOpen}

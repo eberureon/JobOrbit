@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { AppLayout } from "~/components/Sidebar";
 import { Toaster } from "~/components/ui/toaster";
 import { toastManager } from "~/hooks/use-toast";
+import { SettingsProvider } from "~/lib/use-settings";
 import appCss from "~/styles.css?url";
 
 interface MyRouterContext {
@@ -53,11 +54,18 @@ function RootDocument({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("theme");if(t==="dark"){document.documentElement.classList.add("dark");document.documentElement.style.colorScheme="dark"}else if(t==="light"){document.documentElement.style.colorScheme="light"}else if(!t||t==="system"){var m=window.matchMedia("(prefers-color-scheme:dark)");if(m.matches){document.documentElement.classList.add("dark");document.documentElement.style.colorScheme="dark"}else{document.documentElement.style.colorScheme="light"}}}catch(e){}})()`,
+          }}
+        />
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere] bg-background text-foreground">
         <ToastPrimitive.Provider toastManager={toastManager}>
-          <AppLayout>{children}</AppLayout>
-          <Toaster />
+          <SettingsProvider>
+            <AppLayout>{children}</AppLayout>
+            <Toaster />
+          </SettingsProvider>
         </ToastPrimitive.Provider>
         <Devtools />
         <Scripts />
