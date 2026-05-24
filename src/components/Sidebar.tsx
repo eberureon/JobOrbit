@@ -6,11 +6,11 @@ import {
 	Menu,
 	PanelLeftClose,
 	PanelLeftOpen,
+	Settings,
 	X,
 } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
-import { ThemeToggle } from "./ThemeToggle";
 
 const NAV = [
 	{
@@ -72,6 +72,40 @@ function NavLinks({
 	);
 }
 
+function SettingsLink({ collapsed }: { collapsed?: boolean }) {
+	const { pathname } = useLocation();
+	const isActive = pathname === "/settings";
+
+	return (
+		<Link
+			to="/settings"
+			onClick={() => {}}
+			className={`group relative flex items-center rounded-md py-2 text-sm font-medium transition-colors ${
+				collapsed ? "justify-center" : "gap-3 px-3"
+			} ${
+				isActive
+					? "bg-sidebar-accent text-sidebar-accent-foreground"
+					: "text-muted-foreground hover:text-foreground"
+			}`}
+			title={collapsed ? "Settings" : undefined}
+		>
+			<Settings
+				className={`h-4 w-4 shrink-0 ${
+					isActive ? "text-primary" : "text-muted-foreground"
+				}`}
+			/>
+			<span
+				className={`transition-opacity duration-200 ${collapsed ? "opacity-0 w-0 overflow-hidden inline-block whitespace-nowrap" : ""}`}
+			>
+				Settings
+			</span>
+			{isActive && !collapsed && (
+				<span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+			)}
+		</Link>
+	);
+}
+
 export function AppLayout({ children }: { children: React.ReactNode }) {
 	const [mobileOpen, setMobileOpen] = useState(false);
 	const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -109,8 +143,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 						<div
 							className={`flex items-center ${collapsed ? "flex-col gap-3" : "gap-1"}`}
 						>
-							<ThemeToggle />
-							<button
+						<button
 								type="button"
 								onClick={() => setSidebarOpen((v) => !v)}
 								className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 transition-colors"
@@ -124,12 +157,31 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 							</button>
 						</div>
 					</div>
-					<NavLinks collapsed={collapsed} />
+					<div className="flex-1 overflow-y-auto">
+						<NavLinks collapsed={collapsed} />
+					</div>
+					<div
+						className={`border-t border-sidebar-border ${collapsed ? "p-2" : "p-3"}`}
+					>
+						<SettingsLink collapsed={collapsed} />
+					</div>
 				</aside>
 
 				{mobileOpen && (
-					<div className="md:hidden fixed inset-0 z-30 bg-background/95 backdrop-blur pt-14">
-						<NavLinks onNavigate={() => setMobileOpen(false)} />
+					<div className="md:hidden fixed inset-0 z-30 bg-background/95 backdrop-blur pt-14 flex flex-col">
+						<div className="flex-1 overflow-y-auto">
+							<NavLinks onNavigate={() => setMobileOpen(false)} />
+						</div>
+						<div className="border-t border-border p-3">
+							<Link
+								to="/settings"
+								onClick={() => setMobileOpen(false)}
+								className="group relative flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+							>
+								<Settings className="h-4 w-4 shrink-0 text-muted-foreground" />
+								Settings
+							</Link>
+						</div>
 					</div>
 				)}
 

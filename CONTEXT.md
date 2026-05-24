@@ -15,3 +15,9 @@ When an Application is created, an implicit first entry is recorded with
 `old_status = null` and `new_status` set to the application's initial status.
 
 When an Application is deleted, its Status History entries are cascade-deleted.
+
+## Settings
+Per-device configuration stored in `localStorage` under the `joborbit-settings` key.
+Settings include Theme (system/dark/light), Locale, default sort order, page size,
+and delete confirmation toggle. The `theme` value is also mirrored to a separate
+`localStorage` key for an inline `<script>` in `__root.tsx` that prevents FOUC.
