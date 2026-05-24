@@ -278,6 +278,42 @@ describe("Applications", () => {
 		expect(call.data.rows[0].notes).toBe("My note");
 	});
 
+	it("uses applied_date from csv when valid", async () => {
+		mocks.importApplications.mockResolvedValue({ count: 1 });
+		render(<ApplicationsPage />, { wrapper: Wrapper });
+
+		const csvContent = "company;role;applied_date\nSome Corp;Dev;2026-01-15";
+		const file = new File([csvContent], "apps.csv", { type: "text/csv" });
+
+		const input = (await screen.findAllByTestId("input-csv-file"))[0];
+		fireEvent.change(input, { target: { files: [file] } });
+
+		await waitFor(() => {
+			expect(mocks.importApplications).toHaveBeenCalled();
+		});
+
+		const call = mocks.importApplications.mock.calls[0][0];
+		expect(call.data.rows[0].applied_date).toBe("2026-01-15");
+	});
+
+	it("defaults invalid applied_date to today", async () => {
+		mocks.importApplications.mockResolvedValue({ count: 1 });
+		render(<ApplicationsPage />, { wrapper: Wrapper });
+
+		const csvContent = "company;role;applied_date\nSome Corp;Dev;not-a-date";
+		const file = new File([csvContent], "apps.csv", { type: "text/csv" });
+
+		const input = (await screen.findAllByTestId("input-csv-file"))[0];
+		fireEvent.change(input, { target: { files: [file] } });
+
+		await waitFor(() => {
+			expect(mocks.importApplications).toHaveBeenCalled();
+		});
+
+		const call = mocks.importApplications.mock.calls[0][0];
+		expect(call.data.rows[0].applied_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+	});
+
 	it("handles multiple csv rows", async () => {
 		mocks.importApplications.mockResolvedValue({ count: 2 });
 		render(<ApplicationsPage />, { wrapper: Wrapper });

@@ -158,6 +158,9 @@ export function ApplicationsPage() {
           else if (lower === "source") mapped.source = value ?? "";
           else if (lower === "joburl") mapped.job_url = value ?? "";
           else if (lower === "notes") mapped.notes = value ?? "";
+          else if (lower === "applieddate") mapped.applied_date = value ?? "";
+          else if (lower === "applied_date") mapped.applied_date = value ?? "";
+          else if (lower === "applied date") mapped.applied_date = value ?? "";
         }
 
         let status = mapped.status ?? "";
@@ -165,12 +168,17 @@ export function ApplicationsPage() {
           status = "Applied";
         }
 
+        let appliedDate = mapped.applied_date ?? "";
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(appliedDate)) {
+          appliedDate = today;
+        }
+
         const rowData = {
           company: mapped.company ?? "",
           role: mapped.role ?? "",
           location: mapped.location ?? "",
           status,
-          applied_date: today,
+          applied_date: appliedDate,
           salary: mapped.salary ?? "",
           source: mapped.source ?? "",
           job_url: mapped.job_url ?? "",
