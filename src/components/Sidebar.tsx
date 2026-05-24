@@ -65,9 +65,6 @@ function NavLinks({
             {isActive && !collapsed && (
               <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
             )}
-            {isActive && collapsed && (
-              <span className="absolute right-0 h-4 w-1 rounded-full bg-primary" />
-            )}
           </Link>
         );
       })}

@@ -34,6 +34,7 @@ import {
 } from '../../../lib/server/applications.functions'
 import {
   ArrowUpDown,
+  ChevronRight,
   ExternalLink,
   Filter,
   Pencil,
@@ -207,28 +208,40 @@ export function ApplicationsPage() {
       <Card className="card-hairline overflow-hidden">
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
-                    <th className="px-4 py-3 font-medium">Company</th>
-                    <th className="px-4 py-3 font-medium">Role</th>
-                    <th className="px-4 py-3 font-medium">Status</th>
-                    <th className="px-4 py-3 font-medium">Applied</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <tr key={i} className="border-b border-border/40">
-                      <td className="px-4 py-3"><Skeleton className="h-4 w-28" /></td>
-                      <td className="px-4 py-3"><Skeleton className="h-4 w-36" /></td>
-                      <td className="px-4 py-3"><Skeleton className="h-5 w-16 rounded-full" /></td>
-                      <td className="px-4 py-3"><Skeleton className="h-4 w-16" /></td>
+            <>
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
+                      <th className="px-4 py-3 font-medium">Company</th>
+                      <th className="px-4 py-3 font-medium">Role</th>
+                      <th className="px-4 py-3 font-medium">Status</th>
+                      <th className="px-4 py-3 font-medium">Applied</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <tr key={i} className="border-b border-border/40">
+                        <td className="px-4 py-3"><Skeleton className="h-4 w-28" /></td>
+                        <td className="px-4 py-3"><Skeleton className="h-4 w-36" /></td>
+                        <td className="px-4 py-3"><Skeleton className="h-5 w-16 rounded-full" /></td>
+                        <td className="px-4 py-3"><Skeleton className="h-4 w-16" /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="block md:hidden p-4 space-y-4">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="space-y-2">
+                    <Skeleton className="h-5 w-40" />
+                    <Skeleton className="h-4 w-56" />
+                    <Skeleton className="h-3.5 w-20" />
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                  </div>
+                ))}
+              </div>
+            </>
           ) : filtered.length === 0 ? (
             <div className="p-12 text-center">
               <div className="text-sm text-muted-foreground">
@@ -238,120 +251,228 @@ export function ApplicationsPage() {
               </div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
-                    <th className="px-4 py-3 font-medium">
-                      <button
-                        className="inline-flex items-center gap-1 hover:text-foreground"
-                        onClick={() => toggleSort('company')}
-                        data-testid="sort-company"
+            <>
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
+                      <th className="px-4 py-3 font-medium">
+                        <button
+                          className="inline-flex items-center gap-1 hover:text-foreground"
+                          onClick={() => toggleSort('company')}
+                          data-testid="sort-company"
+                        >
+                          Company
+                          <ArrowUpDown className="h-3 w-3" />
+                        </button>
+                      </th>
+                      <th className="px-4 py-3 font-medium">Role</th>
+                      <th className="px-4 py-3 font-medium">Location</th>
+                      <th className="px-4 py-3 font-medium">
+                        <button
+                          className="inline-flex items-center gap-1 hover:text-foreground"
+                          onClick={() => toggleSort('status')}
+                          data-testid="sort-status"
+                        >
+                          Status
+                          <ArrowUpDown className="h-3 w-3" />
+                        </button>
+                      </th>
+                      <th className="px-4 py-3 font-medium">
+                        <button
+                          className="inline-flex items-center gap-1 hover:text-foreground"
+                          onClick={() => toggleSort('applied_date')}
+                          data-testid="sort-date"
+                        >
+                          Applied
+                          <ArrowUpDown className="h-3 w-3" />
+                        </button>
+                      </th>
+                      <th className="px-4 py-3 font-medium">Salary</th>
+                      <th className="px-4 py-3 font-medium">Source</th>
+                      <th className="px-4 py-3 font-medium text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((a) => (
+                      <tr
+                        key={a.id}
+                        data-testid={`row-application-${a.id}`}
+                        className="border-b border-border/40 last:border-0 hover:bg-muted/30 cursor-pointer"
+                        onClick={() => {
+                          setEditing(a)
+                          setDialogOpen(true)
+                        }}
                       >
-                        Company
-                        <ArrowUpDown className="h-3 w-3" />
-                      </button>
-                    </th>
-                    <th className="px-4 py-3 font-medium">Role</th>
-                    <th className="px-4 py-3 font-medium">Location</th>
-                    <th className="px-4 py-3 font-medium">
-                      <button
-                        className="inline-flex items-center gap-1 hover:text-foreground"
-                        onClick={() => toggleSort('status')}
-                        data-testid="sort-status"
-                      >
-                        Status
-                        <ArrowUpDown className="h-3 w-3" />
-                      </button>
-                    </th>
-                    <th className="px-4 py-3 font-medium">
-                      <button
-                        className="inline-flex items-center gap-1 hover:text-foreground"
-                        onClick={() => toggleSort('applied_date')}
-                        data-testid="sort-date"
-                      >
-                        Applied
-                        <ArrowUpDown className="h-3 w-3" />
-                      </button>
-                    </th>
-                    <th className="px-4 py-3 font-medium">Salary</th>
-                    <th className="px-4 py-3 font-medium">Source</th>
-                    <th className="px-4 py-3 font-medium text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((a) => (
-                    <tr
+                        <td className="px-4 py-3 text-foreground font-medium">
+                          {a.company}
+                        </td>
+                        <td className="px-4 py-3 text-foreground/90">{a.role}</td>
+                        <td className="px-4 py-3 text-muted-foreground">
+                          {a.location || '\u2014'}
+                        </td>
+                        <td className="px-4 py-3">
+                          <StatusBadge status={a.status} />
+                        </td>
+                        <td className="px-4 py-3 font-mono-num text-muted-foreground text-xs">
+                          {a.applied_date}
+                        </td>
+                        <td className="px-4 py-3 font-mono-num text-foreground/90 text-xs">
+                          {a.salary || '\u2014'}
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground">
+                          {a.source || '\u2014'}
+                        </td>
+                        <td
+                          className="px-4 py-3 text-right"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="inline-flex items-center gap-1">
+                            {a.job_url && (
+                              <a
+                                href={a.job_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-1.5 rounded hover-elevate text-muted-foreground hover:text-foreground"
+                                data-testid={`link-job-${a.id}`}
+                                aria-label="Open job link"
+                              >
+                                <ExternalLink className="h-3.5 w-3.5" />
+                              </a>
+                            )}
+                            <button
+                              onClick={() => {
+                                setEditing(a)
+                                setDialogOpen(true)
+                              }}
+                              className="p-1.5 rounded hover-elevate text-muted-foreground hover:text-foreground"
+                              data-testid={`button-edit-${a.id}`}
+                              aria-label="Edit"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => setDeleteId(a.id)}
+                              className="p-1.5 rounded hover-elevate text-muted-foreground hover:text-destructive"
+                              data-testid={`button-delete-${a.id}`}
+                              aria-label="Delete"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="block md:hidden divide-y divide-border/40">
+                {filtered.map((a) => {
+                  const hasDetails = a.location || a.salary || a.source || a.job_url
+                  return (
+                    <div
                       key={a.id}
-                      data-testid={`row-application-${a.id}`}
-                      className="border-b border-border/40 last:border-0 hover:bg-muted/30 cursor-pointer"
+                      data-testid={`card-application-${a.id}`}
+                      className="p-4 cursor-pointer hover:bg-muted/30 transition-colors"
                       onClick={() => {
                         setEditing(a)
                         setDialogOpen(true)
                       }}
                     >
-                      <td className="px-4 py-3 text-foreground font-medium">
+                      <div className="text-foreground font-medium">
                         {a.company}
-                      </td>
-                      <td className="px-4 py-3 text-foreground/90">{a.role}</td>
-                      <td className="px-4 py-3 text-muted-foreground">
-                        {a.location || '—'}
-                      </td>
-                      <td className="px-4 py-3">
-                        <StatusBadge status={a.status} />
-                      </td>
-                      <td className="px-4 py-3 font-mono-num text-muted-foreground text-xs">
+                      </div>
+                      <div className="text-foreground/90 text-sm mt-0.5">
+                        {a.role}
+                      </div>
+                      <div className="text-xs font-mono-num text-muted-foreground mt-2">
                         {a.applied_date}
-                      </td>
-                      <td className="px-4 py-3 font-mono-num text-foreground/90 text-xs">
-                        {a.salary || '—'}
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground">
-                        {a.source || '—'}
-                      </td>
-                      <td
-                        className="px-4 py-3 text-right"
+                      </div>
+                      <div className="mt-1.5">
+                        <StatusBadge status={a.status} />
+                      </div>
+                      <div
+                        className="flex items-center gap-1 mt-2"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <div className="inline-flex items-center gap-1">
-                          {a.job_url && (
-                            <a
-                              href={a.job_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-1.5 rounded hover-elevate text-muted-foreground hover:text-foreground"
-                              data-testid={`link-job-${a.id}`}
-                              aria-label="Open job link"
-                            >
-                              <ExternalLink className="h-3.5 w-3.5" />
-                            </a>
-                          )}
-                          <button
-                            onClick={() => {
-                              setEditing(a)
-                              setDialogOpen(true)
-                            }}
+                        {a.job_url && (
+                          <a
+                            href={a.job_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="p-1.5 rounded hover-elevate text-muted-foreground hover:text-foreground"
-                            data-testid={`button-edit-${a.id}`}
-                            aria-label="Edit"
+                            data-testid={`link-job-${a.id}`}
+                            aria-label="Open job link"
                           >
-                            <Pencil className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            onClick={() => setDeleteId(a.id)}
-                            className="p-1.5 rounded hover-elevate text-muted-foreground hover:text-destructive"
-                            data-testid={`button-delete-${a.id}`}
-                            aria-label="Delete"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </a>
+                        )}
+                        <button
+                          onClick={() => {
+                            setEditing(a)
+                            setDialogOpen(true)
+                          }}
+                          className="p-1.5 rounded hover-elevate text-muted-foreground hover:text-foreground"
+                          data-testid={`button-edit-${a.id}`}
+                          aria-label="Edit"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteId(a.id)}
+                          className="p-1.5 rounded hover-elevate text-muted-foreground hover:text-destructive"
+                          data-testid={`button-delete-${a.id}`}
+                          aria-label="Delete"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                      {hasDetails && (
+                        <details className="mt-2 group" onClick={(e) => e.stopPropagation()}>
+                          <summary className="text-xs text-muted-foreground/70 cursor-pointer hover:text-foreground select-none list-none flex items-center gap-1">
+                            <ChevronRight className="h-3 w-3 transition-transform group-open:rotate-90" />
+                            Show details
+                          </summary>
+                          <div className="mt-2 space-y-1 text-xs text-muted-foreground pl-4">
+                            {a.location && (
+                              <div>
+                                <span className="text-muted-foreground/50">Location:</span>{' '}
+                                {a.location}
+                              </div>
+                            )}
+                            {a.salary && (
+                              <div>
+                                <span className="text-muted-foreground/50">Salary:</span>{' '}
+                                <span className="font-mono-num">{a.salary}</span>
+                              </div>
+                            )}
+                            {a.source && (
+                              <div>
+                                <span className="text-muted-foreground/50">Source:</span>{' '}
+                                {a.source}
+                              </div>
+                            )}
+                            {a.job_url && (
+                              <div>
+                                <a
+                                  href={a.job_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-primary hover:underline"
+                                >
+                                  View job posting &rarr;
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        </details>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
