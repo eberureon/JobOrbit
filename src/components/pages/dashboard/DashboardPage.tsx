@@ -196,14 +196,14 @@ export function DashboardPage() {
               </span>
             </div>
           </div>
-          <div className="p-5 pt-2">
-            <div className="h-64" data-testid="chart-timeline">
+          <div className="px-5 pb-5 pt-0">
+            <div className="w-full aspect-[2/1]" data-testid="chart-timeline">
               {statsLoading ? (
                 <div className="w-full h-full flex items-center justify-center">
-                  <Skeleton className="w-full h-56 rounded-lg" />
+                  <Skeleton className="w-full h-full rounded-lg" />
                 </div>
               ) : (
-                <ResponsiveContainer width="100%" height={256}>
+                <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={stats?.timeline ?? []}>
                     <defs>
                       <linearGradient
