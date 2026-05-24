@@ -7,15 +7,16 @@ WORKDIR /app
 
 # Build tools required to compile better-sqlite3 from source.
 RUN apt-get update \
- && apt-get install -y --no-install-recommends python3 make g++ ca-certificates \
- && rm -rf /var/lib/apt/lists/*
+  && apt-get install -y --no-install-recommends python3 make g++ ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 
 
 # ---------- Stage 2: build ----------
-# Build the app (Vite + TanStack Start SSR) into .output/.
+# Build the app (Vite + TanStack Start SSR) into dist/.
+# Use `bun run build` (Vite), not `bun build` (Bun bundler).
 FROM deps AS build
 WORKDIR /app
 COPY . .
@@ -28,23 +29,23 @@ FROM oven/bun:1-slim AS runtime
 WORKDIR /app
 
 ENV NODE_ENV=production \
-    PORT=3000 \
-    DATABASE_URL=/app/data/joborbit.db
+  PORT=3000 \
+  DATABASE_URL=/app/data/joborbit.db
 
 # Install production deps only (better-sqlite3 prebuilds work on debian-slim).
 # Build toolchain stays here in case prebuilds aren't available for the arch.
 RUN apt-get update \
- && apt-get install -y --no-install-recommends python3 make g++ ca-certificates wget \
- && rm -rf /var/lib/apt/lists/*
+  && apt-get install -y --no-install-recommends python3 make g++ ca-certificates wget \
+  && rm -rf /var/lib/apt/lists/*
 
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile --production \
- && apt-get purge -y python3 make g++ \
- && apt-get autoremove -y \
- && rm -rf /var/lib/apt/lists/*
+  && apt-get purge -y python3 make g++ \
+  && apt-get autoremove -y \
+  && rm -rf /var/lib/apt/lists/*
 
 # Copy built output from the build stage.
-COPY --from=build /app/.output ./.output
+COPY --from=build /app/dist ./dist
 
 # Create data dir and run as the non-root user.
 RUN mkdir -p /app/data && chown -R bun:bun /app/data /app
@@ -57,4 +58,4 @@ VOLUME ["/app/data"]
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget -qO- http://127.0.0.1:3000/ >/dev/null 2>&1 || exit 1
 
-CMD ["bun", "run", "srvx"]
+CMD ["bun", "x", "srvx", "dist/server/server.js", "--static", "dist/client", "--host", "0.0.0.0", "--port", "3000"]

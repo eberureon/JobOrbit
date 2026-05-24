@@ -12,8 +12,10 @@ bun --bun run dev
 # Building For Production
 
 ```bash
-bun --bun run build
+bun run build
 ```
+
+Note: use `bun run build` (Vite). `bun build` is Bun's bundler and expects explicit entrypoints.
 
 ## Running With Docker
 
