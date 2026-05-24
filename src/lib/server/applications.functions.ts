@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { insertApplicationSchema } from '../../db/schema.ts'
 import * as db from '../db/applications.ts'
+import { listByApplicationId } from '../db/status-history.ts'
 
 export const listApplications = createServerFn({ method: 'GET' }).handler(async () => {
   return db.listAll()
@@ -34,3 +35,9 @@ export const deleteApplication = createServerFn({ method: 'POST' })
 export const getStats = createServerFn({ method: 'GET' }).handler(async () => {
   return db.stats()
 })
+
+export const getStatusHistory = createServerFn({ method: 'GET' })
+  .inputValidator((data: { applicationId: number }) => data)
+  .handler(async ({ data }) => {
+    return listByApplicationId(data.applicationId)
+  })

@@ -1,9 +1,22 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '../../ui/button'
-import { Input } from '../../ui/input'
-import { Textarea } from '../../ui/textarea'
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import type {
+  Application,
+  InsertApplication,
+  StatusHistory,
+} from "../../../db/schema";
+import { insertApplicationSchema } from "../../../db/schema";
+import { useToast } from "../../../hooks/use-toast";
+import {
+  createApplication,
+  getStatusHistory,
+  updateApplication,
+} from "../../../lib/server/applications.functions";
+import type { ApplicationStatus } from "../../../types";
+import { APPLICATION_STATUSES } from "../../../types";
+import { StatusBadge } from "../../StatusBadge";
+import { Button } from "../../ui/button";
 import {
   Dialog,
   DialogContent,
@@ -11,14 +24,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../ui/select'
+} from "../../ui/dialog";
 import {
   Form,
   FormControl,
@@ -26,19 +32,19 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '../../ui/form'
-import { useToast } from '../../../hooks/use-toast'
-import { APPLICATION_STATUSES } from '../../../types'
-import type { ApplicationStatus } from '../../../types'
-import { insertApplicationSchema } from '../../../db/schema'
-import type { Application, InsertApplication } from '../../../db/schema'
+} from "../../ui/form";
+import { Input } from "../../ui/input";
 import {
-  createApplication,
-  updateApplication,
-} from '../../../lib/server/applications.functions'
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../ui/select";
+import { Textarea } from "../../ui/textarea";
 
 function todayISO(): string {
-  return new Date().toISOString().slice(0, 10)
+  return new Date().toISOString().slice(0, 10);
 }
 
 export function ApplicationDialog({
@@ -46,12 +52,12 @@ export function ApplicationDialog({
   onOpenChange,
   editing,
 }: {
-  open: boolean
-  onOpenChange: (o: boolean) => void
-  editing: Application | null
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  editing: Application | null;
 }) {
-  const queryClient = useQueryClient()
-  const { toast } = useToast()
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const form = useForm<InsertApplication>({
     resolver: zodResolver(insertApplicationSchema),
@@ -68,51 +74,60 @@ export function ApplicationDialog({
           notes: editing.notes,
         }
       : {
-          company: '',
-          role: '',
-          location: '',
-          status: 'Applied' as ApplicationStatus,
+          company: "",
+          role: "",
+          location: "",
+          status: "Applied" as ApplicationStatus,
           applied_date: todayISO(),
-          salary: '',
-          source: '',
-          job_url: '',
-          notes: '',
+          salary: "",
+          source: "",
+          job_url: "",
+          notes: "",
         },
-  })
+  });
+
+  const { data: history = [] } = useQuery<StatusHistory[]>({
+    queryKey: ["status-history", editing?.id],
+    queryFn: () => getStatusHistory({ data: { applicationId: editing!.id } }),
+    enabled: !!editing,
+  });
 
   const mutation = useMutation({
     mutationFn: async (data: InsertApplication) => {
       if (editing) {
-        await updateApplication({ data: { id: editing.id, ...data } })
+        await updateApplication({ data: { id: editing.id, ...data } });
       } else {
-        await createApplication({ data })
+        await createApplication({ data });
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['applications'] })
-      queryClient.invalidateQueries({ queryKey: ['stats'] })
+      queryClient.invalidateQueries({ queryKey: ["applications"] });
+      queryClient.invalidateQueries({ queryKey: ["stats"] });
+      if (editing) {
+        queryClient.invalidateQueries({
+          queryKey: ["status-history", editing.id],
+        });
+      }
       toast({
-        title: editing ? 'Updated' : 'Created',
-        description: editing
-          ? 'Application updated.'
-          : 'Application added.',
-      })
-      onOpenChange(false)
+        title: editing ? "Updated" : "Created",
+        description: editing ? "Application updated." : "Application added.",
+      });
+      onOpenChange(false);
     },
     onError: (e: Error) =>
       toast({
-        title: 'Error',
+        title: "Error",
         description: e.message,
-        variant: 'destructive',
+        variant: "destructive",
       }),
-  })
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {editing ? 'Edit Application' : 'Add Application'}
+            {editing ? "Edit Application" : "Add Application"}
           </DialogTitle>
           <DialogDescription>
             Track a new job application with company, role, status and notes.
@@ -181,10 +196,7 @@ export function ApplicationDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger data-testid="select-status">
                           <SelectValue />
@@ -293,6 +305,39 @@ export function ApplicationDialog({
                 </FormItem>
               )}
             />
+            {editing && history.length > 0 && (
+              <div className="border-t border-border/60 pt-4">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                  Status History
+                </h4>
+                <div className="space-y-1.5">
+                  {history.map((entry) => (
+                    <div
+                      key={entry.id}
+                      className="flex items-center gap-2 text-sm flex-wrap"
+                    >
+                      <span className="font-mono-num text-xs text-muted-foreground shrink-0">
+                        {new Intl.DateTimeFormat("de-DE", {
+                          dateStyle: "medium",
+                        }).format(new Date(entry.changed_at))}
+                      </span>
+                      <span className="text-muted-foreground/60">|</span>
+                      {entry.old_status ? (
+                        <>
+                          <StatusBadge status={entry.old_status} />
+                          <span className="text-muted-foreground/50">
+                            &rarr;
+                          </span>
+                          <StatusBadge status={entry.new_status} />
+                        </>
+                      ) : (
+                        <StatusBadge status={entry.new_status} />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <DialogFooter>
               <Button
                 type="button"
@@ -308,15 +353,15 @@ export function ApplicationDialog({
                 data-testid="button-submit-application"
               >
                 {mutation.isPending
-                  ? 'Saving…'
+                  ? "Saving…"
                   : editing
-                  ? 'Save changes'
-                  : 'Add application'}
+                    ? "Save changes"
+                    : "Add application"}
               </Button>
             </DialogFooter>
           </form>
         </Form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

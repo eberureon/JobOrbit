@@ -39,6 +39,13 @@ sqlite.exec(`
     links TEXT NOT NULL DEFAULT '[]',
     updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
   );
+  CREATE TABLE IF NOT EXISTS status_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    application_id INTEGER NOT NULL,
+    old_status TEXT,
+    new_status TEXT NOT NULL,
+    changed_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+  );
 `)
 
 export const db = drizzle(sqlite, { schema })

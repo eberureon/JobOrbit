@@ -75,3 +75,15 @@ export const insertCvSchema = createInsertSchema(cv)
 
 export type InsertCv = z.infer<typeof insertCvSchema>
 export type Cv = typeof cv.$inferSelect
+
+export const statusHistory = sqliteTable('status_history', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  application_id: integer('application_id').notNull(),
+  old_status: text('old_status'),
+  new_status: text('new_status').notNull(),
+  changed_at: text('changed_at')
+    .notNull()
+    .default(sql`(CURRENT_TIMESTAMP)`),
+})
+
+export type StatusHistory = typeof statusHistory.$inferSelect

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { listAll, getById, insert, update, remove } from './applications'
+import { listByApplicationId } from './status-history'
 
 const validApp = {
   company: 'Acme Inc',
@@ -75,5 +76,46 @@ describe('remove', () => {
 
   it('succeeds for nonexistent id', () => {
     expect(() => remove(999)).not.toThrow()
+  })
+})
+
+describe('status history side-effects', () => {
+  it('creates an initial history entry on insert', () => {
+    const app = insert(validApp)
+    const entries = listByApplicationId(app.id)
+    expect(entries).toHaveLength(1)
+    expect(entries[0].old_status).toBeNull()
+    expect(entries[0].new_status).toBe('Applied')
+  })
+
+  it('creates a history entry when status is updated', () => {
+    const app = insert(validApp)
+    update(app.id, { status: 'Interview' })
+    const entries = listByApplicationId(app.id)
+    expect(entries).toHaveLength(2)
+    expect(entries[0].old_status).toBe('Applied')
+    expect(entries[0].new_status).toBe('Interview')
+  })
+
+  it('does not create a history entry when non-status fields are updated', () => {
+    const app = insert(validApp)
+    update(app.id, { company: 'New Corp' })
+    const entries = listByApplicationId(app.id)
+    expect(entries).toHaveLength(1)
+  })
+
+  it('does not create a history entry when status stays the same', () => {
+    const app = insert(validApp)
+    update(app.id, { status: 'Applied' })
+    const entries = listByApplicationId(app.id)
+    expect(entries).toHaveLength(1)
+  })
+
+  it('cascades delete history entries on remove', () => {
+    const app = insert(validApp)
+    update(app.id, { status: 'Interview' })
+    update(app.id, { status: 'Offer' })
+    remove(app.id)
+    expect(listByApplicationId(app.id)).toEqual([])
   })
 })

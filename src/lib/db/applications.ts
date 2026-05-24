@@ -4,6 +4,7 @@ import { eq, desc } from 'drizzle-orm'
 import type { Stats } from '../../types.ts'
 import type { InsertApplication } from '../../db/schema.ts'
 import { computeStats } from '../stats.ts'
+import { insertEntry, deleteByApplicationId } from './status-history.ts'
 
 export function listAll() {
   return db
@@ -22,7 +23,9 @@ export function getById(id: number) {
 }
 
 export function insert(data: InsertApplication) {
-  return db.insert(applications).values(data).returning().get()
+  const app = db.insert(applications).values(data).returning().get()
+  insertEntry(app.id, app.status, null)
+  return app
 }
 
 export function update(id: number, data: Record<string, unknown>) {
@@ -31,15 +34,22 @@ export function update(id: number, data: Record<string, unknown>) {
   if (Object.keys(partial.data).length === 0) {
     return getById(id)
   }
-  return db
+  const old = getById(id)
+  if (!old) throw new Error('Application not found')
+  const updated = db
     .update(applications)
     .set(partial.data)
     .where(eq(applications.id, id))
     .returning()
     .get()
+  if (partial.data.status && partial.data.status !== old.status) {
+    insertEntry(id, partial.data.status, old.status)
+  }
+  return updated
 }
 
 export function remove(id: number) {
+  deleteByApplicationId(id)
   db.delete(applications).where(eq(applications.id, id)).run()
 }
 
