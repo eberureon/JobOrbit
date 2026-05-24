@@ -1,13 +1,11 @@
 import {
 	HeadContent,
 	Link,
-	Outlet,
 	Scripts,
 	createRootRouteWithContext,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { TanStackDevtools } from "@tanstack/react-devtools";
-import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
+import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { AppLayout } from "../components/Sidebar";
 import { Toaster } from "../components/ui/toaster";
 
@@ -52,7 +50,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 	),
 });
 
-function RootDocument({ children }: { children: React.ReactNode }) {
+function RootDocument({ children }: { children: ReactNode }) {
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<head>
@@ -62,6 +60,28 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			<body className="font-sans antialiased [overflow-wrap:anywhere] bg-background text-foreground">
 				<AppLayout>{children}</AppLayout>
 				<Toaster />
+				<Devtools />
+				<Scripts />
+			</body>
+		</html>
+	);
+}
+
+function Devtools() {
+	const [node, setNode] = useState<ReactNode>(null);
+
+	useEffect(() => {
+		if (!import.meta.env.DEV) return;
+		let mounted = true;
+		const load = async () => {
+			const [{ TanStackDevtools }, { TanStackRouterDevtoolsPanel }, query] =
+				await Promise.all([
+					import("@tanstack/react-devtools"),
+					import("@tanstack/react-router-devtools"),
+					import("../integrations/tanstack-query/devtools"),
+				]);
+			if (!mounted) return;
+			setNode(
 				<TanStackDevtools
 					config={{ position: "bottom-right" }}
 					plugins={[
@@ -69,11 +89,16 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 							name: "Tanstack Router",
 							render: <TanStackRouterDevtoolsPanel />,
 						},
-						TanStackQueryDevtools,
+						query.default,
 					]}
-				/>
-				<Scripts />
-			</body>
-		</html>
-	);
+				/>,
+			);
+		};
+		load();
+		return () => {
+			mounted = false;
+		};
+	}, []);
+
+	return import.meta.env.DEV ? node : null;
 }

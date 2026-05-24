@@ -73,8 +73,8 @@ skills:
 - Legacy app moved to `legacy/` (do not edit in place; migrate into `src/` routes).
 - TanStack Start scaffold command used: `npx @tanstack/cli@latest create my-tanstack-app --agent --package-manager bun --toolchain biome --add-ons neon,drizzle,sentry,better-auth,tanstack-query,table,form`.
 - Intent setup commands run: `npx @tanstack/intent@latest install --map`, then `npx @tanstack/intent@latest list`.
-- Stack choices to preserve: TanStack Start + Router + Query + Table + Form + Better Auth + Drizzle + Biome.
-- Env vars (see `.env.local`, `.env.example`): `DATABASE_URL`, `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`.
+- Stack choices to preserve: TanStack Start + Router + Query + Drizzle + Biome.
+- Env vars (see `.env.local`, `.env.example`): `DATABASE_URL`.
 - Tooling quirk: prefix shell commands with `rtk` per `.github/copilot-instructions.md`.
 - UI: shadcn/ui primitives copied from legacy into `src/components/ui/` (Button, Input, Textarea, Label, Card, Dialog, AlertDialog, Select, DropdownMenu, Form, Toast, Separator, Alert, Badge, Table) + `src/hooks/use-toast.ts`.
 - CSS: shadcn HSL CSS vars merged into `src/styles.css` (light + dark modes via `:root` / `:root[data-theme="dark"]` / `@media (prefers-color-scheme: dark)`). Tailwind v4 `@theme` entries for color classes (`bg-card`, `text-muted-foreground`, etc.). Status badge colors, elevation/hover utilities added.
