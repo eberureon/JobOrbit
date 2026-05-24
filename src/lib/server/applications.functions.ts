@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { insertApplicationSchema } from '../../db/schema.ts'
 import * as db from '../db/applications.ts'
 import { listByApplicationId } from '../db/status-history.ts'
+import { z } from 'zod'
 
 export const listApplications = createServerFn({ method: 'GET' }).handler(async () => {
   return db.listAll()
@@ -20,9 +21,14 @@ export const createApplication = createServerFn({ method: 'POST' })
   })
 
 export const updateApplication = createServerFn({ method: 'POST' })
+  .inputValidator(
+    z.object({
+      id: z.number(),
+      data: insertApplicationSchema.partial(),
+    }),
+  )
   .handler(async ({ data }) => {
-    const { id, ...fields } = data as { id: number } & Record<string, unknown>
-    return db.update(id, fields)
+    return db.update(data.id, data.data)
   })
 
 export const deleteApplication = createServerFn({ method: 'POST' })

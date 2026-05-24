@@ -95,7 +95,7 @@ export function ApplicationDialog({
   const mutation = useMutation({
     mutationFn: async (data: InsertApplication) => {
       if (editing) {
-        await updateApplication({ data: { id: editing.id, ...data } });
+        await updateApplication({ data: { id: editing.id, data } });
       } else {
         await createApplication({ data });
       }

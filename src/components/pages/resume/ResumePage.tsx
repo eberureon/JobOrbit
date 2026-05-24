@@ -5,8 +5,18 @@ import { useForm } from "react-hook-form";
 import type { InsertResume, Resume } from "../../../db/schema";
 import { useToast } from "../../../hooks/use-toast";
 import { buildMarkdown, parseList, safeParseJson } from "../../../lib/resume";
+import { exportMarkdown } from "../../../lib/export-markdown";
 import { getResume, upsertResume } from "../../../lib/server/resume.functions";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "../../ui/form";
+import { Input } from "../../ui/input";
 import { Skeleton } from "../../ui/skeleton";
+import { Textarea } from "../../ui/textarea";
 
 type FormFields = {
   full_name: string;
@@ -51,7 +61,6 @@ function ResumePreview({
     <div className="font-sans space-y-5">
       <div className="border-b border-border pb-4">
         <div className="text-xs uppercase tracking-widest text-primary font-mono-num">
-          {/* // curriculum vitae */}
         </div>
         <h2 className="mt-1 text-xl font-semibold text-foreground">
           {values.full_name || "Your Name"}
@@ -193,21 +202,6 @@ export function ResumePage() {
       toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
-  function exportMarkdown() {
-    const md = buildMarkdown(values, skillsList, linksList);
-    const blob = new Blob([md], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    const safeName =
-      (values.full_name || "resume").replace(/\s+/g, "_").toLowerCase() + ".md";
-    a.download = safeName;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -221,7 +215,7 @@ export function ResumePage() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={exportMarkdown}
+            onClick={() => exportMarkdown(values, skillsList, linksList, buildMarkdown)}
             className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium border border-[var(--button-outline)] shadow-xs active:shadow-none min-h-9 px-4 py-2 hover-elevate"
           >
             <Download className="h-4 w-4" />
@@ -244,167 +238,175 @@ export function ResumePage() {
             <div className="text-sm font-medium">Edit</div>
           </div>
           <div className="p-6 pt-0">
-            <form
-              onSubmit={form.handleSubmit((d) => saveMutation.mutate(d))}
-              className="space-y-4"
-            >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label
-                    htmlFor="resume-name"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Full name
-                  </label>
-                  <input
-                    id="resume-name"
-                    data-testid="input-resume-name"
-                    {...form.register("full_name")}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit((d) => saveMutation.mutate(d))}
+                className="space-y-4"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <FormField
+                    control={form.control}
+                    name="full_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Full name</FormLabel>
+                        <FormControl>
+                          <Input
+                            data-testid="input-resume-name"
+                            {...field}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
                   />
-                </div>
-                <div>
-                  <label
-                    htmlFor="resume-headline"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Headline
-                  </label>
-                  <input
-                    id="resume-headline"
-                    placeholder="Senior Frontend Engineer"
-                    {...form.register("headline")}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  <FormField
+                    control={form.control}
+                    name="headline"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Headline</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Senior Frontend Engineer" {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
                   />
-                </div>
-                <div>
-                  <label
-                    htmlFor="resume-email"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Email
-                  </label>
-                  <input
-                    id="resume-email"
-                    type="email"
-                    {...form.register("email")}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input type="email" {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
                   />
-                </div>
-                <div>
-                  <label
-                    htmlFor="resume-phone"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Phone
-                  </label>
-                  <input
-                    id="resume-phone"
-                    {...form.register("phone")}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
                   />
+                  <div className="sm:col-span-2">
+                    <FormField
+                      control={form.control}
+                      name="location"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Location</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
-                <div className="sm:col-span-2">
-                  <label
-                    htmlFor="resume-location"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Location
-                  </label>
-                  <input
-                    id="resume-location"
-                    {...form.register("location")}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                  />
-                </div>
-              </div>
 
-              <div>
-                <label
-                  htmlFor="resume-summary"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Summary
-                </label>
-                <textarea
-                  id="resume-summary"
-                  rows={4}
-                  placeholder="A short professional summary..."
-                  {...form.register("summary")}
-                  className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                <FormField
+                  control={form.control}
+                  name="summary"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Summary</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          rows={4}
+                          placeholder="A short professional summary..."
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
                 />
-              </div>
 
-              <div>
-                <label
-                  htmlFor="resume-skills"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Skills (one per line)
-                </label>
-                <textarea
-                  id="resume-skills"
-                  rows={5}
-                  className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono-num"
-                  placeholder={"TypeScript\nReact\nNode.js"}
-                  {...form.register("skills")}
+                <FormField
+                  control={form.control}
+                  name="skills"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Skills (one per line)</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          rows={5}
+                          className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono-num"
+                          placeholder={"TypeScript\nReact\nNode.js"}
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
                 />
-              </div>
 
-              <div>
-                <label
-                  htmlFor="resume-experience"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Experience (markdown)
-                </label>
-                <textarea
-                  id="resume-experience"
-                  rows={8}
-                  className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono-num text-xs"
-                  placeholder={
-                    "### Senior Engineer \u2014 Acme Inc.\n2022 \u2014 Present\n- Built X\n- Led Y"
-                  }
-                  {...form.register("experience")}
+                <FormField
+                  control={form.control}
+                  name="experience"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Experience (markdown)</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          rows={8}
+                          className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono-num text-xs"
+                          placeholder={
+                            "### Senior Engineer \u2014 Acme Inc.\n2022 \u2014 Present\n- Built X\n- Led Y"
+                          }
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
                 />
-              </div>
 
-              <div>
-                <label
-                  htmlFor="resume-education"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Education (markdown)
-                </label>
-                <textarea
-                  id="resume-education"
-                  rows={5}
-                  className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono-num text-xs"
-                  placeholder={
-                    "### BSc Computer Science \u2014 University Name\n2014 \u2014 2018"
-                  }
-                  {...form.register("education")}
+                <FormField
+                  control={form.control}
+                  name="education"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Education (markdown)</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          rows={5}
+                          className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono-num text-xs"
+                          placeholder={
+                            "### BSc Computer Science \u2014 University Name\n2014 \u2014 2018"
+                          }
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
                 />
-              </div>
 
-              <div>
-                <label
-                  htmlFor="resume-links"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Links (one per line)
-                </label>
-                <textarea
-                  id="resume-links"
-                  rows={4}
-                  className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono-num text-xs"
-                  placeholder={
-                    "https://github.com/you\nhttps://linkedin.com/in/you"
-                  }
-                  {...form.register("links")}
+                <FormField
+                  control={form.control}
+                  name="links"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Links (one per line)</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          rows={4}
+                          className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono-num text-xs"
+                          placeholder={
+                            "https://github.com/you\nhttps://linkedin.com/in/you"
+                          }
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
                 />
-              </div>
-            </form>
+              </form>
+            </Form>
           </div>
         </div>
 

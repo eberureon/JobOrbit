@@ -25,6 +25,7 @@ import { Skeleton } from '../../ui/skeleton'
 import { useToast } from '../../../hooks/use-toast'
 import { StatusBadge } from '../../StatusBadge'
 import { ApplicationDialog } from './ApplicationDialog'
+import { RowActions } from './RowActions'
 import { APPLICATION_STATUSES } from '../../../types'
 import type { ApplicationStatus } from '../../../types'
 import type { Application } from '../../../db/schema'
@@ -35,12 +36,9 @@ import {
 import {
   ArrowUpDown,
   ChevronRight,
-  ExternalLink,
   Filter,
-  Pencil,
   Plus,
   Search,
-  Trash2,
   X,
 } from 'lucide-react'
 
@@ -327,39 +325,15 @@ export function ApplicationsPage() {
                           className="px-4 py-3 text-right"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <div className="inline-flex items-center gap-1">
-                            {a.job_url && (
-                              <a
-                                href={a.job_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-1.5 rounded hover-elevate text-muted-foreground hover:text-foreground"
-                                data-testid={`link-job-${a.id}`}
-                                aria-label="Open job link"
-                              >
-                                <ExternalLink className="h-3.5 w-3.5" />
-                              </a>
-                            )}
-                            <button
-                              onClick={() => {
-                                setEditing(a)
-                                setDialogOpen(true)
-                              }}
-                              className="p-1.5 rounded hover-elevate text-muted-foreground hover:text-foreground"
-                              data-testid={`button-edit-${a.id}`}
-                              aria-label="Edit"
-                            >
-                              <Pencil className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              onClick={() => setDeleteId(a.id)}
-                              className="p-1.5 rounded hover-elevate text-muted-foreground hover:text-destructive"
-                              data-testid={`button-delete-${a.id}`}
-                              aria-label="Delete"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
+                          <RowActions
+                            id={a.id}
+                            jobUrl={a.job_url}
+                            onEdit={() => {
+                              setEditing(a)
+                              setDialogOpen(true)
+                            }}
+                            onDelete={() => setDeleteId(a.id)}
+                          />
                         </td>
                       </tr>
                     ))}
@@ -396,37 +370,15 @@ export function ApplicationsPage() {
                         className="flex items-center gap-1 mt-2"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        {a.job_url && (
-                          <a
-                            href={a.job_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-1.5 rounded hover-elevate text-muted-foreground hover:text-foreground"
-                            data-testid={`link-job-${a.id}`}
-                            aria-label="Open job link"
-                          >
-                            <ExternalLink className="h-3.5 w-3.5" />
-                          </a>
-                        )}
-                        <button
-                          onClick={() => {
+                        <RowActions
+                          id={a.id}
+                          jobUrl={a.job_url}
+                          onEdit={() => {
                             setEditing(a)
                             setDialogOpen(true)
                           }}
-                          className="p-1.5 rounded hover-elevate text-muted-foreground hover:text-foreground"
-                          data-testid={`button-edit-${a.id}`}
-                          aria-label="Edit"
-                        >
-                          <Pencil className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          onClick={() => setDeleteId(a.id)}
-                          className="p-1.5 rounded hover-elevate text-muted-foreground hover:text-destructive"
-                          data-testid={`button-delete-${a.id}`}
-                          aria-label="Delete"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
+                          onDelete={() => setDeleteId(a.id)}
+                        />
                       </div>
                       {hasDetails && (
                         <details className="mt-2 group" onClick={(e) => e.stopPropagation()}>
