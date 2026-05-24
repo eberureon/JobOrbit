@@ -1,5 +1,10 @@
-import { sqliteTable, AnySQLiteColumn, integer, text } from "drizzle-orm/sqlite-core"
-  import { sql } from "drizzle-orm"
+import {
+	sqliteTable,
+	AnySQLiteColumn,
+	integer,
+	text,
+} from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
 
 export const applications = sqliteTable("applications", {
 	id: integer().primaryKey({ autoIncrement: true }),
@@ -52,4 +57,3 @@ export const resume = sqliteTable("resume", {
 	links: text().default("[]").notNull(),
 	updatedAt: text("updated_at").default("sql`(CURRENT_TIMESTAMP)`").notNull(),
 });
-

@@ -23,14 +23,14 @@ description: Full-stack web performance optimization including Lighthouse audits
 
 ### Frontend loading
 
-| Issue | Fix |
-|---|---|
-| Large JS bundles | Code-split routes (`autoCodeSplitting` in TanStack Router), dynamic `import()` for heavy components |
-| Render-blocking CSS | Inline critical CSS, defer non-critical with `media="print" onload="this.media='all'"` |
-| Unoptimized images | Add `loading="lazy"`, use `<picture>` with WebP/AVIF, set explicit `width`/`height` |
-| Custom fonts causing layout shift | Use `font-display: swap` or `optional`, preconnect to font origin, subset fonts |
-| Too many HTTP requests | Bundle where possible, use HTTP/2, preconnect to critical origins |
-| No caching headers | Set `Cache-Control: public, max-age=31536000, immutable` on fingerprinted assets |
+| Issue                             | Fix                                                                                                 |
+| --------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Large JS bundles                  | Code-split routes (`autoCodeSplitting` in TanStack Router), dynamic `import()` for heavy components |
+| Render-blocking CSS               | Inline critical CSS, defer non-critical with `media="print" onload="this.media='all'"`              |
+| Unoptimized images                | Add `loading="lazy"`, use `<picture>` with WebP/AVIF, set explicit `width`/`height`                 |
+| Custom fonts causing layout shift | Use `font-display: swap` or `optional`, preconnect to font origin, subset fonts                     |
+| Too many HTTP requests            | Bundle where possible, use HTTP/2, preconnect to critical origins                                   |
+| No caching headers                | Set `Cache-Control: public, max-age=31536000, immutable` on fingerprinted assets                    |
 
 ### Frontend runtime
 

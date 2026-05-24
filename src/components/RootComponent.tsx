@@ -5,55 +5,62 @@ import { Logo } from "./Logo";
 import { NavLinks, Sidebar } from "./Sidebar";
 
 export function RootComponent() {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const collapsed = !sidebarOpen;
+	const [mobileOpen, setMobileOpen] = useState(false);
+	const [sidebarOpen, setSidebarOpen] = useState(true);
+	const collapsed = !sidebarOpen;
 
-  return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="sticky top-0 z-40 flex items-center justify-between border-b border-sidebar-border bg-sidebar/80 backdrop-blur px-4 py-3 md:hidden">
-        <Logo />
-        <button
-          type="button"
-          onClick={() => setMobileOpen((v) => !v)}
-          className="rounded-md border border-border p-2"
-          aria-label="Toggle menu"
-        >
-          {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-        </button>
-      </div>
+	return (
+		<div className="min-h-screen bg-background text-foreground">
+			<div className="sticky top-0 z-40 flex items-center justify-between border-b border-sidebar-border bg-sidebar/80 backdrop-blur px-4 py-3 md:hidden">
+				<Logo />
+				<button
+					type="button"
+					onClick={() => setMobileOpen((v) => !v)}
+					className="rounded-md border border-border p-2"
+					aria-label="Toggle menu"
+				>
+					{mobileOpen ? (
+						<X className="h-4 w-4" />
+					) : (
+						<Menu className="h-4 w-4" />
+					)}
+				</button>
+			</div>
 
-      <div className="flex">
-        <Sidebar collapsed={collapsed} onToggle={() => setSidebarOpen((v) => !v)} />
+			<div className="flex">
+				<Sidebar
+					collapsed={collapsed}
+					onToggle={() => setSidebarOpen((v) => !v)}
+				/>
 
-        {mobileOpen && (
-          <div className="md:hidden fixed inset-0 z-30 bg-background/95 backdrop-blur pt-14 flex flex-col">
-            <div className="flex-1 overflow-y-auto">
-              <NavLinks onNavigate={() => setMobileOpen(false)} />
-            </div>
-            <div className="border-t border-border p-3">
-              <Link
-                to="/settings"
-                onClick={() => setMobileOpen(false)}
-                className="group relative flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Settings className="h-4 w-4 shrink-0 text-muted-foreground" />
-                Settings
-              </Link>
-            </div>
-          </div>
-        )}
+				{mobileOpen && (
+					<div className="md:hidden fixed inset-0 z-30 bg-background/95 backdrop-blur pt-14 flex flex-col">
+						<div className="flex-1 overflow-y-auto">
+							<NavLinks onNavigate={() => setMobileOpen(false)} />
+						</div>
+						<div className="border-t border-border p-3">
+							<Link
+								to="/settings"
+								onClick={() => setMobileOpen(false)}
+								className="group relative flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+							>
+								<Settings className="h-4 w-4 shrink-0 text-muted-foreground" />
+								Settings
+							</Link>
+						</div>
+					</div>
+				)}
 
-        <main
-          className={`flex-1 min-h-screen min-w-0 overflow-x-hidden transition-[padding] duration-200 ease-in-out ${
-            collapsed ? "md:pl-14" : "md:pl-60"
-          }`}
-        >
-          <div className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto min-w-0">
-            <Outlet />
-          </div>
-        </main>
-      </div>
-    </div>
-  );
+				<main
+					className={`flex-1 min-h-screen min-w-0 overflow-x-hidden transition-[padding] duration-200 ease-in-out ${
+						collapsed ? "md:pl-14" : "md:pl-60"
+					}`}
+				>
+					<div className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto min-w-0">
+						<Outlet />
+					</div>
+				</main>
+			</div>
+		</div>
+	);
 }
