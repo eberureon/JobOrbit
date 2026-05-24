@@ -1,15 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowUpDown, ChevronLeft, ChevronRight, Filter, Plus, Search, Upload, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import Papa from "papaparse";
-import type { ApplicationStatus, SortOrder } from "~/lib/types";
-import { APPLICATION_STATUSES } from "~/lib/types";
-import { insertApplicationSchema } from "~/db/schema";
 import {
-  deleteApplication,
-  importApplications,
-  listApplications,
-} from "~/lib/server/applications.functions";
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  Plus,
+  Search,
+  Upload,
+  X,
+} from "lucide-react";
+import Papa from "papaparse";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { StatusBadge } from "~/components/StatusBadge";
 import {
   AlertDialog,
@@ -34,7 +35,15 @@ import {
 import { Input } from "~/components/ui/input";
 import { Skeleton } from "~/components/ui/skeleton";
 import type { Application } from "~/db/schema";
+import { insertApplicationSchema } from "~/db/schema";
 import { useToast } from "~/hooks/use-toast";
+import {
+  deleteApplication,
+  importApplications,
+  listApplications,
+} from "~/lib/server/applications.functions";
+import type { ApplicationStatus, SortOrder } from "~/lib/types";
+import { APPLICATION_STATUSES } from "~/lib/types";
 import { getEffectiveLocale, useSettings } from "~/lib/use-settings";
 import { ApplicationDialog } from "./ApplicationDialog";
 import { RowActions } from "./RowActions";
@@ -43,9 +52,12 @@ type SortKey = "applied_date" | "company" | "status";
 
 function sortFromDefault(d: SortOrder): [SortKey, "asc" | "desc"] {
   switch (d) {
-    case "newest": return ["applied_date", "desc"];
-    case "a-z": return ["company", "asc"];
-    case "follow-up": return ["status", "asc"];
+    case "newest":
+      return ["applied_date", "desc"];
+    case "a-z":
+      return ["company", "asc"];
+    case "follow-up":
+      return ["status", "asc"];
   }
 }
 
@@ -104,12 +116,17 @@ export function ApplicationsPage() {
     return list;
   }, [apps, search, statusFilter, sortKey, sortDir]);
 
-  useEffect(() => { setPage(0); }, [search, statusFilter, sortKey, sortDir]);
+  useEffect(() => {
+    setPage(0);
+  }, [search, statusFilter, sortKey, sortDir]);
 
   const pageSize = settings.pageSize;
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const safePage = Math.min(page, totalPages - 1);
-  const paginated = filtered.slice(safePage * pageSize, (safePage + 1) * pageSize);
+  const paginated = filtered.slice(
+    safePage * pageSize,
+    (safePage + 1) * pageSize,
+  );
 
   function toggleStatus(s: ApplicationStatus) {
     setStatusFilter((prev) => {
@@ -213,9 +230,7 @@ export function ApplicationsPage() {
         } else {
           rowErrors.push({
             row: rowNum,
-            reason: result.error.errors
-              .map((e) => e.message)
-              .join("; "),
+            reason: result.error.errors.map((e) => e.message).join("; "),
           });
         }
       }
@@ -255,7 +270,11 @@ export function ApplicationsPage() {
       }
     },
     onError: (e: Error) =>
-      toast({ title: "Import failed", description: e.message, variant: "destructive" }),
+      toast({
+        title: "Import failed",
+        description: e.message,
+        variant: "destructive",
+      }),
   });
 
   function handleFileImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -424,11 +443,11 @@ export function ApplicationsPage() {
             </div>
           ) : (
             <>
-              <div className="hidden lg:block overflow-x-auto">
+              <div className="hidden xl:block overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
-                      <th className="px-4 py-3 font-medium">
+                      <th className="px-4 py-3 font-medium max-w-52">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -440,7 +459,7 @@ export function ApplicationsPage() {
                           <ArrowUpDown className="h-3 w-3" />
                         </Button>
                       </th>
-                      <th className="px-4 py-3 font-medium">Role</th>
+                      <th className="px-4 py-3 font-medium max-w-52">Role</th>
                       <th className="px-4 py-3 font-medium">Location</th>
                       <th className="px-4 py-3 font-medium">
                         <Button
@@ -484,10 +503,10 @@ export function ApplicationsPage() {
                           setDialogOpen(true);
                         }}
                       >
-                        <td className="px-4 py-3 text-foreground font-medium">
+                        <td className="px-4 py-3 text-foreground font-medium max-w-52">
                           {a.company}
                         </td>
-                        <td className="px-4 py-3 text-foreground/90">
+                        <td className="px-4 py-3 text-foreground/90 max-w-52">
                           {a.role}
                         </td>
                         <td className="px-4 py-3 text-muted-foreground">
@@ -528,7 +547,7 @@ export function ApplicationsPage() {
                 </table>
               </div>
 
-              <div className="block lg:hidden divide-y divide-border/40">
+              <div className="block xl:hidden divide-y divide-border/40">
                 {paginated.map((a) => {
                   return (
                     <div
@@ -549,12 +568,12 @@ export function ApplicationsPage() {
                       role="button"
                       tabIndex={0}
                     >
+                      <p className="mb-1.5">
+                        <StatusBadge status={a.status} />
+                      </p>
                       <p className="text-foreground font-medium">{a.company}</p>
                       <p className="text-foreground/90 text-sm mt-0.5">
                         {a.role}
-                      </p>
-                      <p className="mt-1.5">
-                        <StatusBadge status={a.status} />
                       </p>
                       <div className="space-y-1 text-xs font-mono-num text-muted-foreground mt-2">
                         <p>
