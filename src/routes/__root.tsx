@@ -1,9 +1,15 @@
 import { Toast as ToastPrimitive } from "@base-ui/react/toast";
 import type { QueryClient } from "@tanstack/react-query";
-import { createRootRouteWithContext, HeadContent, Link, Scripts } from "@tanstack/react-router";
+import {
+  createRootRouteWithContext,
+  HeadContent,
+  Scripts,
+} from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
-import { AppLayout } from "~/components/Sidebar";
+import { NotFound } from "~/components/NotFound";
+import { RootComponent } from "~/components/RootComponent";
+import { RootError } from "~/components/RootError";
 import { Toaster } from "~/components/ui/toaster";
 import { toastManager } from "~/hooks/use-toast";
 import { SettingsProvider } from "~/lib/use-settings";
@@ -12,6 +18,9 @@ import appCss from "~/styles.css?url";
 interface MyRouterContext {
   queryClient: QueryClient;
 }
+
+const INIT_THEME =
+  `(function(){try{var t=localStorage.getItem("theme");if(t==="dark"){document.documentElement.classList.add("dark");document.documentElement.style.colorScheme="dark"}else if(t==="light"){document.documentElement.style.colorScheme="light"}else if(!t||t==="system"){var m=window.matchMedia("(prefers-color-scheme:dark)");if(m.matches){document.documentElement.classList.add("dark");document.documentElement.style.colorScheme="dark"}else{document.documentElement.style.colorScheme="light"}}}catch(e){}})()` as const;
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: () => ({
@@ -22,39 +31,28 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),
-  shellComponent: RootDocument,
-  notFoundComponent: () => (
-    <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
-      <div className="text-6xl font-mono-num text-muted-foreground/30 font-semibold">404</div>
-      <h1 className="mt-4 text-xl font-semibold text-foreground">Page not found</h1>
-      <p className="mt-2 text-sm text-muted-foreground max-w-sm">
-        This page doesn't exist or was moved.
-      </p>
-      <Link
-        to="/"
-        className="mt-6 inline-flex items-center gap-2 rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:opacity-90 transition-opacity"
-      >
-        Back to dashboard
-      </Link>
-    </div>
-  ),
+  shellComponent: DocumentShell,
+  component: RootComponent,
+  errorComponent: RootError,
+  notFoundComponent: NotFound,
 });
 
-function RootDocument({ children }: { children: ReactNode }) {
+function DocumentShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem("theme");if(t==="dark"){document.documentElement.classList.add("dark");document.documentElement.style.colorScheme="dark"}else if(t==="light"){document.documentElement.style.colorScheme="light"}else if(!t||t==="system"){var m=window.matchMedia("(prefers-color-scheme:dark)");if(m.matches){document.documentElement.classList.add("dark");document.documentElement.style.colorScheme="dark"}else{document.documentElement.style.colorScheme="light"}}}catch(e){}})()`,
+            __html: INIT_THEME,
           }}
         />
       </head>
-      <body className="font-sans antialiased [overflow-wrap:anywhere] bg-background text-foreground">
+      <body className="font-sans antialiased wrap-anywhere bg-background text-foreground">
         <ToastPrimitive.Provider toastManager={toastManager}>
           <SettingsProvider>
-            <AppLayout>{children}</AppLayout>
+            {children}
             <Toaster />
           </SettingsProvider>
         </ToastPrimitive.Provider>
@@ -72,11 +70,12 @@ function Devtools() {
     if (!import.meta.env.DEV) return;
     let mounted = true;
     const load = async () => {
-      const [{ TanStackDevtools }, { TanStackRouterDevtoolsPanel }, query] = await Promise.all([
-        import("@tanstack/react-devtools"),
-        import("@tanstack/react-router-devtools"),
-        import("../integrations/tanstack-query/devtools"),
-      ]);
+      const [{ TanStackDevtools }, { TanStackRouterDevtoolsPanel }, query] =
+        await Promise.all([
+          import("@tanstack/react-devtools"),
+          import("@tanstack/react-router-devtools"),
+          import("../integrations/tanstack-query/devtools"),
+        ]);
       if (!mounted) return;
       setNode(
         <TanStackDevtools
