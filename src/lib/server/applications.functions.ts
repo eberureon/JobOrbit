@@ -49,3 +49,14 @@ export const getStatusHistory = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     return listByApplicationId(data.applicationId);
   });
+
+export const importApplications = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      rows: z.array(insertApplicationSchema),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const apps = db.bulkInsert(data.rows);
+    return { count: apps.length };
+  });

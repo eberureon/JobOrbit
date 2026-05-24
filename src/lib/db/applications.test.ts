@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { getById, insert, listAll, remove, update } from "./applications";
+import {
+  bulkInsert,
+  getById,
+  insert,
+  listAll,
+  remove,
+  update,
+} from "./applications";
 import { listByApplicationId } from "./status-history";
 
 const validApp = {
@@ -55,6 +62,33 @@ describe("insert", () => {
     expect(result.role).toBe("Engineer");
     expect(result.applied_date).toBe("2026-05-20");
     expect(result.created_at).toBeDefined();
+  });
+});
+
+describe("bulkInsert", () => {
+  it("inserts multiple applications in a transaction", () => {
+    const apps = bulkInsert([
+      { ...validApp, company: "First" },
+      { ...validApp, company: "Second" },
+    ]);
+    expect(apps).toHaveLength(2);
+    expect(apps[0].id).toBeGreaterThan(0);
+    expect(apps[1].id).toBeGreaterThan(0);
+    expect(apps[0].company).toBe("First");
+    expect(apps[1].company).toBe("Second");
+  });
+
+  it("creates status history entries for each inserted app", () => {
+    const apps = bulkInsert([
+      { ...validApp, company: "A" },
+      { ...validApp, company: "B" },
+    ]);
+    const h1 = listByApplicationId(apps[0].id);
+    const h2 = listByApplicationId(apps[1].id);
+    expect(h1).toHaveLength(1);
+    expect(h1[0].new_status).toBe("Applied");
+    expect(h2).toHaveLength(1);
+    expect(h2[0].new_status).toBe("Applied");
   });
 });
 

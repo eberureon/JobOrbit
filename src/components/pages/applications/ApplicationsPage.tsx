@@ -1,6 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowUpDown, Filter, Plus, Search, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { ArrowUpDown, Filter, Plus, Search, Upload, X } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import Papa from "papaparse";
+import type { ApplicationStatus } from "~/lib/types";
+import { APPLICATION_STATUSES } from "~/lib/types";
+import { insertApplicationSchema } from "~/db/schema";
+import {
+  deleteApplication,
+  importApplications,
+  listApplications,
+} from "~/lib/server/applications.functions";
 import { StatusBadge } from "~/components/StatusBadge";
 import {
   AlertDialog,
@@ -26,13 +35,7 @@ import { Input } from "~/components/ui/input";
 import { Skeleton } from "~/components/ui/skeleton";
 import type { Application } from "~/db/schema";
 import { useToast } from "~/hooks/use-toast";
-import {
-  deleteApplication,
-  listApplications,
-} from "~/lib/server/applications.functions";
 import { useSettings } from "~/lib/use-settings";
-import type { ApplicationStatus } from "~/lib/types";
-import { APPLICATION_STATUSES } from "~/lib/types";
 import { ApplicationDialog } from "./ApplicationDialog";
 import { RowActions } from "./RowActions";
 
@@ -59,6 +62,7 @@ export function ApplicationsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Application | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filtered = useMemo(() => {
     let list = [...apps];
@@ -125,6 +129,112 @@ export function ApplicationsPage() {
     }
   }
 
+  const importMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const text = await file.text();
+      const { data, errors: parseErrors } = Papa.parse<Record<string, string>>(
+        text,
+        { header: true, skipEmptyLines: true, dynamicTyping: false },
+      );
+
+      const today = new Date().toISOString().slice(0, 10);
+      const rowErrors: { row: number; reason: string }[] = [];
+      for (const err of parseErrors) {
+        rowErrors.push({ row: err.row + 1, reason: err.message });
+      }
+
+      const validRows: (typeof insertApplicationSchema._type)[] = [];
+      for (let i = 0; i < data.length; i++) {
+        const row = data[i];
+        const rowNum = i + 2;
+        const mapped: Record<string, string> = {};
+        for (const [key, value] of Object.entries(row)) {
+          const lower = key.toLowerCase();
+          if (lower === "company") mapped.company = value ?? "";
+          else if (lower === "role") mapped.role = value ?? "";
+          else if (lower === "location") mapped.location = value ?? "";
+          else if (lower === "status") mapped.status = value ?? "";
+          else if (lower === "salary") mapped.salary = value ?? "";
+          else if (lower === "source") mapped.source = value ?? "";
+          else if (lower === "joburl") mapped.job_url = value ?? "";
+          else if (lower === "notes") mapped.notes = value ?? "";
+        }
+
+        let status = mapped.status ?? "";
+        if (!APPLICATION_STATUSES.includes(status as ApplicationStatus)) {
+          status = "Applied";
+        }
+
+        const rowData = {
+          company: mapped.company ?? "",
+          role: mapped.role ?? "",
+          location: mapped.location ?? "",
+          status,
+          applied_date: today,
+          salary: mapped.salary ?? "",
+          source: mapped.source ?? "",
+          job_url: mapped.job_url ?? "",
+          notes: mapped.notes ?? "",
+        };
+
+        const result = insertApplicationSchema.safeParse(rowData);
+        if (result.success) {
+          validRows.push(result.data);
+        } else {
+          rowErrors.push({
+            row: rowNum,
+            reason: result.error.errors
+              .map((e) => e.message)
+              .join("; "),
+          });
+        }
+      }
+
+      if (validRows.length === 0 && rowErrors.length === 0) {
+        throw new Error("CSV file is empty or has no valid rows.");
+      }
+
+      const result = await importApplications({ data: { rows: validRows } });
+      return { imported: result.count, total: data.length, errors: rowErrors };
+    },
+    onSuccess: ({ imported, total, errors }) => {
+      queryClient.invalidateQueries({ queryKey: ["applications"] });
+      queryClient.invalidateQueries({ queryKey: ["stats"] });
+      const skipped = total - imported;
+      if (skipped === 0) {
+        toast({
+          title: "Import complete",
+          description: `Imported ${imported} application${imported === 1 ? "" : "s"}.`,
+        });
+      } else {
+        const detail = errors
+          .slice(0, 3)
+          .map((e) => `Row ${e.row}: ${e.reason}`)
+          .join("\n");
+        toast({
+          title: "Import complete",
+          description: `Imported ${imported} of ${total}. ${skipped} row${skipped === 1 ? "" : "s"} skipped.`,
+        });
+        if (detail) {
+          toast({
+            title: "Skipped rows",
+            description: detail,
+            variant: "destructive",
+          });
+        }
+      }
+    },
+    onError: (e: Error) =>
+      toast({ title: "Import failed", description: e.message, variant: "destructive" }),
+  });
+
+  function handleFileImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    importMutation.mutate(file);
+    e.target.value = "";
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -139,16 +249,35 @@ export function ApplicationsPage() {
             of {apps.length} shown
           </p>
         </div>
-        <Button
-          data-testid="button-add-application"
-          onClick={() => {
-            setEditing(null);
-            setDialogOpen(true);
-          }}
-        >
-          <Plus className="h-4 w-4 mr-1.5" />
-          Add Application
-        </Button>
+        <div className="flex items-center gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv"
+            className="hidden"
+            data-testid="input-csv-file"
+            onChange={handleFileImport}
+          />
+          <Button
+            variant="outline"
+            data-testid="button-import-csv"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={importMutation.isPending}
+          >
+            <Upload className="h-4 w-4 mr-1.5" />
+            Import CSV
+          </Button>
+          <Button
+            data-testid="button-add-application"
+            onClick={() => {
+              setEditing(null);
+              setDialogOpen(true);
+            }}
+          >
+            <Plus className="h-4 w-4 mr-1.5" />
+            Add Application
+          </Button>
+        </div>
       </div>
 
       <Card className="card-hairline">

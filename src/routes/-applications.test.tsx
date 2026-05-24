@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { createWrapper } from "../test/test-utils";
 import { ApplicationsPage } from "../components/pages/applications";
 import type { Application } from "../db/schema";
@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
 	deleteApplication: vi.fn<any, any>(),
 	createApplication: vi.fn<any, any>(),
 	updateApplication: vi.fn<any, any>(),
+	importApplications: vi.fn<any, any>(),
 }));
 
 vi.mock("../lib/server/applications.functions", () => ({
@@ -17,6 +18,7 @@ vi.mock("../lib/server/applications.functions", () => ({
 	deleteApplication: mocks.deleteApplication,
 	createApplication: mocks.createApplication,
 	updateApplication: mocks.updateApplication,
+	importApplications: mocks.importApplications,
 }));
 
 const sampleApps: Application[] = [
@@ -190,5 +192,109 @@ describe("Applications", () => {
 		expect(
 			(await screen.findAllByText("Add Application")).length,
 		).toBeGreaterThanOrEqual(1);
+	});
+
+	it("renders import csv button", async () => {
+		render(<ApplicationsPage />, { wrapper: Wrapper });
+		expect(
+			(await screen.findAllByTestId("button-import-csv")).length,
+		).toBeGreaterThanOrEqual(1);
+	});
+
+	it("imports applications from csv file", async () => {
+		mocks.importApplications.mockResolvedValue({ count: 2 });
+		render(<ApplicationsPage />, { wrapper: Wrapper });
+
+		const csvContent = "company;role;location;status\nAcme Inc;Engineer;Remote;Applied\nBeta Corp;Senior Dev;Berlin;Interview";
+		const file = new File([csvContent], "apps.csv", { type: "text/csv" });
+
+		const input = (await screen.findAllByTestId("input-csv-file"))[0];
+		fireEvent.change(input, { target: { files: [file] } });
+
+		await waitFor(() => {
+			expect(mocks.importApplications).toHaveBeenCalled();
+		});
+
+		const call = mocks.importApplications.mock.calls[0][0];
+		expect(call.data.rows).toHaveLength(2);
+		expect(call.data.rows[0].company).toBe("Acme Inc");
+		expect(call.data.rows[0].role).toBe("Engineer");
+		expect(call.data.rows[1].company).toBe("Beta Corp");
+		expect(call.data.rows[1].role).toBe("Senior Dev");
+	});
+
+	it("defaults missing status to Applied", async () => {
+		mocks.importApplications.mockResolvedValue({ count: 1 });
+		render(<ApplicationsPage />, { wrapper: Wrapper });
+
+		const csvContent = "company;role\nSome Corp;Dev";
+		const file = new File([csvContent], "apps.csv", { type: "text/csv" });
+
+		const input = (await screen.findAllByTestId("input-csv-file"))[0];
+		fireEvent.change(input, { target: { files: [file] } });
+
+		await waitFor(() => {
+			expect(mocks.importApplications).toHaveBeenCalled();
+		});
+
+		const call = mocks.importApplications.mock.calls[0][0];
+		expect(call.data.rows[0].status).toBe("Applied");
+	});
+
+	it("defaults invalid status to Applied", async () => {
+		mocks.importApplications.mockResolvedValue({ count: 1 });
+		render(<ApplicationsPage />, { wrapper: Wrapper });
+
+		const csvContent = "company;role;status\nSome Corp;Dev;BadStatus";
+		const file = new File([csvContent], "apps.csv", { type: "text/csv" });
+
+		const input = (await screen.findAllByTestId("input-csv-file"))[0];
+		fireEvent.change(input, { target: { files: [file] } });
+
+		await waitFor(() => {
+			expect(mocks.importApplications).toHaveBeenCalled();
+		});
+
+		const call = mocks.importApplications.mock.calls[0][0];
+		expect(call.data.rows[0].status).toBe("Applied");
+	});
+
+	it("maps jobUrl and Notes columns case-insensitively", async () => {
+		mocks.importApplications.mockResolvedValue({ count: 1 });
+		render(<ApplicationsPage />, { wrapper: Wrapper });
+
+		const csvContent = "company;role;jobUrl;Notes\nSome Corp;Dev;https://job.com;My note";
+		const file = new File([csvContent], "apps.csv", { type: "text/csv" });
+
+		const input = (await screen.findAllByTestId("input-csv-file"))[0];
+		fireEvent.change(input, { target: { files: [file] } });
+
+		await waitFor(() => {
+			expect(mocks.importApplications).toHaveBeenCalled();
+		});
+
+		const call = mocks.importApplications.mock.calls[0][0];
+		expect(call.data.rows[0].job_url).toBe("https://job.com");
+		expect(call.data.rows[0].notes).toBe("My note");
+	});
+
+	it("handles multiple csv rows", async () => {
+		mocks.importApplications.mockResolvedValue({ count: 2 });
+		render(<ApplicationsPage />, { wrapper: Wrapper });
+
+		const csvContent = "company;role\nAcme Inc;Engineer\nBeta Corp;Senior Dev";
+		const file = new File([csvContent], "apps.csv", { type: "text/csv" });
+
+		const input = (await screen.findAllByTestId("input-csv-file"))[0];
+		fireEvent.change(input, { target: { files: [file] } });
+
+		await waitFor(() => {
+			expect(mocks.importApplications).toHaveBeenCalled();
+		});
+
+		const call = mocks.importApplications.mock.calls[0][0];
+		expect(call.data.rows).toHaveLength(2);
+		expect(call.data.rows[0].company).toBe("Acme Inc");
+		expect(call.data.rows[1].company).toBe("Beta Corp");
 	});
 });

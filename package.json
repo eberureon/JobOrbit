@@ -25,7 +25,6 @@
     "@faker-js/faker": "^10.3.0",
     "@fontsource-variable/geist": "^5.2.9",
     "@hookform/resolvers": "^5.4.0",
-
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/match-sorter-utils": "latest",
     "@tanstack/react-devtools": "latest",
@@ -44,6 +43,7 @@
     "drizzle-orm": "^0.45.1",
     "drizzle-zod": "^0.8.3",
     "lucide-react": "^1.16.0",
+    "papaparse": "^5.5.3",
     "react": "^19.2.0",
     "react-day-picker": "^10.0.1",
     "react-dom": "^19.2.0",
@@ -65,6 +65,7 @@
     "@testing-library/react": "^16.3.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.10.2",
+    "@types/papaparse": "^5.5.2",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^6.0.1",
