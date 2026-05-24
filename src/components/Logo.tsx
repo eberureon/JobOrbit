@@ -33,7 +33,7 @@ export function Logo({
           strokeWidth="1.5"
           strokeLinecap="round"
         />
-        <circle cx="18" cy="6" r="2" fill="hsl(var(--primary))" />
+        <circle cx="18" cy="6" r="2" fill="var(--primary)" />
       </svg>
       <span
         className={`font-semibold tracking-tight text-foreground text-base transition-opacity duration-200 ${

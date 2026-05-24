@@ -135,7 +135,7 @@ export function DashboardPage() {
         <div className="absolute inset-0 bg-dot-grid opacity-60 pointer-events-none" />
         <div className="relative px-6 py-7">
           <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.7)]" />
+            <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_var(--primary)/0.7]" />
             <span className="font-mono-num">live</span>
             <span>· dashboard</span>
           </div>
@@ -215,25 +215,25 @@ export function DashboardPage() {
                       >
                         <stop
                           offset="0%"
-                          stopColor="hsl(var(--primary))"
+                          stopColor="var(--primary)"
                           stopOpacity={0.4}
                         />
                         <stop
                           offset="100%"
-                          stopColor="hsl(var(--primary))"
+                          stopColor="var(--primary)"
                           stopOpacity={0}
                         />
                       </linearGradient>
                     </defs>
                     <CartesianGrid
-                      stroke="hsl(var(--border))"
+                      stroke="var(--border)"
                       strokeDasharray="3 3"
                       vertical={false}
                     />
                     <XAxis
                       dataKey="date"
                       tick={{
-                        fill: "hsl(var(--muted-foreground))",
+                        fill: "var(--muted-foreground)",
                         fontSize: 11,
                       }}
                       tickFormatter={(d: string) => {
@@ -243,30 +243,30 @@ export function DashboardPage() {
                       interval={Math.floor(
                         ((stats?.timeline.length ?? 90) - 1) / 6,
                       )}
-                      stroke="hsl(var(--border))"
+                      stroke="var(--border)"
                     />
                     <YAxis
                       tick={{
-                        fill: "hsl(var(--muted-foreground))",
+                        fill: "var(--muted-foreground)",
                         fontSize: 11,
                       }}
                       allowDecimals={false}
-                      stroke="hsl(var(--border))"
+                      stroke="var(--border)"
                       width={28}
                     />
                     <Tooltip
                       contentStyle={{
-                        background: "hsl(var(--popover))",
-                        border: "1px solid hsl(var(--border))",
+                        background: "var(--popover)",
+                        border: "1px solid var(--border)",
                         borderRadius: 8,
                         fontSize: 12,
                       }}
-                      labelStyle={{ color: "hsl(var(--foreground))" }}
+                      labelStyle={{ color: "var(--foreground)" }}
                     />
                     <Area
                       type="monotone"
                       dataKey="count"
-                      stroke="hsl(var(--primary))"
+                      stroke="var(--primary)"
                       strokeWidth={2}
                       fill="url(#g-timeline)"
                     />
@@ -304,7 +304,7 @@ export function DashboardPage() {
                       innerRadius={48}
                       outerRadius={80}
                       paddingAngle={2}
-                      stroke="hsl(var(--card))"
+                      stroke="var(--card)"
                       strokeWidth={2}
                     >
                       {pieData.map((entry) => (
@@ -313,8 +313,8 @@ export function DashboardPage() {
                     </Pie>
                     <Tooltip
                       contentStyle={{
-                        background: "hsl(var(--popover))",
-                        border: "1px solid hsl(var(--border))",
+                        background: "var(--popover)",
+                        border: "1px solid var(--border)",
                         borderRadius: 8,
                         fontSize: 12,
                       }}

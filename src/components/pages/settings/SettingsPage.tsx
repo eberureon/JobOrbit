@@ -108,7 +108,7 @@ export function SettingsPage() {
         <div className="absolute inset-0 bg-dot-grid opacity-60 pointer-events-none" />
         <div className="relative px-6 py-7">
           <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.7)]" />
+            <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_var(--primary)/0.7]" />
             settings
           </div>
           <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
