@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { Skeleton } from "~/components/ui/skeleton";
 
 export function TimelineChart({
@@ -26,7 +33,7 @@ export function TimelineChart({
   return (
     <div ref={ref} className="w-full" data-testid="chart-timeline">
       {loading ? (
-        <div className="w-full aspect-[2/1] grid">
+        <div className="w-full aspect-2/1 grid">
           <Skeleton className="w-full h-full rounded-lg" />
         </div>
       ) : width > 0 ? (
@@ -37,7 +44,11 @@ export function TimelineChart({
               <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+          <CartesianGrid
+            stroke="var(--border)"
+            strokeDasharray="3 3"
+            vertical={false}
+          />
           <XAxis
             dataKey="date"
             tick={{

@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { bulkInsert, getById, insert, listAll, remove, update } from "./applications";
+import {
+  bulkInsert,
+  getById,
+  insert,
+  listAll,
+  remove,
+  update,
+} from "./applications";
 import { listByApplicationId } from "./status-history";
 
 const validApp = {
@@ -92,15 +99,15 @@ describe("update", () => {
       company: "Updated Corp",
       role: "Senior Engineer",
     });
-    expect(updated.company).toBe("Updated Corp");
-    expect(updated.role).toBe("Senior Engineer");
-    expect(updated.applied_date).toBe("2026-05-20");
+    expect(updated!.company).toBe("Updated Corp");
+    expect(updated!.role).toBe("Senior Engineer");
+    expect(updated!.applied_date).toBe("2026-05-20");
   });
 
   it("returns existing row when update data is empty", () => {
     const created = insert(validApp);
     const result = update(created.id, {});
-    expect(result.company).toBe("Acme Inc");
+    expect(result!.company).toBe("Acme Inc");
   });
 
   it("rejects invalid fields", () => {

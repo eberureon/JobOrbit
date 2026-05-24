@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { insert as insertApp } from "./applications";
-import { deleteByApplicationId, insertEntry, listByApplicationId } from "./status-history";
+import {
+  deleteByApplicationId,
+  insertEntry,
+  listByApplicationId,
+} from "./status-history";
+import type { InsertApplication } from "~/db/schema";
 
-const validApp = {
+const validApp: InsertApplication = {
   company: "Acme Inc",
   role: "Engineer",
   applied_date: "2026-05-20",

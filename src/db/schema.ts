@@ -2,11 +2,7 @@ import { sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import type { ApplicationStatus } from "~/lib/types";
 import { APPLICATION_STATUSES } from "~/lib/types";
-
-export { APPLICATION_STATUSES };
-export type { ApplicationStatus };
 
 export const applications = sqliteTable("applications", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -29,13 +25,13 @@ export const insertApplicationSchema = createInsertSchema(applications)
   .extend({
     company: z.string().min(1, "Company is required"),
     role: z.string().min(1, "Role is required"),
-    status: z.enum(APPLICATION_STATUSES).default("Applied"),
+    status: z.optional(z.enum(APPLICATION_STATUSES).default("Applied")),
     applied_date: z.string().min(1, "Date is required"),
-    location: z.string().default(""),
-    salary: z.string().default(""),
-    source: z.string().default(""),
-    job_url: z.string().default(""),
-    notes: z.string().default(""),
+    location: z.optional(z.string().default("")),
+    salary: z.optional(z.string().default("")),
+    source: z.optional(z.string().default("")),
+    job_url: z.optional(z.string().default("")),
+    notes: z.optional(z.string().default("")),
   });
 
 export type InsertApplication = z.infer<typeof insertApplicationSchema>;
