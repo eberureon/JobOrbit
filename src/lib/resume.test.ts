@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseList, safeParseJson, buildMarkdown } from './cv'
+import { parseList, safeParseJson, buildMarkdown } from './resume'
 
 describe('parseList', () => {
   it('splits newline-separated text into trimmed strings', () => {

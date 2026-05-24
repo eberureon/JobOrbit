@@ -79,7 +79,7 @@ skills:
 - UI: shadcn/ui primitives copied from legacy into `src/components/ui/` (Button, Input, Textarea, Label, Card, Dialog, AlertDialog, Select, DropdownMenu, Form, Toast, Separator, Alert, Badge, Table) + `src/hooks/use-toast.ts`.
 - CSS: shadcn HSL CSS vars merged into `src/styles.css` (light + dark modes via `:root` / `:root[data-theme="dark"]` / `@media (prefers-color-scheme: dark)`). Tailwind v4 `@theme` entries for color classes (`bg-card`, `text-muted-foreground`, etc.). Status badge colors, elevation/hover utilities added.
 - Migrated routes: `/` (Dashboard with stats/charts), `/applications` (full CRUD with search/filter/sort/dialog).
-- Server functions: `src/lib/server/applications.functions.ts` (list/get/create/update/delete/stats), `src/lib/server/cv.functions.ts` (get/upsert).
+- Server functions: `src/lib/server/applications.functions.ts` (list/get/create/update/delete/stats), `src/lib/server/resume.functions.ts` (get/upsert).
 - Database: SQLite via `better-sqlite3` + `drizzle-orm/better-sqlite3`. Tables auto-create on startup via `CREATE TABLE IF NOT EXISTS` in `src/db/index.ts`. DB file lives at `./data/joborbit.db` (configurable via `DATABASE_URL` in `.env.local`, defaults to `./data/joborbit.db`).
 - Removed PostgreSQL/Neon migration: switched from `pgTable`/`serial` to `sqliteTable`/`integer` with autoIncrement. Deleted `neon-vite-plugin.ts`, `src/db.ts`, removed `@neondatabase/serverless`, `pg`, `@types/pg`, `vite-plugin-neon-new`. Drizzle Kit dialect set to `sqlite`.
 - SQLite API patterns: use `.all()` for list queries, `.get()` for single-row, `.run()` for delete, `.returning().get()` for insert/update (supported by drizzle-orm + better-sqlite3).

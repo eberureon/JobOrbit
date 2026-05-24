@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { getCv, upsertCv } from './cv'
+import { getResume, upsertResume } from './resume'
 
-describe('getCv', () => {
-  it('returns a CV with default values when none exists', () => {
-    const result = getCv()
+describe('getResume', () => {
+  it('returns a resume with default values when none exists', () => {
+    const result = getResume()
     expect(result.id).toBe(1)
     expect(result.full_name).toBe('')
     expect(result.headline).toBe('')
@@ -18,16 +18,16 @@ describe('getCv', () => {
     expect(result.updated_at).toBeDefined()
   })
 
-  it('returns the existing CV after first call', () => {
-    const first = getCv()
-    const second = getCv()
+  it('returns the existing resume after first call', () => {
+    const first = getResume()
+    const second = getResume()
     expect(second).toEqual(first)
   })
 })
 
-describe('upsertCv', () => {
-  it('inserts a CV when none exists and returns it', () => {
-    const result = upsertCv({
+describe('upsertResume', () => {
+  it('inserts a resume when none exists and returns it', () => {
+    const result = upsertResume({
       full_name: 'Jane Doe',
       headline: 'Senior Engineer',
       email: 'jane@example.com',
@@ -46,9 +46,9 @@ describe('upsertCv', () => {
     expect(result.updated_at).toBeDefined()
   })
 
-  it('updates an existing CV', () => {
-    upsertCv({ full_name: 'Original' })
-    const updated = upsertCv({
+  it('updates an existing resume', () => {
+    upsertResume({ full_name: 'Original' })
+    const updated = upsertResume({
       full_name: 'Updated Name',
       headline: 'New Headline',
     })
@@ -57,15 +57,15 @@ describe('upsertCv', () => {
   })
 
   it('preserves fields not included in update', () => {
-    upsertCv({ full_name: 'Alice', email: 'alice@example.com' })
-    const result = upsertCv({ full_name: 'Alice Updated' })
+    upsertResume({ full_name: 'Alice', email: 'alice@example.com' })
+    const result = upsertResume({ full_name: 'Alice Updated' })
     expect(result.full_name).toBe('Alice Updated')
     expect(result.email).toBe('alice@example.com')
   })
 
   it('rejects invalid data via schema', () => {
     expect(() =>
-      upsertCv({ skills: 'not-json-array' } as any),
+      upsertResume({ skills: 'not-json-array' } as any),
     ).not.toThrow()
   })
 })

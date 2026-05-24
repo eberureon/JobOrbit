@@ -25,7 +25,7 @@ sqlite.exec(`
     notes TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
   );
-  CREATE TABLE IF NOT EXISTS cv (
+  CREATE TABLE IF NOT EXISTS resume (
     id INTEGER PRIMARY KEY,
     full_name TEXT NOT NULL DEFAULT '',
     headline TEXT NOT NULL DEFAULT '',

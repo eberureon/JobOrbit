@@ -20,7 +20,7 @@ const NAV = [
     activeOptions: { exact: true },
   },
   { to: "/applications", label: "Applications", icon: Briefcase },
-  { to: "/cv", label: "CV", icon: FileText },
+  { to: "/resume", label: "Resume", icon: FileText },
 ];
 
 function NavLinks({
