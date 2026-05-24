@@ -13,49 +13,52 @@ RUN apt-get update \
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 
-
 # ---------- Stage 2: build ----------
 # Build the app (Vite + TanStack Start SSR) into dist/.
-# Use `bun run build` (Vite), not `bun build` (Bun bundler).
 FROM deps AS build
 WORKDIR /app
 COPY . .
 RUN bun --bun run build
 
+# ---------- Stage 3: prod deps ----------
+# Install production dependencies with Bun on Node libc.
+FROM node:lts-slim AS prod-deps
+WORKDIR /app
 
-# ---------- Stage 3: runtime ----------
-# Minimal production image. Only production deps + built artifacts.
-FROM oven/bun:1-slim AS runtime
+# Build tools required to compile better-sqlite3 from source.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends python3 make g++ ca-certificates curl unzip \
+  && rm -rf /var/lib/apt/lists/*
+
+# Install Bun for lockfile-compatible installs.
+RUN curl -fsSL https://bun.sh/install | bash
+ENV PATH="/root/.bun/bin:${PATH}"
+
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile --production
+
+# ---------- Stage 4: runtime ----------
+# Minimal production image running srvx on Node.js.
+FROM node:lts-slim AS runtime
 WORKDIR /app
 
 ENV NODE_ENV=production \
   PORT=3000 \
+  HOST=0.0.0.0 \
   DATABASE_URL=/app/data/joborbit.db
 
-# Install production deps only (better-sqlite3 prebuilds work on debian-slim).
-# Build toolchain stays here in case prebuilds aren't available for the arch.
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends python3 make g++ ca-certificates wget \
-  && rm -rf /var/lib/apt/lists/*
+COPY package.json ./
+COPY --from=prod-deps /app/node_modules ./node_modules
 
-COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile --production \
-  && apt-get purge -y python3 make g++ \
-  && apt-get autoremove -y \
-  && rm -rf /var/lib/apt/lists/*
-
-# Copy built output from the build stage.
+# Copy built output and migrations from the build stage.
 COPY --from=build /app/dist ./dist
+COPY --from=build /app/drizzle ./dist/drizzle
 
 # Create data dir and run as the non-root user.
-RUN mkdir -p /app/data && chown -R bun:bun /app/data /app
-USER bun
+RUN mkdir -p /app/data && chown -R node:node /app
+USER node
 
 EXPOSE 3000
 VOLUME ["/app/data"]
 
-# Healthcheck hits the server.
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget -qO- http://127.0.0.1:3000/ >/dev/null 2>&1 || exit 1
-
-CMD ["bun", "x", "srvx", "dist/server/server.js", "--static", "dist/client", "--host", "0.0.0.0", "--port", "3000"]
+CMD ["node", "./node_modules/.bin/srvx", "--prod", "-s", "../client", "dist/server/server.js"]

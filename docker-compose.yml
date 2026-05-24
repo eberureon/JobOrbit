@@ -13,7 +13,7 @@ services:
     container_name: job-orbit
     restart: unless-stopped
     ports:
-      - "127.0.0.1:${PORT:-3000}:3000"
+      - "${PORT:-3000}:3000"
     environment:
       NODE_ENV: production
       PORT: "3000"
@@ -24,7 +24,13 @@ services:
     volumes:
       - job-orbit-data:/app/data
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
       interval: 30s
       timeout: 5s
       retries: 3

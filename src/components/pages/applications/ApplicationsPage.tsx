@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowUpDown, Filter, Plus, Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
-import { StatusBadge } from "@/components/StatusBadge";
+import { StatusBadge } from "~/components/StatusBadge";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -11,9 +11,9 @@ import {
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+} from "~/components/ui/alert-dialog";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent } from "~/components/ui/card";
 import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
@@ -21,17 +21,17 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
-import type { Application } from "@/db/schema";
-import { useToast } from "@/hooks/use-toast";
+} from "~/components/ui/dropdown-menu";
+import { Input } from "~/components/ui/input";
+import { Skeleton } from "~/components/ui/skeleton";
+import type { Application } from "~/db/schema";
+import { useToast } from "~/hooks/use-toast";
 import {
 	deleteApplication,
 	listApplications,
-} from "@/lib/server/applications.functions";
-import type { ApplicationStatus } from "@/types";
-import { APPLICATION_STATUSES } from "@/types";
+} from "~/lib/server/applications.functions";
+import type { ApplicationStatus } from "~/types";
+import { APPLICATION_STATUSES } from "~/types";
 import { ApplicationDialog } from "./ApplicationDialog";
 import { RowActions } from "./RowActions";
 

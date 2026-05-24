@@ -7,9 +7,9 @@ import {
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
-import { AppLayout } from "@/components/Sidebar";
-import { Toaster } from "@/components/ui/toaster";
-import appCss from "@/styles.css?url";
+import { AppLayout } from "~/components/Sidebar";
+import { Toaster } from "~/components/ui/toaster";
+import appCss from "~/styles.css?url";
 
 interface MyRouterContext {
   queryClient: QueryClient;
