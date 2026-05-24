@@ -430,11 +430,10 @@ export function ApplicationsPage() {
 													</p>
 												)}
 											</div>
-											<button
+											<div
 												className="flex items-center gap-1 mt-2"
 												onClick={(e) => e.stopPropagation()}
 												onKeyDown={(e) => e.stopPropagation()}
-												type="button"
 											>
 												<RowActions
 													id={a.id}
@@ -445,7 +444,7 @@ export function ApplicationsPage() {
 													}}
 													onDelete={() => setDeleteId(a.id)}
 												/>
-											</button>
+											</div>
 										</div>
 									);
 								})}
