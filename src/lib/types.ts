@@ -9,7 +9,7 @@ export const APPLICATION_STATUSES = [
 
 export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 
-export type Stats = {
+export interface Stats {
   total: number;
   last7Days: number;
   last30Days: number;
@@ -23,4 +23,14 @@ export type Stats = {
   };
   timeline: { date: string; count: number }[];
   topCompanies: { company: string; count: number }[];
-};
+}
+
+export const SORT_ODER = ["newest", "a-z", "follow-up"];
+export enum SORT_KEY {
+  APPLIED_DATE = "applied_date",
+  COMPANY = "company",
+  STATUS = "status",
+}
+
+export type SortOrder = (typeof SORT_ODER)[number];
+export type SortKey = (typeof SORT_KEY)[keyof typeof SORT_KEY];
