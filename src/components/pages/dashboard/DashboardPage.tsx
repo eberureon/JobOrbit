@@ -1,17 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, Briefcase, Calendar, Target } from "lucide-react";
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  Cell,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { StatusBadge, statusColor } from "~/components/StatusBadge";
 import { Skeleton } from "~/components/ui/skeleton";
 import type { Application } from "~/db/schema";
@@ -21,6 +10,9 @@ import {
 } from "~/lib/server/applications.functions";
 import type { ApplicationStatus, Stats } from "~/lib/types";
 import { getEffectiveLocale, useSettings } from "~/lib/use-settings";
+import { FunnelRow } from "./FunnelRow";
+import { StatCard } from "./StatCard";
+import { TimelineChart } from "./TimeLineChart";
 
 const STATUS_ORDER: ApplicationStatus[] = [
   "Applied",
@@ -30,81 +22,6 @@ const STATUS_ORDER: ApplicationStatus[] = [
   "Rejected",
   "Withdrawn",
 ];
-
-function StatCard({
-  label,
-  value,
-  hint,
-  icon: Icon,
-  testId,
-  loading,
-}: {
-  label: string;
-  value: string | number;
-  hint?: string;
-  icon: React.ComponentType<{ className?: string }>;
-  testId: string;
-  loading?: boolean;
-}) {
-  return (
-    <div className="rounded-xl border border-card-border bg-card card-hairline relative overflow-hidden p-5">
-      <div className="flex items-start justify-between">
-        <div className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
-          {label}
-        </div>
-        <Icon className="h-4 w-4 text-muted-foreground" />
-      </div>
-      {loading ? (
-        <Skeleton className="mt-3 h-9 w-20" />
-      ) : (
-        <div
-          className="mt-3 font-mono-num text-3xl font-semibold text-foreground"
-          data-testid={testId}
-        >
-          {value}
-        </div>
-      )}
-      {hint && (
-        <div className="mt-1 text-xs text-muted-foreground font-mono-num">
-          {hint}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function FunnelRow({
-  label,
-  count,
-  total,
-  color,
-  testId,
-}: {
-  label: string;
-  count: number;
-  total: number;
-  color: string;
-  testId: string;
-}) {
-  const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-  return (
-    <div data-testid={testId} className="space-y-1.5">
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-muted-foreground">{label}</span>
-        <span className="font-mono-num text-foreground">
-          {count}
-          <span className="text-muted-foreground ml-2">{pct}%</span>
-        </span>
-      </div>
-      <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-        <div
-          className="h-full rounded-full transition-all"
-          style={{ width: `${pct}%`, backgroundColor: color }}
-        />
-      </div>
-    </div>
-  );
-}
 
 export function DashboardPage() {
   const { data: stats, isLoading: statsLoading } = useQuery<Stats>({
@@ -197,83 +114,10 @@ export function DashboardPage() {
             </div>
           </div>
           <div className="px-5 pb-5 pt-0">
-            <div className="w-full aspect-[2/1]" data-testid="chart-timeline">
-              {statsLoading ? (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Skeleton className="w-full h-full rounded-lg" />
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={stats?.timeline ?? []}>
-                    <defs>
-                      <linearGradient
-                        id="g-timeline"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop
-                          offset="0%"
-                          stopColor="var(--primary)"
-                          stopOpacity={0.4}
-                        />
-                        <stop
-                          offset="100%"
-                          stopColor="var(--primary)"
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid
-                      stroke="var(--border)"
-                      strokeDasharray="3 3"
-                      vertical={false}
-                    />
-                    <XAxis
-                      dataKey="date"
-                      tick={{
-                        fill: "var(--muted-foreground)",
-                        fontSize: 11,
-                      }}
-                      tickFormatter={(d: string) => {
-                        const dt = new Date(d);
-                        return `${dt.getMonth() + 1}/${dt.getDate()}`;
-                      }}
-                      interval={Math.floor(
-                        ((stats?.timeline.length ?? 90) - 1) / 6,
-                      )}
-                      stroke="var(--border)"
-                    />
-                    <YAxis
-                      tick={{
-                        fill: "var(--muted-foreground)",
-                        fontSize: 11,
-                      }}
-                      allowDecimals={false}
-                      stroke="var(--border)"
-                      width={28}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        background: "var(--popover)",
-                        border: "1px solid var(--border)",
-                        borderRadius: 8,
-                        fontSize: 12,
-                      }}
-                      labelStyle={{ color: "var(--foreground)" }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="count"
-                      stroke="var(--primary)"
-                      strokeWidth={2}
-                      fill="url(#g-timeline)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              )}
-            </div>
+            <TimelineChart
+              data={stats?.timeline ?? []}
+              loading={statsLoading}
+            />
           </div>
         </div>
 
