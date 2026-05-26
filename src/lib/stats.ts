@@ -66,6 +66,7 @@ export function computeStats(
 		offer: offersTotal,
 		accepted: acceptedTotal,
 		rejected: statusBreakdown.Rejected,
+		withdrawn: statusBreakdown.Withdrawn,
 	};
 
 	const timeline: { date: string; count: number }[] = [];

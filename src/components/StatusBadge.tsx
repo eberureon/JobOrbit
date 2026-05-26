@@ -19,14 +19,14 @@ export function StatusBadge({
 		<span
 			className="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium tabular-nums"
 			style={{
-				color: `hsl(var(${v}))`,
-				borderColor: `hsl(var(${v}) / 0.3)`,
-				backgroundColor: `hsl(var(${v}) / 0.08)`,
+				color: `oklch(var(${v}))`,
+				borderColor: `oklch(var(${v}) / 0.3)`,
+				backgroundColor: `oklch(var(${v}) / 0.08)`,
 			}}
 		>
 			<span
 				className="h-1.5 w-1.5 rounded-full"
-				style={{ backgroundColor: `hsl(var(${v}))` }}
+				style={{ backgroundColor: `oklch(var(${v}))` }}
 			/>
 			{status}
 		</span>
@@ -35,5 +35,5 @@ export function StatusBadge({
 
 export function statusColor(status: ApplicationStatus | string): string {
 	const v = STATUS_VAR[status as ApplicationStatus] ?? "--muted-foreground";
-	return `hsl(var(${v}))`;
+	return `oklch(var(${v}))`;
 }

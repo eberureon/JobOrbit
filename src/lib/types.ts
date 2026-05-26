@@ -20,6 +20,7 @@ export interface Stats {
 		offer: number;
 		accepted: number;
 		rejected: number;
+		withdrawn: number;
 	};
 	timeline: { date: string; count: number }[];
 	topCompanies: { company: string; count: number }[];

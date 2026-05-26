@@ -6,7 +6,8 @@
 @plugin "@tailwindcss/typography";
 
 @theme inline {
-  --font-sans: "Geist Variable", "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-sans:
+    "Geist Variable", "Manrope", ui-sans-serif, system-ui, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -108,12 +109,12 @@
   --badge-outline: rgba(23, 58, 64, 0.08);
   --elevate-1: rgba(23, 58, 64, 0.04);
   --elevate-2: rgba(23, 58, 64, 0.08);
-  --status-applied: 210 90% 60%;
-  --status-interview: 40 90% 60%;
-  --status-offer: 145 70% 50%;
-  --status-accepted: 158 80% 50%;
-  --status-rejected: 0 70% 55%;
-  --status-withdrawn: 220 10% 55%;
+  --status-applied: 0.67 0.16 251;
+  --status-interview: 0.8 0.15 80;
+  --status-offer: 0.7 0.17 290;
+  --status-accepted: 0.77 0.2 151;
+  --status-rejected: 0.6 0.2 25;
+  --status-withdrawn: 0.6 0.02 250;
 }
 
 .dark {
@@ -166,12 +167,12 @@
   --badge-outline: rgba(255, 255, 255, 0.05);
   --elevate-1: rgba(255, 255, 255, 0.04);
   --elevate-2: rgba(255, 255, 255, 0.08);
-  --status-applied: 210 90% 60%;
-  --status-interview: 40 90% 60%;
-  --status-offer: 145 70% 50%;
-  --status-accepted: 158 80% 50%;
-  --status-rejected: 0 70% 55%;
-  --status-withdrawn: 220 10% 55%;
+  --status-applied: 0.67 0.16 251;
+  --status-interview: 0.8 0.15 80;
+  --status-offer: 0.7 0.17 290;
+  --status-accepted: 0.77 0.2 151;
+  --status-rejected: 0.6 0.2 25;
+  --status-withdrawn: 0.6 0.02 250;
 }
 
 * {
@@ -187,12 +188,17 @@ body,
 body {
   margin: 0;
   color: var(--sea-ink);
-  font-family: "Geist Variable", "Manrope", ui-sans-serif, system-ui, sans-serif;
+  font-family:
+    "Geist Variable", "Manrope", ui-sans-serif, system-ui, sans-serif;
   background-color: var(--bg-base);
   background:
     radial-gradient(1100px 620px at -8% -10%, var(--hero-a), transparent 58%),
     radial-gradient(1050px 620px at 112% -12%, var(--hero-b), transparent 62%),
-    radial-gradient(720px 380px at 50% 115%, rgba(79, 184, 178, 0.1), transparent 68%),
+    radial-gradient(
+      720px 380px at 50% 115%,
+      rgba(79, 184, 178, 0.1),
+      transparent 68%
+    ),
     linear-gradient(
       180deg,
       color-mix(in oklab, var(--sand) 68%, white) 0%,
@@ -212,8 +218,16 @@ body::before {
   z-index: -1;
   opacity: 0.28;
   background:
-    radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.8), transparent 34%),
-    radial-gradient(circle at 78% 26%, rgba(79, 184, 178, 0.2), transparent 42%),
+    radial-gradient(
+      circle at 20% 15%,
+      rgba(255, 255, 255, 0.8),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at 78% 26%,
+      rgba(79, 184, 178, 0.2),
+      transparent 42%
+    ),
     radial-gradient(circle at 42% 82%, rgba(47, 106, 74, 0.14), transparent 36%);
 }
 
@@ -286,7 +300,11 @@ pre code {
 }
 
 .bg-dot-grid {
-  background-image: radial-gradient(circle, var(--border) 0.5px, transparent 0.5px);
+  background-image: radial-gradient(
+    circle,
+    var(--border) 0.5px,
+    transparent 0.5px
+  );
   background-size: 18px 18px;
   mask-image: radial-gradient(circle at 50% 0%, black, transparent 70%);
 }

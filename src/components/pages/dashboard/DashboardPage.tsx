@@ -193,11 +193,13 @@ export function DashboardPage() {
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 				<div className="lg:col-span-2 rounded-xl border border-card-border bg-card card-hairline">
 					<div className="p-5 pb-3">
-						<div className="text-sm font-medium text-foreground flex items-center gap-2">
+						<div className="flex items-center flex-wrap gap-2">
 							<Target className="h-4 w-4 text-primary" />
-							Success Rate Funnel
-							<span className="ml-2 text-xs font-normal text-muted-foreground">
-								cumulative — each stage includes later stages
+							<span className="font-medium text-foreground text-sm">
+								Success Rate Funnel
+							</span>
+							<span className="lg:ml-2 text-xs font-normal text-muted-foreground">
+								cumulative - each stage includes later stages
 							</span>
 						</div>
 					</div>
@@ -218,13 +220,15 @@ export function DashboardPage() {
 							</>
 						) : (
 							<>
-								<FunnelRow
-									label="Applied"
-									count={stats?.funnel.applied ?? 0}
-									total={stats?.funnel.applied ?? 0}
-									color={statusColor("Applied")}
-									testId="funnel-applied"
-								/>
+								<div className="pt-3 border-b border-border text-xs flex items-center justify-between text-muted-foreground">
+									<span>Total Applications</span>
+									<span
+										className="font-mono-num text-foreground"
+										data-testid="funnel-rejected"
+									>
+										{stats?.funnel.applied ?? 0}
+									</span>
+								</div>
 								<FunnelRow
 									label="Interview"
 									count={stats?.funnel.interview ?? 0}
@@ -252,6 +256,13 @@ export function DashboardPage() {
 									total={stats?.funnel.applied ?? 0}
 									color={statusColor("Rejected")}
 									testId="funnel-rejected"
+								/>
+								<FunnelRow
+									label="Withdrawn"
+									count={stats?.funnel.withdrawn ?? 0}
+									total={stats?.funnel.applied ?? 0}
+									color={statusColor("Withdrawn")}
+									testId="funnel-withdrawn"
 								/>
 							</>
 						)}
