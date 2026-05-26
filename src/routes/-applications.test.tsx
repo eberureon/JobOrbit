@@ -46,14 +46,14 @@ const sampleApps: Application[] = [
 
 let Wrapper: ReturnType<typeof createWrapper>;
 
-	describe("Applications", () => {
+describe("Applications", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.mocked(appFns.listApplications).mockResolvedValue([]);
 		vi.mocked(appFns.listStatusHistory).mockResolvedValue([]);
-		vi.mocked(appFns.deleteApplication).mockResolvedValue(undefined as never);
-		vi.mocked(appFns.createApplication).mockResolvedValue(undefined as never);
-		vi.mocked(appFns.updateApplication).mockResolvedValue(undefined as never);
+		vi.mocked(appFns.deleteApplication).mockResolvedValue(undefined as any);
+		vi.mocked(appFns.createApplication).mockResolvedValue(undefined as any);
+		vi.mocked(appFns.updateApplication).mockResolvedValue(undefined as any);
 		vi.mocked(appFns.importApplications).mockResolvedValue({ count: 0 });
 		Wrapper = createWrapper();
 	});
@@ -376,4 +376,3 @@ let Wrapper: ReturnType<typeof createWrapper>;
 		expect(call.data.rows[1].company).toBe("Beta Corp");
 	});
 });
-

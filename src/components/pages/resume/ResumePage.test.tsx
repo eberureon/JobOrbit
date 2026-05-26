@@ -16,11 +16,6 @@ vi.mock("~/lib/server/resume.functions", async (importOriginal) => {
 	};
 });
 
-const mocks = vi.hoisted(() => ({
-	getResume: vi.fn<[], any>(),
-	upsertResume: vi.fn<any, any>(),
-}));
-
 const emptyResume: Resume = {
 	id: 1,
 	full_name: "",

@@ -53,7 +53,6 @@ describe("listByApplicationId", () => {
 
 	it("does not return entries for other applications", () => {
 		const a = insertApp(validApp);
-		const b = insertApp(validApp);
 		insertEntry(a.id, "Interview", "Applied");
 		const aEntries = listByApplicationId(a.id);
 		expect(aEntries).toHaveLength(2);
