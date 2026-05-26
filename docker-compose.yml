@@ -9,7 +9,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: job-orbit:latest
     container_name: job-orbit
     restart: unless-stopped
     ports:

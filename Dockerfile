@@ -47,15 +47,15 @@ ENV NODE_ENV=production \
   HOST=0.0.0.0 \
   DATABASE_URL=/app/data/joborbit.db
 
-COPY package.json ./
-COPY --from=prod-deps /app/node_modules ./node_modules
+COPY --chown=node:node package.json ./
+COPY --chown=node:node --from=prod-deps /app/node_modules ./node_modules
 
 # Copy built output and migrations from the build stage.
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/drizzle ./dist/drizzle
+COPY --chown=node:node --from=build /app/dist ./dist
+COPY --chown=node:node --from=build /app/drizzle ./dist/drizzle
 
 # Create data dir and run as the non-root user.
-RUN mkdir -p /app/data && chown -R node:node /app
+RUN install -d -o node -g node /app/data
 USER node
 
 EXPOSE 3000
