@@ -41,3 +41,17 @@ export function deleteByApplicationId(applicationId: number) {
 		.where(eq(statusHistory.application_id, applicationId))
 		.run();
 }
+
+export function bulkInsertStatusHistory(
+	entries: { application_id: number; old_status: string | null; new_status: string }[],
+) {
+	return db.transaction((tx) =>
+		entries.map((entry) =>
+			tx
+				.insert(statusHistory)
+				.values(entry)
+				.returning()
+				.get() as StatusHistory,
+		),
+	);
+}

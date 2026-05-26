@@ -200,10 +200,24 @@ describe("Applications", () => {
 		).toBeGreaterThanOrEqual(1);
 	});
 
-	it("renders import csv button", async () => {
+	it("renders data menu with import/export items", async () => {
 		render(<ApplicationsPage />, { wrapper: Wrapper });
 		expect(
+			(await screen.findAllByTestId("button-data-menu")).length,
+		).toBeGreaterThanOrEqual(1);
+
+		fireEvent.click((await screen.findAllByTestId("button-data-menu"))[0]);
+		expect(
 			(await screen.findAllByTestId("button-import-csv")).length,
+		).toBeGreaterThanOrEqual(1);
+		expect(
+			(await screen.findAllByTestId("button-export-csv")).length,
+		).toBeGreaterThanOrEqual(1);
+		expect(
+			(await screen.findAllByTestId("button-import-history")).length,
+		).toBeGreaterThanOrEqual(1);
+		expect(
+			(await screen.findAllByTestId("button-export-history")).length,
 		).toBeGreaterThanOrEqual(1);
 	});
 
