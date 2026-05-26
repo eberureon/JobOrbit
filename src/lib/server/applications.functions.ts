@@ -84,9 +84,7 @@ const importStatusHistorySchema = z.object({
 export const importStatusHistory = createServerFn({ method: "POST" })
 	.inputValidator(importStatusHistorySchema)
 	.handler(async ({ data }) => {
-		const appIds = new Set(
-			(db.listAll() as { id: number }[]).map((a) => a.id),
-		);
+		const appIds = new Set((db.listAll() as { id: number }[]).map((a) => a.id));
 		const valid = data.rows.filter((r) => appIds.has(r.application_id));
 		const skipped = data.rows.length - valid.length;
 		const entries = bulkInsertStatusHistory(valid);

@@ -43,15 +43,20 @@ export function deleteByApplicationId(applicationId: number) {
 }
 
 export function bulkInsertStatusHistory(
-	entries: { application_id: number; old_status: string | null; new_status: string }[],
+	entries: {
+		application_id: number;
+		old_status: string | null;
+		new_status: string;
+	}[],
 ) {
 	return db.transaction((tx) =>
-		entries.map((entry) =>
-			tx
-				.insert(statusHistory)
-				.values(entry)
-				.returning()
-				.get() as StatusHistory,
+		entries.map(
+			(entry) =>
+				tx
+					.insert(statusHistory)
+					.values(entry)
+					.returning()
+					.get() as StatusHistory,
 		),
 	);
 }
