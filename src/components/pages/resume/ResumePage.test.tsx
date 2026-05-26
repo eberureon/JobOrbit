@@ -5,15 +5,20 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Resume } from "~/db/schema";
 import { createWrapper } from "~/test/test-utils";
 import { ResumePage } from "./ResumePage";
+import * as resumeFns from "~/lib/server/resume.functions";
+
+vi.mock("~/lib/server/resume.functions", async (importOriginal) => {
+	const actual = (await importOriginal()) as typeof resumeFns;
+	return {
+		...actual,
+		getResume: vi.fn(),
+		upsertResume: vi.fn(),
+	};
+});
 
 const mocks = vi.hoisted(() => ({
 	getResume: vi.fn<[], any>(),
 	upsertResume: vi.fn<any, any>(),
-}));
-
-vi.mock("../../../lib/server/resume.functions", () => ({
-	getResume: mocks.getResume,
-	upsertResume: mocks.upsertResume,
 }));
 
 const emptyResume: Resume = {
@@ -45,13 +50,14 @@ const filledCv: Resume = {
 	links: '["https://github.com/jane"]',
 };
 
-const Wrapper = createWrapper();
+let Wrapper: ReturnType<typeof createWrapper>;
 
 describe("ResumePage", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mocks.getResume.mockResolvedValue(emptyResume);
-		mocks.upsertResume.mockResolvedValue(emptyResume);
+		vi.mocked(resumeFns.getResume).mockResolvedValue(emptyResume);
+		vi.mocked(resumeFns.upsertResume).mockResolvedValue(emptyResume);
+		Wrapper = createWrapper();
 	});
 
 	it("renders the page title", async () => {
@@ -89,7 +95,7 @@ describe("ResumePage", () => {
 	});
 
 	it("loads resume data into form fields", async () => {
-		mocks.getResume.mockResolvedValue(filledCv);
+		vi.mocked(resumeFns.getResume).mockResolvedValue(filledCv);
 		render(<ResumePage />, { wrapper: Wrapper });
 
 		const nameInput = (
@@ -108,7 +114,7 @@ describe("ResumePage", () => {
 	});
 
 	it("shows saved content in preview", async () => {
-		mocks.getResume.mockResolvedValue(filledCv);
+		vi.mocked(resumeFns.getResume).mockResolvedValue(filledCv);
 		render(<ResumePage />, { wrapper: Wrapper });
 
 		expect(
@@ -123,15 +129,15 @@ describe("ResumePage", () => {
 	});
 
 	it("calls upsertResume on Save", async () => {
-		mocks.getResume.mockResolvedValue(filledCv);
-		mocks.upsertResume.mockResolvedValue(filledCv);
+		vi.mocked(resumeFns.getResume).mockResolvedValue(filledCv);
+		vi.mocked(resumeFns.upsertResume).mockResolvedValue(filledCv);
 		render(<ResumePage />, { wrapper: Wrapper });
 
 		const saveBtn = (await screen.findAllByText("Save"))[0];
 		fireEvent.click(saveBtn);
 
 		await waitFor(() => {
-			expect(mocks.upsertResume).toHaveBeenCalled();
+			expect(resumeFns.upsertResume).toHaveBeenCalled();
 		});
 	});
 

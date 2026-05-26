@@ -35,13 +35,14 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { Input } from "~/components/ui/input";
 import { Skeleton } from "~/components/ui/skeleton";
-import type { Application } from "~/db/schema";
+import type { Application, StatusHistory } from "~/db/schema";
 import { insertApplicationSchema } from "~/db/schema";
 import { useToast } from "~/hooks/use-toast";
 import {
-  deleteApplication,
-  importApplications,
-  listApplications,
+	deleteApplication,
+	importApplications,
+	listApplications,
+	listStatusHistory,
 } from "~/lib/server/applications.functions";
 import type { ApplicationStatus, SortOrder, SortKey } from "~/lib/types";
 import { APPLICATION_STATUSES, SORT_KEY } from "~/lib/types";
@@ -68,15 +69,25 @@ export function ApplicationsPage() {
 
   const { settings } = useSettings();
 
-  const { data: apps = [], isLoading } = useQuery<Application[]>({
-    queryKey: ["applications"],
-    queryFn: () => listApplications(),
-  });
+	const appsQuery = useQuery<Application[]>({
+		queryKey: ["applications"],
+		queryFn: () => listApplications(),
+	});
+	const historyQuery = useQuery<StatusHistory[]>({
+		queryKey: ["status-history"],
+		queryFn: () => listStatusHistory(),
+	});
+	const apps = appsQuery.data ?? [];
+	const history = historyQuery.data ?? [];
+	const isLoading = appsQuery.isLoading || historyQuery.isLoading;
 
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<Set<ApplicationStatus>>(
-    new Set(),
-  );
+	const [statusFilter, setStatusFilter] = useState<Set<ApplicationStatus>>(
+		new Set(),
+	);
+	const [historyFilter, setHistoryFilter] = useState<Set<ApplicationStatus>>(
+		new Set(),
+	);
   const [sortKey, setSortKey] = useState<SortKey>(
     sortFromDefault(settings.defaultSort)[0],
   );
@@ -92,34 +103,43 @@ export function ApplicationsPage() {
 
   const locale = getEffectiveLocale(settings);
 
-  const filtered = useMemo(() => {
-    let list = [...apps];
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      list = list.filter(
+	const filtered = useMemo(() => {
+		let list = [...apps];
+		if (search.trim()) {
+			const q = search.toLowerCase();
+			list = list.filter(
         (a) =>
           a.company.toLowerCase().includes(q) ||
           a.role.toLowerCase().includes(q),
       );
     }
-    if (statusFilter.size > 0) {
-      list = list.filter((a) =>
-        statusFilter.has(a.status as ApplicationStatus),
-      );
-    }
-    list.sort((a, b) => {
-      const av = (a as any)[sortKey];
-      const bv = (b as any)[sortKey];
-      if (av < bv) return sortDir === "asc" ? -1 : 1;
-      if (av > bv) return sortDir === "asc" ? 1 : -1;
-      return 0;
-    });
-    return list;
-  }, [apps, search, statusFilter, sortKey, sortDir]);
+		if (statusFilter.size > 0) {
+			list = list.filter((a) =>
+				statusFilter.has(a.status as ApplicationStatus),
+			);
+		}
+		if (historyFilter.size > 0) {
+			const historyMatches = new Set<number>();
+			for (const entry of history) {
+				if (historyFilter.has(entry.new_status as ApplicationStatus)) {
+					historyMatches.add(entry.application_id);
+				}
+			}
+			list = list.filter((a) => historyMatches.has(a.id));
+		}
+		list.sort((a, b) => {
+			const av = (a as any)[sortKey];
+			const bv = (b as any)[sortKey];
+			if (av < bv) return sortDir === "asc" ? -1 : 1;
+			if (av > bv) return sortDir === "asc" ? 1 : -1;
+			return 0;
+		});
+		return list;
+	}, [apps, history, search, statusFilter, historyFilter, sortKey, sortDir]);
 
   useEffect(() => {
     setPage(0);
-  }, [search, statusFilter, sortKey, sortDir]);
+	}, [search, statusFilter, historyFilter, sortKey, sortDir]);
 
   const pageSize = settings.pageSize;
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
@@ -129,14 +149,23 @@ export function ApplicationsPage() {
     (safePage + 1) * pageSize,
   );
 
-  function toggleStatus(s: ApplicationStatus) {
-    setStatusFilter((prev) => {
-      const next = new Set(prev);
-      if (next.has(s)) next.delete(s);
-      else next.add(s);
-      return next;
-    });
-  }
+	function toggleStatus(s: ApplicationStatus) {
+		setStatusFilter((prev) => {
+			const next = new Set(prev);
+			if (next.has(s)) next.delete(s);
+			else next.add(s);
+			return next;
+		});
+	}
+
+	function toggleHistoryStatus(s: ApplicationStatus) {
+		setHistoryFilter((prev) => {
+			const next = new Set(prev);
+			if (next.has(s)) next.delete(s);
+			else next.add(s);
+			return next;
+		});
+	}
 
   function toggleSort(k: SortKey) {
     if (sortKey === k) {
@@ -362,6 +391,11 @@ export function ApplicationsPage() {
                     {statusFilter.size}
                   </span>
                 )}
+                {historyFilter.size > 0 && (
+                  <span className="ml-2 rounded bg-muted text-muted-foreground px-1.5 py-0.5 text-xs font-mono-num">
+                    {historyFilter.size}
+                  </span>
+                )}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -379,13 +413,31 @@ export function ApplicationsPage() {
                   </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Historical status</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {APPLICATION_STATUSES.map((s) => (
+                  <DropdownMenuCheckboxItem
+                    key={`history-${s}`}
+                    checked={historyFilter.has(s)}
+                    onCheckedChange={() => toggleHistoryStatus(s)}
+                    data-testid={`filter-history-${s}`}
+                  >
+                    {s}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-          {statusFilter.size > 0 && (
+          {(statusFilter.size > 0 || historyFilter.size > 0) && (
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setStatusFilter(new Set())}
+              onClick={() => {
+                setStatusFilter(new Set());
+                setHistoryFilter(new Set());
+              }}
               data-testid="button-clear-filters"
             >
               <X className="h-3.5 w-3.5 mr-1" />

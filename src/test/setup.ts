@@ -1,4 +1,5 @@
 import { afterEach } from "vitest";
+import { cleanup } from "@testing-library/react";
 
 process.env.DATABASE_URL = ":memory:";
 
@@ -9,6 +10,23 @@ class MockResizeObserver {
 }
 
 globalThis.ResizeObserver = MockResizeObserver;
+
+globalThis.matchMedia =
+	globalThis.matchMedia ||
+	((query: string) => ({
+		matches: false,
+		media: query,
+		onchange: null,
+		addEventListener: () => {},
+		removeEventListener: () => {},
+		addListener: () => {},
+		removeListener: () => {},
+		dispatchEvent: () => false,
+	}));
+
+afterEach(() => {
+	cleanup();
+});
 
 afterEach(async () => {
 	const mod = await import("../db/index.ts");

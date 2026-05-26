@@ -4,21 +4,15 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { createWrapper } from "../test/test-utils";
 import { ApplicationsPage } from "../components/pages/applications";
 import type { Application } from "../db/schema";
+import * as appFns from "~/lib/server/applications.functions";
 
-const mocks = vi.hoisted(() => ({
-	listApplications: vi.fn<[], any>(),
-	deleteApplication: vi.fn<any, any>(),
-	createApplication: vi.fn<any, any>(),
-	updateApplication: vi.fn<any, any>(),
-	importApplications: vi.fn<any, any>(),
-}));
-
-vi.mock("../lib/server/applications.functions", () => ({
-	listApplications: mocks.listApplications,
-	deleteApplication: mocks.deleteApplication,
-	createApplication: mocks.createApplication,
-	updateApplication: mocks.updateApplication,
-	importApplications: mocks.importApplications,
+vi.mock("~/lib/server/applications.functions", () => ({
+	listApplications: vi.fn(),
+	deleteApplication: vi.fn(),
+	createApplication: vi.fn(),
+	updateApplication: vi.fn(),
+	importApplications: vi.fn(),
+	listStatusHistory: vi.fn(),
 }));
 
 const sampleApps: Application[] = [
@@ -50,12 +44,18 @@ const sampleApps: Application[] = [
 	},
 ];
 
-const Wrapper = createWrapper();
+let Wrapper: ReturnType<typeof createWrapper>;
 
-describe("Applications", () => {
+	describe("Applications", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mocks.listApplications.mockResolvedValue([]);
+		vi.mocked(appFns.listApplications).mockResolvedValue([]);
+		vi.mocked(appFns.listStatusHistory).mockResolvedValue([]);
+		vi.mocked(appFns.deleteApplication).mockResolvedValue(undefined as never);
+		vi.mocked(appFns.createApplication).mockResolvedValue(undefined as never);
+		vi.mocked(appFns.updateApplication).mockResolvedValue(undefined as never);
+		vi.mocked(appFns.importApplications).mockResolvedValue({ count: 0 });
+		Wrapper = createWrapper();
 	});
 
 	it("renders the page title", async () => {
@@ -87,7 +87,7 @@ describe("Applications", () => {
 	});
 
 	it("renders a table when applications exist", async () => {
-		mocks.listApplications.mockResolvedValue(sampleApps);
+		vi.mocked(appFns.listApplications).mockResolvedValue(sampleApps);
 		render(<ApplicationsPage />, { wrapper: Wrapper });
 		expect(
 			(await screen.findAllByText("Acme Inc")).length,
@@ -104,14 +104,17 @@ describe("Applications", () => {
 	});
 
 	it("shows count of filtered and total apps", async () => {
-		mocks.listApplications.mockResolvedValue(sampleApps);
+		vi.mocked(appFns.listApplications).mockResolvedValue(sampleApps);
 		render(<ApplicationsPage />, { wrapper: Wrapper });
-		const els = await screen.findAllByTestId("text-app-count");
-		expect(els[0].textContent).toBe("2");
+		await screen.findAllByText("Acme Inc");
+		await waitFor(async () => {
+			const els = await screen.findAllByTestId("text-app-count");
+			expect(els[0].textContent).toBe("2");
+		});
 	});
 
 	it("renders status badges for each application", async () => {
-		mocks.listApplications.mockResolvedValue(sampleApps);
+		vi.mocked(appFns.listApplications).mockResolvedValue(sampleApps);
 		render(<ApplicationsPage />, { wrapper: Wrapper });
 		expect(
 			(await screen.findAllByText("Applied")).length,
@@ -122,7 +125,7 @@ describe("Applications", () => {
 	});
 
 	it("renders edit and delete buttons per row", async () => {
-		mocks.listApplications.mockResolvedValue(sampleApps);
+		vi.mocked(appFns.listApplications).mockResolvedValue(sampleApps);
 		render(<ApplicationsPage />, { wrapper: Wrapper });
 		expect(
 			(await screen.findAllByTestId("button-edit-1")).length,
@@ -139,7 +142,7 @@ describe("Applications", () => {
 	});
 
 	it("renders external link when job_url exists", async () => {
-		mocks.listApplications.mockResolvedValue(sampleApps);
+		vi.mocked(appFns.listApplications).mockResolvedValue(sampleApps);
 		render(<ApplicationsPage />, { wrapper: Wrapper });
 		expect(
 			(await screen.findAllByTestId("link-job-1")).length,
@@ -147,7 +150,7 @@ describe("Applications", () => {
 	});
 
 	it("shows sort buttons for company, status, and date", async () => {
-		mocks.listApplications.mockResolvedValue(sampleApps);
+		vi.mocked(appFns.listApplications).mockResolvedValue(sampleApps);
 		render(<ApplicationsPage />, { wrapper: Wrapper });
 		expect(
 			(await screen.findAllByTestId("sort-company")).length,
@@ -161,19 +164,22 @@ describe("Applications", () => {
 	});
 
 	it("shows no-match message when filter yields empty", async () => {
-		mocks.listApplications.mockResolvedValue(sampleApps);
+		vi.mocked(appFns.listApplications).mockResolvedValue(sampleApps);
 		render(<ApplicationsPage />, { wrapper: Wrapper });
+		await screen.findAllByText("Acme Inc");
 
 		const searchInput = (await screen.findAllByTestId("input-search"))[0];
 		fireEvent.input(searchInput, { target: { value: "ZZZ_NoMatch" } });
 
-		expect(
-			(await screen.findAllByText(/No applications match/i)).length,
-		).toBeGreaterThanOrEqual(1);
+		await waitFor(async () => {
+			expect(
+				(await screen.findAllByText(/No applications match/i)).length,
+			).toBeGreaterThanOrEqual(1);
+		});
 	});
 
 	it("opens dialog when edit button is clicked", async () => {
-		mocks.listApplications.mockResolvedValue(sampleApps);
+		vi.mocked(appFns.listApplications).mockResolvedValue(sampleApps);
 		render(<ApplicationsPage />, { wrapper: Wrapper });
 
 		fireEvent.click((await screen.findAllByTestId("button-edit-1"))[0]);
@@ -183,7 +189,7 @@ describe("Applications", () => {
 	});
 
 	it("opens dialog when add application button is clicked", async () => {
-		mocks.listApplications.mockResolvedValue(sampleApps);
+		vi.mocked(appFns.listApplications).mockResolvedValue(sampleApps);
 		render(<ApplicationsPage />, { wrapper: Wrapper });
 
 		fireEvent.click(
@@ -201,8 +207,42 @@ describe("Applications", () => {
 		).toBeGreaterThanOrEqual(1);
 	});
 
+	it("filters by historical status", async () => {
+		vi.mocked(appFns.listApplications).mockResolvedValue(sampleApps);
+		vi.mocked(appFns.listStatusHistory).mockResolvedValue([
+			{
+				id: 1,
+				application_id: 1,
+				old_status: "Applied",
+				new_status: "Interview",
+				changed_at: "2026-05-20T00:00:00.000Z",
+			},
+		]);
+		render(<ApplicationsPage />, { wrapper: Wrapper });
+		await waitFor(() => {
+			expect(appFns.listStatusHistory).toHaveBeenCalled();
+		});
+		await screen.findAllByText("Acme Inc");
+		await screen.findAllByText("Beta Corp");
+		await waitFor(async () => {
+			const counts = await screen.findAllByTestId("text-app-count");
+			expect(counts[0].textContent).toBe("2");
+		});
+
+		fireEvent.click((await screen.findAllByTestId("button-filter-status"))[0]);
+		fireEvent.click(
+			(await screen.findAllByTestId("filter-history-Interview"))[0],
+		);
+
+		await waitFor(async () => {
+			const counts = await screen.findAllByTestId("text-app-count");
+			expect(counts[0].textContent).toBe("1");
+		});
+		fireEvent.click((await screen.findAllByTestId("button-clear-filters"))[0]);
+	});
+
 	it("imports applications from csv file", async () => {
-		mocks.importApplications.mockResolvedValue({ count: 2 });
+		vi.mocked(appFns.importApplications).mockResolvedValue({ count: 2 });
 		render(<ApplicationsPage />, { wrapper: Wrapper });
 
 		const csvContent =
@@ -213,10 +253,10 @@ describe("Applications", () => {
 		fireEvent.change(input, { target: { files: [file] } });
 
 		await waitFor(() => {
-			expect(mocks.importApplications).toHaveBeenCalled();
+			expect(appFns.importApplications).toHaveBeenCalled();
 		});
 
-		const call = mocks.importApplications.mock.calls[0][0];
+		const call = (appFns.importApplications as any).mock.calls[0][0];
 		expect(call.data.rows).toHaveLength(2);
 		expect(call.data.rows[0].company).toBe("Acme Inc");
 		expect(call.data.rows[0].role).toBe("Engineer");
@@ -225,7 +265,7 @@ describe("Applications", () => {
 	});
 
 	it("defaults missing status to Applied", async () => {
-		mocks.importApplications.mockResolvedValue({ count: 1 });
+		vi.mocked(appFns.importApplications).mockResolvedValue({ count: 1 });
 		render(<ApplicationsPage />, { wrapper: Wrapper });
 
 		const csvContent = "company;role\nSome Corp;Dev";
@@ -235,15 +275,15 @@ describe("Applications", () => {
 		fireEvent.change(input, { target: { files: [file] } });
 
 		await waitFor(() => {
-			expect(mocks.importApplications).toHaveBeenCalled();
+			expect(appFns.importApplications).toHaveBeenCalled();
 		});
 
-		const call = mocks.importApplications.mock.calls[0][0];
+		const call = (appFns.importApplications as any).mock.calls[0][0];
 		expect(call.data.rows[0].status).toBe("Applied");
 	});
 
 	it("defaults invalid status to Applied", async () => {
-		mocks.importApplications.mockResolvedValue({ count: 1 });
+		vi.mocked(appFns.importApplications).mockResolvedValue({ count: 1 });
 		render(<ApplicationsPage />, { wrapper: Wrapper });
 
 		const csvContent = "company;role;status\nSome Corp;Dev;BadStatus";
@@ -253,15 +293,15 @@ describe("Applications", () => {
 		fireEvent.change(input, { target: { files: [file] } });
 
 		await waitFor(() => {
-			expect(mocks.importApplications).toHaveBeenCalled();
+			expect(appFns.importApplications).toHaveBeenCalled();
 		});
 
-		const call = mocks.importApplications.mock.calls[0][0];
+		const call = (appFns.importApplications as any).mock.calls[0][0];
 		expect(call.data.rows[0].status).toBe("Applied");
 	});
 
 	it("maps jobUrl and Notes columns case-insensitively", async () => {
-		mocks.importApplications.mockResolvedValue({ count: 1 });
+		vi.mocked(appFns.importApplications).mockResolvedValue({ count: 1 });
 		render(<ApplicationsPage />, { wrapper: Wrapper });
 
 		const csvContent =
@@ -272,16 +312,16 @@ describe("Applications", () => {
 		fireEvent.change(input, { target: { files: [file] } });
 
 		await waitFor(() => {
-			expect(mocks.importApplications).toHaveBeenCalled();
+			expect(appFns.importApplications).toHaveBeenCalled();
 		});
 
-		const call = mocks.importApplications.mock.calls[0][0];
+		const call = (appFns.importApplications as any).mock.calls[0][0];
 		expect(call.data.rows[0].job_url).toBe("https://job.com");
 		expect(call.data.rows[0].notes).toBe("My note");
 	});
 
 	it("uses applied_date from csv when valid", async () => {
-		mocks.importApplications.mockResolvedValue({ count: 1 });
+		vi.mocked(appFns.importApplications).mockResolvedValue({ count: 1 });
 		render(<ApplicationsPage />, { wrapper: Wrapper });
 
 		const csvContent = "company;role;applied_date\nSome Corp;Dev;2026-01-15";
@@ -291,15 +331,15 @@ describe("Applications", () => {
 		fireEvent.change(input, { target: { files: [file] } });
 
 		await waitFor(() => {
-			expect(mocks.importApplications).toHaveBeenCalled();
+			expect(appFns.importApplications).toHaveBeenCalled();
 		});
 
-		const call = mocks.importApplications.mock.calls[0][0];
+		const call = (appFns.importApplications as any).mock.calls[0][0];
 		expect(call.data.rows[0].applied_date).toBe("2026-01-15");
 	});
 
 	it("defaults invalid applied_date to today", async () => {
-		mocks.importApplications.mockResolvedValue({ count: 1 });
+		vi.mocked(appFns.importApplications).mockResolvedValue({ count: 1 });
 		render(<ApplicationsPage />, { wrapper: Wrapper });
 
 		const csvContent = "company;role;applied_date\nSome Corp;Dev;not-a-date";
@@ -309,15 +349,15 @@ describe("Applications", () => {
 		fireEvent.change(input, { target: { files: [file] } });
 
 		await waitFor(() => {
-			expect(mocks.importApplications).toHaveBeenCalled();
+			expect(appFns.importApplications).toHaveBeenCalled();
 		});
 
-		const call = mocks.importApplications.mock.calls[0][0];
+		const call = (appFns.importApplications as any).mock.calls[0][0];
 		expect(call.data.rows[0].applied_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 	});
 
 	it("handles multiple csv rows", async () => {
-		mocks.importApplications.mockResolvedValue({ count: 2 });
+		vi.mocked(appFns.importApplications).mockResolvedValue({ count: 2 });
 		render(<ApplicationsPage />, { wrapper: Wrapper });
 
 		const csvContent = "company;role\nAcme Inc;Engineer\nBeta Corp;Senior Dev";
@@ -327,12 +367,13 @@ describe("Applications", () => {
 		fireEvent.change(input, { target: { files: [file] } });
 
 		await waitFor(() => {
-			expect(mocks.importApplications).toHaveBeenCalled();
+			expect(appFns.importApplications).toHaveBeenCalled();
 		});
 
-		const call = mocks.importApplications.mock.calls[0][0];
+		const call = (appFns.importApplications as any).mock.calls[0][0];
 		expect(call.data.rows).toHaveLength(2);
 		expect(call.data.rows[0].company).toBe("Acme Inc");
 		expect(call.data.rows[1].company).toBe("Beta Corp");
 	});
 });
+

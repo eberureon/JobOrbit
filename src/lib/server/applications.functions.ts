@@ -2,7 +2,10 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { insertApplicationSchema } from "~/db/schema.ts";
 import * as db from "~/lib/db/applications.ts";
-import { listByApplicationId } from "~/lib/db/status-history.ts";
+import {
+	listAllStatusHistory,
+	listByApplicationId,
+} from "~/lib/db/status-history.ts";
 
 export const listApplications = createServerFn({ method: "GET" }).handler(
 	async () => {
@@ -49,6 +52,12 @@ export const getStatusHistory = createServerFn({ method: "GET" })
 	.handler(async ({ data }) => {
 		return listByApplicationId(data.applicationId);
 	});
+
+export const listStatusHistory = createServerFn({ method: "GET" }).handler(
+	async () => {
+		return listAllStatusHistory();
+	},
+);
 
 export const importApplications = createServerFn({ method: "POST" })
 	.inputValidator(

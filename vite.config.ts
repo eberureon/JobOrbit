@@ -15,11 +15,11 @@ const config = defineConfig({
     tanstackStart(),
     viteReact(),
   ],
-  test: {
-    include: ["src/**/*.{test,spec}.{ts,tsx}"],
-    environment: "node",
-    setupFiles: ["./src/test/setup.ts"],
-  },
+	test: {
+		include: ["src/**/*.{test,spec}.{ts,tsx}"],
+		environment: "jsdom",
+		setupFiles: ["./src/test/setup.ts"],
+	},
 });
 
 export default config;
