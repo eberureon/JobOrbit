@@ -1,7 +1,10 @@
-import type { Application } from "../db/schema";
+import type { Application, StatusHistory } from "../db/schema";
 import type { ApplicationStatus, Stats } from "./types";
 
-export function computeStats(rows: Application[]): Stats {
+export function computeStats(
+	rows: Application[],
+	history: StatusHistory[] = [],
+): Stats {
 	const now = new Date();
 	const dayMs = 24 * 60 * 60 * 1000;
 	const startOfDay = (d: Date) =>
@@ -32,16 +35,36 @@ export function computeStats(rows: Application[]): Stats {
 		}
 	}
 
-	const advancedFromInterview =
+	let interviewsTotal =
 		statusBreakdown.Interview +
 		statusBreakdown.Offer +
 		statusBreakdown.Accepted;
-	const reachedOffer = statusBreakdown.Offer + statusBreakdown.Accepted;
+	let offersTotal = statusBreakdown.Offer + statusBreakdown.Accepted;
+	let acceptedTotal = statusBreakdown.Accepted;
+	if (history.length > 0) {
+		const interviewIds = new Set<number>();
+		const offerIds = new Set<number>();
+		const acceptedIds = new Set<number>();
+		for (const entry of history) {
+			if (entry.new_status === "Interview") {
+				interviewIds.add(entry.application_id);
+			}
+			if (entry.new_status === "Offer") {
+				offerIds.add(entry.application_id);
+			}
+			if (entry.new_status === "Accepted") {
+				acceptedIds.add(entry.application_id);
+			}
+		}
+		interviewsTotal = interviewIds.size;
+		offersTotal = offerIds.size;
+		acceptedTotal = acceptedIds.size;
+	}
 	const funnel = {
 		applied: rows.length,
-		interview: advancedFromInterview,
-		offer: reachedOffer,
-		accepted: statusBreakdown.Accepted,
+		interview: interviewsTotal,
+		offer: offersTotal,
+		accepted: acceptedTotal,
 		rejected: statusBreakdown.Rejected,
 	};
 

@@ -8,7 +8,11 @@ import {
 } from "~/db/schema.ts";
 import { computeStats } from "~/lib/stats.ts";
 import type { Stats } from "~/lib/types.ts";
-import { deleteByApplicationId, insertEntry } from "./status-history.ts";
+import {
+	deleteByApplicationId,
+	insertEntry,
+	listAllStatusHistory,
+} from "./status-history.ts";
 
 export function listAll() {
 	return db
@@ -71,5 +75,6 @@ export function bulkInsert(rows: InsertApplication[]) {
 
 export function stats() {
 	const rows = listAll();
-	return computeStats(rows) as Stats;
+	const history = listAllStatusHistory();
+	return computeStats(rows, history) as Stats;
 }

@@ -202,24 +202,22 @@ export function DashboardPage() {
             </div>
           </div>
           <div className="p-5 pt-0 space-y-4">
-            {statsLoading ? (
-              <>
-                {["Applied", "Interview", "Offer", "Accepted"].map((label) => (
-                  <div key={label} className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">{label}</span>
-                      <Skeleton className="h-3 w-6" />
-                    </div>
-                    <Skeleton className="h-2 w-full rounded-full" />
-                  </div>
-                ))}
-                <div className="pt-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
-                  <span>Rejected</span>
-                  <Skeleton className="h-3 w-6" />
-                </div>
-              </>
-            ) : (
-              <>
+				{statsLoading ? (
+					<>
+						{["Applied", "Interview", "Offer", "Accepted", "Rejected"].map(
+							(label) => (
+								<div key={label} className="space-y-1.5">
+									<div className="flex items-center justify-between text-xs">
+										<span className="text-muted-foreground">{label}</span>
+										<Skeleton className="h-3 w-6" />
+									</div>
+									<Skeleton className="h-2 w-full rounded-full" />
+								</div>
+							),
+						)}
+					</>
+				) : (
+					<>
                 <FunnelRow
                   label="Applied"
                   count={stats?.funnel.applied ?? 0}
@@ -248,17 +246,15 @@ export function DashboardPage() {
                   color={statusColor("Accepted")}
                   testId="funnel-accepted"
                 />
-                <div className="pt-3 border-t border-border text-xs flex items-center justify-between text-muted-foreground">
-                  <span>Rejected</span>
-                  <span
-                    className="font-mono-num text-foreground"
-                    data-testid="funnel-rejected"
-                  >
-                    {stats?.funnel.rejected ?? 0}
-                  </span>
-                </div>
-              </>
-            )}
+						<FunnelRow
+							label="Rejected"
+							count={stats?.funnel.rejected ?? 0}
+							total={stats?.funnel.applied ?? 0}
+							color={statusColor("Rejected")}
+							testId="funnel-rejected"
+						/>
+					</>
+				)}
           </div>
         </div>
 

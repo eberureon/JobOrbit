@@ -12,6 +12,14 @@ export function listByApplicationId(applicationId: number) {
 		.all() as StatusHistory[];
 }
 
+export function listAllStatusHistory() {
+	return db
+		.select()
+		.from(statusHistory)
+		.orderBy(desc(statusHistory.changed_at), desc(statusHistory.id))
+		.all() as StatusHistory[];
+}
+
 export function insertEntry(
 	applicationId: number,
 	newStatus: string,

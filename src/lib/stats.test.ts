@@ -76,7 +76,51 @@ describe("computeStats", () => {
 			makeApp({ id: 4, status: "Accepted" }),
 			makeApp({ id: 5, status: "Rejected" }),
 		];
-		const stats = computeStats(apps);
+		const history = [
+			{
+				id: 1,
+				application_id: 2,
+				old_status: "Applied",
+				new_status: "Interview",
+				changed_at: "2026-05-20T00:00:00.000Z",
+			},
+			{
+				id: 2,
+				application_id: 3,
+				old_status: "Applied",
+				new_status: "Interview",
+				changed_at: "2026-05-20T00:00:00.000Z",
+			},
+			{
+				id: 3,
+				application_id: 3,
+				old_status: "Interview",
+				new_status: "Offer",
+				changed_at: "2026-05-21T00:00:00.000Z",
+			},
+			{
+				id: 4,
+				application_id: 4,
+				old_status: "Applied",
+				new_status: "Interview",
+				changed_at: "2026-05-21T00:00:00.000Z",
+			},
+			{
+				id: 5,
+				application_id: 4,
+				old_status: "Interview",
+				new_status: "Offer",
+				changed_at: "2026-05-22T00:00:00.000Z",
+			},
+			{
+				id: 6,
+				application_id: 4,
+				old_status: "Offer",
+				new_status: "Accepted",
+				changed_at: "2026-05-23T00:00:00.000Z",
+			},
+		];
+		const stats = computeStats(apps, history);
 		expect(stats.funnel).toEqual({
 			applied: 5,
 			interview: 3,
