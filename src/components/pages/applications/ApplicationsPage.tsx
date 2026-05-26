@@ -467,8 +467,8 @@ export function ApplicationsPage() {
 
 	return (
 		<div className="space-y-6">
-			<div className="flex items-center justify-between flex-wrap gap-3">
-				<div>
+			<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+				<div className="col-span-1">
 					<h1 className="text-xl font-semibold tracking-tight text-foreground">
 						Applications
 					</h1>
@@ -484,7 +484,7 @@ export function ApplicationsPage() {
 						)}
 					</p>
 				</div>
-				<div className="flex items-center gap-2">
+				<div className="flex items-center gap-2 sm:justify-end-safe">
 					<input
 						ref={fileInputRef}
 						type="file"
@@ -853,18 +853,6 @@ export function ApplicationsPage() {
 															Source:
 														</span>{" "}
 														{a.source}
-													</p>
-												)}
-												{a.job_url && (
-													<p>
-														<a
-															href={a.job_url}
-															target="_blank"
-															rel="noopener noreferrer"
-															className="text-primary hover:underline"
-														>
-															View job posting &rarr;
-														</a>
 													</p>
 												)}
 											</div>

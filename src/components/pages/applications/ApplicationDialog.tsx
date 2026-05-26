@@ -1,8 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
+import { CalendarIcon } from "lucide-react";
 import { StatusBadge } from "~/components/StatusBadge";
 import { Button } from "~/components/ui/button";
+import { Calendar } from "~/components/ui/calendar";
 import {
 	Dialog,
 	DialogContent,
@@ -12,6 +14,11 @@ import {
 	DialogTitle,
 } from "~/components/ui/dialog";
 import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "~/components/ui/popover";
+import {
 	Form,
 	FormControl,
 	FormField,
@@ -19,6 +26,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from "~/components/ui/form";
+import { cn } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
 import {
 	Select,
@@ -42,6 +50,7 @@ import {
 } from "~/lib/server/applications.functions";
 import type { ApplicationStatus } from "~/lib/types";
 import { APPLICATION_STATUSES } from "~/lib/types";
+import { getEffectiveLocale, useSettings } from "~/lib/use-settings";
 
 function todayISO(): string {
 	return new Date().toISOString().slice(0, 10);
@@ -58,6 +67,9 @@ export function ApplicationDialog({
 }) {
 	const queryClient = useQueryClient();
 	const { toast } = useToast();
+
+	const { settings } = useSettings();
+	const locale = getEffectiveLocale(settings);
 
 	const form = useForm<InsertApplication>({
 		resolver: zodResolver(insertApplicationSchema),
@@ -124,7 +136,7 @@ export function ApplicationDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+			<DialogContent className="w-[95%] max-w-2xl max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle>
 						{editing ? "Edit Application" : "Add Application"}
@@ -198,11 +210,14 @@ export function ApplicationDialog({
 										<FormLabel>Status</FormLabel>
 										<Select value={field.value} onValueChange={field.onChange}>
 											<FormControl>
-												<SelectTrigger data-testid="select-status">
+												<SelectTrigger
+													className="w-full"
+													data-testid="select-status"
+												>
 													<SelectValue />
 												</SelectTrigger>
 											</FormControl>
-											<SelectContent>
+											<SelectContent className="w-52" align="start">
 												{APPLICATION_STATUSES.map((s) => (
 													<SelectItem
 														key={s}
@@ -222,15 +237,48 @@ export function ApplicationDialog({
 								control={form.control}
 								name="applied_date"
 								render={({ field }) => (
-									<FormItem>
+									<FormItem className="flex flex-col">
 										<FormLabel>Applied Date</FormLabel>
-										<FormControl>
-											<Input
-												{...field}
-												type="date"
-												data-testid="input-applied-date"
-											/>
-										</FormControl>
+										<Popover>
+											<PopoverTrigger>
+												<FormControl>
+													<Button
+														variant="outline"
+														data-testid="input-applied-date"
+														className={cn(
+															"w-full pl-3 text-left font-normal",
+															!field.value && "text-muted-foreground",
+														)}
+													>
+														{field.value ? (
+															new Intl.DateTimeFormat(locale, {
+																dateStyle: "medium",
+															}).format(new Date(field.value + "T00:00:00"))
+														) : (
+															<span>Pick a date</span>
+														)}
+														<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+													</Button>
+												</FormControl>
+											</PopoverTrigger>
+											<PopoverContent className="w-auto p-0" align="start">
+												<Calendar
+													mode="single"
+													className="w-full"
+													selected={
+														field.value
+															? new Date(field.value + "T00:00:00")
+															: undefined
+													}
+													onSelect={(date) =>
+														field.onChange(
+															date ? date.toISOString().slice(0, 10) : "",
+														)
+													}
+													captionLayout="dropdown"
+												/>
+											</PopoverContent>
+										</Popover>
 										<FormMessage />
 									</FormItem>
 								)}
