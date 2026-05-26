@@ -43,7 +43,7 @@ FROM node:lts-slim AS runtime
 WORKDIR /app
 
 ENV NODE_ENV=production \
-  PORT=3000 \
+  PORT=9000 \
   HOST=0.0.0.0 \
   DATABASE_URL=/app/data/joborbit.db
 
@@ -58,7 +58,7 @@ COPY --chown=node:node --from=build /app/drizzle ./dist/drizzle
 RUN install -d -o node -g node /app/data
 USER node
 
-EXPOSE 3000
+EXPOSE 9000
 VOLUME ["/app/data"]
 
 CMD ["node", "./node_modules/.bin/srvx", "--prod", "-s", "../client", "dist/server/server.js"]

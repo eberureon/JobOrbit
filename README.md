@@ -23,11 +23,11 @@ Note: use `bun run build` (Vite). `bun build` is Bun's bundler and expects expli
 docker compose up -d
 ```
 
-The app listens on port `3000` inside the container. Configure the host port in `.env`.
+The app listens on port `9000` inside the container. Configure the host port in `.env`.
 
 ## Environment Variables
 
-- `PORT` - host port for Docker compose (defaults to `3000`)
+- `PORT` - host port for Docker compose (defaults to `9000`)
 - `DATABASE_URL` - SQLite path (defaults to `./data/joborbit.db`)
 - `TZ` - container timezone (defaults to `Etc/UTC`)
 
