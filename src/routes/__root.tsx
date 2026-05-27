@@ -47,7 +47,7 @@ function DocumentShell({ children }: { children: ReactNode }) {
 					}}
 				/>
 			</head>
-			<body className="font-sans antialiased wrap-anywhere bg-background text-foreground">
+			<body>
 				<Toast.Provider />
 				<SettingsProvider>{children}</SettingsProvider>
 				<Devtools />
