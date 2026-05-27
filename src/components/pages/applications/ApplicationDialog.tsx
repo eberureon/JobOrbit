@@ -2,8 +2,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
 import { StatusBadge } from "~/components/StatusBadge";
+import { parseDate } from "@internationalized/date";
 import {
 	Button,
+	Calendar,
+	DateField,
+	DatePicker,
 	FieldError,
 	Input,
 	Label,
@@ -12,7 +16,9 @@ import {
 	Select,
 	TextArea,
 	TextField,
+	Description,
 } from "@heroui/react";
+import { I18nProvider } from "react-aria-components";
 import { toLocalDateString } from "~/lib/date";
 import type {
 	Application,
@@ -116,13 +122,13 @@ export function ApplicationDialog({
 		<Modal.Backdrop isOpen={open} onOpenChange={onOpenChange}>
 			<Modal.Container size="lg">
 				<Modal.Dialog className="w-[95%] max-w-2xl max-h-[90vh] overflow-y-auto">
-					<Modal.Header>
+					<Modal.Header className="gap-0">
 						<Modal.Heading>
 							{editing ? "Edit Application" : "Add Application"}
 						</Modal.Heading>
-						<p className="text-sm text-muted-foreground">
+						<Description className="text-sm">
 							Track a new job application with company, role, status and notes.
-						</p>
+						</Description>
 					</Modal.Header>
 					<Modal.Body>
 						<form
@@ -231,19 +237,66 @@ export function ApplicationDialog({
 									control={form.control}
 									name="applied_date"
 									render={({ field, fieldState }) => (
-										<TextField
-											value={field.value}
-											onChange={field.onChange}
-											onBlur={field.onBlur}
-											isInvalid={!!fieldState.error}
-											data-testid="input-applied-date"
-										>
-											<Label className="text-sm font-medium text-foreground">
-												Applied Date
-											</Label>
-											<Input type="date" />
-											<FieldError>{fieldState.error?.message}</FieldError>
-										</TextField>
+										<I18nProvider locale={locale}>
+											<DatePicker
+												value={field.value ? parseDate(field.value) : null}
+												onChange={(value) =>
+													field.onChange(value ? value.toString() : "")
+												}
+												onBlur={field.onBlur}
+												isInvalid={!!fieldState.error}
+												isRequired
+												data-testid="input-applied-date"
+											>
+												<Label className="text-sm font-medium text-foreground">
+													Applied Date
+												</Label>
+												<DateField.Group fullWidth>
+													<DateField.Input>
+														{(segment) => (
+															<DateField.Segment segment={segment} />
+														)}
+													</DateField.Input>
+													<DateField.Suffix>
+														<DatePicker.Trigger>
+															<DatePicker.TriggerIndicator />
+														</DatePicker.Trigger>
+													</DateField.Suffix>
+												</DateField.Group>
+												<FieldError>{fieldState.error?.message}</FieldError>
+												<DatePicker.Popover>
+													<Calendar aria-label="Applied date">
+														<Calendar.Header>
+															<Calendar.YearPickerTrigger>
+																<Calendar.YearPickerTriggerHeading />
+																<Calendar.YearPickerTriggerIndicator />
+															</Calendar.YearPickerTrigger>
+															<Calendar.NavButton slot="previous" />
+															<Calendar.NavButton slot="next" />
+														</Calendar.Header>
+														<Calendar.Grid>
+															<Calendar.GridHeader>
+																{(day) => (
+																	<Calendar.HeaderCell>
+																		{day}
+																	</Calendar.HeaderCell>
+																)}
+															</Calendar.GridHeader>
+															<Calendar.GridBody>
+																{(date) => <Calendar.Cell date={date} />}
+															</Calendar.GridBody>
+														</Calendar.Grid>
+														<Calendar.YearPickerGrid>
+															<Calendar.YearPickerGridBody>
+																{({ year }) => (
+																	<Calendar.YearPickerCell year={year} />
+																)}
+															</Calendar.YearPickerGridBody>
+														</Calendar.YearPickerGrid>
+													</Calendar>
+												</DatePicker.Popover>
+											</DatePicker>
+										</I18nProvider>
 									)}
 								/>
 								<Controller
@@ -358,7 +411,7 @@ export function ApplicationDialog({
 							)}
 							<div className="flex items-center justify-end gap-2 pt-2">
 								<Button
-									variant="tertiary"
+									variant="outline"
 									onPress={() => onOpenChange(false)}
 									data-testid="button-cancel"
 								>
