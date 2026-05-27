@@ -7,7 +7,7 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
-import { Skeleton } from "~/components/ui/skeleton";
+import { Skeleton } from "@heroui/react";
 
 export function TimelineChart({
 	data,

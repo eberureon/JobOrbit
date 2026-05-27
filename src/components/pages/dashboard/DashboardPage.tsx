@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, Briefcase, Calendar, Target } from "lucide-react";
 import { Pie, PieChart, ResponsiveContainer, Sector, Tooltip } from "recharts";
 import { StatusBadge, statusColor } from "~/components/StatusBadge";
-import { Skeleton } from "~/components/ui/skeleton";
+import { Skeleton } from "@heroui/react";
 import type { Application } from "~/db/schema";
 import type { PieSectorShapeProps } from "recharts";
 import {

@@ -2,24 +2,13 @@ import { Monitor, Moon, Sun } from "lucide-react";
 import { useState } from "react";
 import {
 	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-} from "~/components/ui/alert-dialog";
-import { Label } from "~/components/ui/label";
-import {
+	Button,
+	Label,
+	ListBox,
 	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "~/components/ui/select";
-import { Separator } from "~/components/ui/separator";
-import { Switch } from "~/components/ui/switch";
+	Separator,
+	Switch,
+} from "@heroui/react";
 import {
 	LOCALE_OPTIONS,
 	PAGE_SIZE_OPTIONS,
@@ -146,18 +135,27 @@ export function SettingsPage() {
 					>
 						<Select
 							value={settings.locale}
-							onValueChange={(locale) => update({ locale })}
+							onChange={(locale) => update({ locale: locale as string })}
+							className="w-48"
 						>
-							<SelectTrigger className="w-48">
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent>
-								{LOCALE_OPTIONS.map((opt) => (
-									<SelectItem key={opt.value} value={opt.value}>
-										{opt.label}
-									</SelectItem>
-								))}
-							</SelectContent>
+							<Select.Trigger>
+								<Select.Value />
+								<Select.Indicator />
+							</Select.Trigger>
+							<Select.Popover>
+								<ListBox>
+									{LOCALE_OPTIONS.map((opt) => (
+										<ListBox.Item
+											key={opt.value}
+											id={opt.value}
+											textValue={opt.label}
+										>
+											{opt.label}
+											<ListBox.ItemIndicator />
+										</ListBox.Item>
+									))}
+								</ListBox>
+							</Select.Popover>
 						</Select>
 					</SettingRow>
 				</div>
@@ -176,20 +174,27 @@ export function SettingsPage() {
 					>
 						<Select
 							value={settings.defaultSort}
-							onValueChange={(defaultSort) =>
-								update({ defaultSort: defaultSort as SortOrder })
-							}
+							onChange={(v) => update({ defaultSort: v as SortOrder })}
+							className="w-40"
 						>
-							<SelectTrigger className="w-40">
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent>
-								{SORT_OPTIONS.map((opt) => (
-									<SelectItem key={opt.value} value={opt.value}>
-										{opt.label}
-									</SelectItem>
-								))}
-							</SelectContent>
+							<Select.Trigger>
+								<Select.Value />
+								<Select.Indicator />
+							</Select.Trigger>
+							<Select.Popover>
+								<ListBox>
+									{SORT_OPTIONS.map((opt) => (
+										<ListBox.Item
+											key={opt.value}
+											id={opt.value}
+											textValue={opt.label}
+										>
+											{opt.label}
+											<ListBox.ItemIndicator />
+										</ListBox.Item>
+									))}
+								</ListBox>
+							</Select.Popover>
 						</Select>
 					</SettingRow>
 				</div>
@@ -200,18 +205,27 @@ export function SettingsPage() {
 					<SettingRow label="Page size" description="Applications per page">
 						<Select
 							value={String(settings.pageSize)}
-							onValueChange={(v) => update({ pageSize: Number(v) as PageSize })}
+							onChange={(v) => update({ pageSize: Number(v) as PageSize })}
+							className="w-20"
 						>
-							<SelectTrigger className="w-20">
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent>
-								{PAGE_SIZE_OPTIONS.map((size) => (
-									<SelectItem key={size} value={String(size)}>
-										{size}
-									</SelectItem>
-								))}
-							</SelectContent>
+							<Select.Trigger>
+								<Select.Value />
+								<Select.Indicator />
+							</Select.Trigger>
+							<Select.Popover>
+								<ListBox>
+									{PAGE_SIZE_OPTIONS.map((size) => (
+										<ListBox.Item
+											key={size}
+											id={String(size)}
+											textValue={String(size)}
+										>
+											{size}
+											<ListBox.ItemIndicator />
+										</ListBox.Item>
+									))}
+								</ListBox>
+							</Select.Popover>
 						</Select>
 					</SettingRow>
 				</div>
@@ -224,35 +238,54 @@ export function SettingsPage() {
 						description="Show a confirmation dialog before deleting an application"
 					>
 						<Switch
-							checked={settings.askBeforeDelete}
-							onCheckedChange={handleDeleteToggle}
-						/>
+							isSelected={settings.askBeforeDelete}
+							onChange={handleDeleteToggle}
+						>
+							<Switch.Control>
+								<Switch.Thumb />
+							</Switch.Control>
+						</Switch>
 					</SettingRow>
 				</div>
 			</div>
 
-			<AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-				<AlertDialogContent>
-					<AlertDialogHeader>
-						<AlertDialogTitle>Disable delete confirmation?</AlertDialogTitle>
-						<AlertDialogDescription>
-							When turned off, applications will be deleted immediately without
-							asking for confirmation. This action cannot be undone.
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<AlertDialogFooter>
-						<AlertDialogCancel>Cancel</AlertDialogCancel>
-						<AlertDialogAction
-							onClick={() => {
-								update({ askBeforeDelete: false });
-								setDeleteDialogOpen(false);
-							}}
-						>
-							Disable
-						</AlertDialogAction>
-					</AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
+			<AlertDialog.Backdrop
+				isOpen={deleteDialogOpen}
+				onOpenChange={setDeleteDialogOpen}
+			>
+				<AlertDialog.Container>
+					<AlertDialog.Dialog className="sm:max-w-[400px]">
+						<AlertDialog.Header>
+							<AlertDialog.Heading>
+								Disable delete confirmation?
+							</AlertDialog.Heading>
+						</AlertDialog.Header>
+						<AlertDialog.Body>
+							<p className="text-sm text-muted-foreground">
+								When turned off, applications will be deleted immediately
+								without asking for confirmation. This action cannot be undone.
+							</p>
+						</AlertDialog.Body>
+						<AlertDialog.Footer>
+							<Button
+								variant="tertiary"
+								onPress={() => setDeleteDialogOpen(false)}
+							>
+								Cancel
+							</Button>
+							<Button
+								variant="danger"
+								onPress={() => {
+									update({ askBeforeDelete: false });
+									setDeleteDialogOpen(false);
+								}}
+							>
+								Disable
+							</Button>
+						</AlertDialog.Footer>
+					</AlertDialog.Dialog>
+				</AlertDialog.Container>
+			</AlertDialog.Backdrop>
 		</div>
 	);
 }

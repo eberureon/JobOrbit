@@ -1,5 +1,5 @@
+import { Button } from "@heroui/react";
 import { ExternalLink, Pencil, Trash2 } from "lucide-react";
-import { Button } from "~/components/ui/button";
 
 type RowActionsProps = {
 	id: number;
@@ -25,9 +25,9 @@ export function RowActions({ id, jobUrl, onEdit, onDelete }: RowActionsProps) {
 			)}
 			<Button
 				variant="ghost"
-				size="icon"
-				onClick={onEdit}
-				className="p-1.5 rounded hover-elevate text-muted-foreground hover:text-foreground"
+				isIconOnly
+				onPress={onEdit}
+				className="p-1.5 rounded hover-elevate text-muted-foreground hover:text-foreground data-[hover=true]:!bg-transparent"
 				data-testid={`button-edit-${id}`}
 				aria-label="Edit"
 			>
@@ -35,9 +35,9 @@ export function RowActions({ id, jobUrl, onEdit, onDelete }: RowActionsProps) {
 			</Button>
 			<Button
 				variant="ghost"
-				size="icon"
-				onClick={onDelete}
-				className="p-1.5 rounded hover-elevate text-muted-foreground hover:text-destructive"
+				isIconOnly
+				onPress={onDelete}
+				className="p-1.5 rounded hover-elevate text-muted-foreground hover:!text-destructive data-[hover=true]:!bg-transparent"
 				data-testid={`button-delete-${id}`}
 				aria-label="Delete"
 			>

@@ -1,42 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import { CalendarIcon } from "lucide-react";
+import { Controller, useForm } from "react-hook-form";
 import { StatusBadge } from "~/components/StatusBadge";
-import { Button } from "~/components/ui/button";
-import { Calendar } from "~/components/ui/calendar";
 import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "~/components/ui/dialog";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "~/components/ui/popover";
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from "~/components/ui/form";
-import { cn } from "~/lib/utils";
-import { toLocalDateString } from "~/lib/date";
-import { Input } from "~/components/ui/input";
-import {
+	Button,
+	FieldError,
+	Input,
+	Label,
+	ListBox,
+	Modal,
 	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "~/components/ui/select";
-import { Textarea } from "~/components/ui/textarea";
+	TextArea,
+	TextField,
+} from "@heroui/react";
+import { toLocalDateString } from "~/lib/date";
 import type {
 	Application,
 	InsertApplication,
@@ -136,283 +113,273 @@ export function ApplicationDialog({
 	});
 
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="w-[95%] max-w-2xl max-h-[90vh] overflow-y-auto">
-				<DialogHeader>
-					<DialogTitle>
-						{editing ? "Edit Application" : "Add Application"}
-					</DialogTitle>
-					<DialogDescription>
-						Track a new job application with company, role, status and notes.
-					</DialogDescription>
-				</DialogHeader>
-				<Form {...form}>
-					<form
-						onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
-						className="space-y-4"
-					>
-						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-							<FormField
-								control={form.control}
-								name="company"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Company *</FormLabel>
-										<FormControl>
-											<Input
-												{...field}
-												data-testid="input-company"
-												placeholder="Acme Inc."
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="role"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Role *</FormLabel>
-										<FormControl>
-											<Input
-												{...field}
-												data-testid="input-role"
-												placeholder="Senior Engineer"
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="location"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Location</FormLabel>
-										<FormControl>
-											<Input
-												{...field}
-												data-testid="input-location"
-												placeholder="Remote · Berlin"
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="status"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Status</FormLabel>
-										<Select value={field.value} onValueChange={field.onChange}>
-											<FormControl>
-												<SelectTrigger
-													className="w-full"
-													data-testid="select-status"
-												>
-													<SelectValue />
-												</SelectTrigger>
-											</FormControl>
-											<SelectContent className="w-52" align="start">
-												{APPLICATION_STATUSES.map((s) => (
-													<SelectItem
-														key={s}
-														value={s}
-														data-testid={`option-status-${s}`}
-													>
-														{s}
-													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="applied_date"
-								render={({ field }) => (
-									<FormItem className="flex flex-col">
-										<FormLabel>Applied Date</FormLabel>
-										<Popover>
-											<PopoverTrigger>
-												<FormControl>
-													<Button
-														variant="outline"
-														data-testid="input-applied-date"
-														className={cn(
-															"w-full pl-3 text-left font-normal",
-															!field.value && "text-muted-foreground",
-														)}
-													>
-														{field.value ? (
-															new Intl.DateTimeFormat(locale, {
-																dateStyle: "medium",
-															}).format(new Date(field.value + "T00:00:00"))
-														) : (
-															<span>Pick a date</span>
-														)}
-														<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-													</Button>
-												</FormControl>
-											</PopoverTrigger>
-											<PopoverContent className="w-auto p-0" align="start">
-												<Calendar
-													mode="single"
-													selected={
-														field.value
-															? new Date(field.value + "T00:00:00")
-															: undefined
-													}
-													onSelect={(date) => {
-														if (!date) {
-															field.onChange("");
-															return;
-														}
-
-														field.onChange(toLocalDateString(date));
-													}}
-													captionLayout="dropdown"
-												/>
-											</PopoverContent>
-										</Popover>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="salary"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Salary</FormLabel>
-										<FormControl>
-											<Input
-												{...field}
-												data-testid="input-salary"
-												placeholder="$120k or €60k-80k"
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="source"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Source</FormLabel>
-										<FormControl>
-											<Input
-												{...field}
-												data-testid="input-source"
-												placeholder="LinkedIn / Referral / Indeed"
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="job_url"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Job URL</FormLabel>
-										<FormControl>
-											<Input
-												{...field}
-												data-testid="input-job-url"
-												placeholder="https://…"
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-						</div>
-						<FormField
-							control={form.control}
-							name="notes"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Notes</FormLabel>
-									<FormControl>
-										<Textarea
-											{...field}
-											data-testid="input-notes"
-											rows={4}
-											placeholder="Recruiter contact, interview prep, etc."
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						{editing && history.length > 0 && (
-							<div className="border-t border-border/60 pt-4">
-								<h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-									Status History
-								</h4>
-								<div className="space-y-1.5">
-									{history.map((entry) => (
-										<div
-											key={entry.id}
-											className="flex items-center gap-2 text-sm flex-wrap"
+		<Modal.Backdrop isOpen={open} onOpenChange={onOpenChange}>
+			<Modal.Container size="lg">
+				<Modal.Dialog className="w-[95%] max-w-2xl max-h-[90vh] overflow-y-auto">
+					<Modal.Header>
+						<Modal.Heading>
+							{editing ? "Edit Application" : "Add Application"}
+						</Modal.Heading>
+						<p className="text-sm text-muted-foreground">
+							Track a new job application with company, role, status and notes.
+						</p>
+					</Modal.Header>
+					<Modal.Body>
+						<form
+							onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
+							className="space-y-4"
+						>
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+								<Controller
+									control={form.control}
+									name="company"
+									render={({ field, fieldState }) => (
+										<TextField
+											value={field.value}
+											onChange={field.onChange}
+											onBlur={field.onBlur}
+											isInvalid={!!fieldState.error}
+											isRequired
+											data-testid="input-company"
 										>
-											<span className="font-mono-num text-xs text-muted-foreground shrink-0">
-												{new Intl.DateTimeFormat("de-DE", {
-													dateStyle: "medium",
-												}).format(new Date(entry.changed_at))}
-											</span>
-											<span className="text-muted-foreground/60">|</span>
-											{entry.old_status ? (
-												<>
-													<StatusBadge status={entry.old_status} />
-													<span className="text-muted-foreground/50">
-														&rarr;
-													</span>
-													<StatusBadge status={entry.new_status} />
-												</>
-											) : (
-												<StatusBadge status={entry.new_status} />
-											)}
+											<Label className="text-sm font-medium text-foreground">
+												Company
+											</Label>
+											<Input placeholder="Acme Inc." />
+											<FieldError>{fieldState.error?.message}</FieldError>
+										</TextField>
+									)}
+								/>
+								<Controller
+									control={form.control}
+									name="role"
+									render={({ field, fieldState }) => (
+										<TextField
+											value={field.value}
+											onChange={field.onChange}
+											onBlur={field.onBlur}
+											isRequired
+											isInvalid={!!fieldState.error}
+											data-testid="input-role"
+										>
+											<Label className="text-sm font-medium text-foreground">
+												Role
+											</Label>
+											<Input placeholder="Senior Engineer" />
+											<FieldError>{fieldState.error?.message}</FieldError>
+										</TextField>
+									)}
+								/>
+								<Controller
+									control={form.control}
+									name="location"
+									render={({ field, fieldState }) => (
+										<TextField
+											value={field.value}
+											onChange={field.onChange}
+											onBlur={field.onBlur}
+											isInvalid={!!fieldState.error}
+											data-testid="input-location"
+										>
+											<Label className="text-sm font-medium text-foreground">
+												Location
+											</Label>
+											<Input placeholder="Remote · Berlin" />
+											<FieldError>{fieldState.error?.message}</FieldError>
+										</TextField>
+									)}
+								/>
+								<Controller
+									control={form.control}
+									name="status"
+									render={({ field, fieldState }) => (
+										<div className="flex flex-col ">
+											<Label className="text-sm font-medium text-foreground">
+												Status
+											</Label>
+											<Select
+												value={field.value}
+												onChange={(v) => field.onChange(v)}
+												className="w-full"
+												isInvalid={!!fieldState.error}
+											>
+												<Select.Trigger>
+													<Select.Value />
+													<Select.Indicator />
+												</Select.Trigger>
+												<Select.Popover>
+													<ListBox>
+														{APPLICATION_STATUSES.map((s) => (
+															<ListBox.Item
+																key={s}
+																id={s}
+																textValue={s}
+																data-testid={`option-status-${s}`}
+															>
+																{s}
+																<ListBox.ItemIndicator />
+															</ListBox.Item>
+														))}
+													</ListBox>
+												</Select.Popover>
+											</Select>
+											<FieldError>{fieldState.error?.message}</FieldError>
 										</div>
-									))}
-								</div>
+									)}
+								/>
+								<Controller
+									control={form.control}
+									name="applied_date"
+									render={({ field, fieldState }) => (
+										<TextField
+											value={field.value}
+											onChange={field.onChange}
+											onBlur={field.onBlur}
+											isInvalid={!!fieldState.error}
+											data-testid="input-applied-date"
+										>
+											<Label className="text-sm font-medium text-foreground">
+												Applied Date
+											</Label>
+											<Input type="date" />
+											<FieldError>{fieldState.error?.message}</FieldError>
+										</TextField>
+									)}
+								/>
+								<Controller
+									control={form.control}
+									name="salary"
+									render={({ field, fieldState }) => (
+										<TextField
+											value={field.value}
+											onChange={field.onChange}
+											onBlur={field.onBlur}
+											isInvalid={!!fieldState.error}
+											data-testid="input-salary"
+										>
+											<Label className="text-sm font-medium text-foreground">
+												Salary
+											</Label>
+											<Input placeholder="$120k or €60k-80k" />
+											<FieldError>{fieldState.error?.message}</FieldError>
+										</TextField>
+									)}
+								/>
+								<Controller
+									control={form.control}
+									name="source"
+									render={({ field, fieldState }) => (
+										<TextField
+											value={field.value}
+											onChange={field.onChange}
+											onBlur={field.onBlur}
+											isInvalid={!!fieldState.error}
+											data-testid="input-source"
+										>
+											<Label className="text-sm font-medium text-foreground">
+												Source
+											</Label>
+											<Input placeholder="LinkedIn / Referral / Indeed" />
+											<FieldError>{fieldState.error?.message}</FieldError>
+										</TextField>
+									)}
+								/>
+								<Controller
+									control={form.control}
+									name="job_url"
+									render={({ field, fieldState }) => (
+										<TextField
+											value={field.value}
+											onChange={field.onChange}
+											onBlur={field.onBlur}
+											isInvalid={!!fieldState.error}
+											data-testid="input-job-url"
+										>
+											<Label className="text-sm font-medium text-foreground">
+												Job URL
+											</Label>
+											<Input placeholder="https://…" />
+											<FieldError>{fieldState.error?.message}</FieldError>
+										</TextField>
+									)}
+								/>
 							</div>
-						)}
-						<DialogFooter>
-							<Button
-								type="button"
-								variant="outline"
-								onClick={() => onOpenChange(false)}
-								data-testid="button-cancel"
-							>
-								Cancel
-							</Button>
-							<Button
-								type="submit"
-								disabled={mutation.isPending}
-								data-testid="button-submit-application"
-							>
-								{mutation.isPending
-									? "Saving…"
-									: editing
-										? "Save changes"
-										: "Add application"}
-							</Button>
-						</DialogFooter>
-					</form>
-				</Form>
-			</DialogContent>
-		</Dialog>
+							<Controller
+								control={form.control}
+								name="notes"
+								render={({ field, fieldState }) => (
+									<TextField
+										value={field.value}
+										onChange={field.onChange}
+										onBlur={field.onBlur}
+										isInvalid={!!fieldState.error}
+										data-testid="input-notes"
+									>
+										<Label className="text-sm font-medium text-foreground">
+											Notes
+										</Label>
+										<TextArea placeholder="Recruiter contact, interview prep, etc." />
+										<FieldError>{fieldState.error?.message}</FieldError>
+									</TextField>
+								)}
+							/>
+							{editing && history.length > 0 && (
+								<div className="border-t border-border/60 pt-4">
+									<h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+										Status History
+									</h4>
+									<div className="space-y-1.5">
+										{history.map((entry) => (
+											<div
+												key={entry.id}
+												className="flex items-center gap-2 text-sm flex-wrap"
+											>
+												<span className="font-mono-num text-xs text-muted-foreground shrink-0">
+													{new Intl.DateTimeFormat(locale, {
+														dateStyle: "medium",
+													}).format(new Date(entry.changed_at))}
+												</span>
+												<span className="text-muted-foreground/60">|</span>
+												{entry.old_status ? (
+													<>
+														<StatusBadge status={entry.old_status} />
+														<span className="text-muted-foreground/50">
+															&rarr;
+														</span>
+														<StatusBadge status={entry.new_status} />
+													</>
+												) : (
+													<StatusBadge status={entry.new_status} />
+												)}
+											</div>
+										))}
+									</div>
+								</div>
+							)}
+							<div className="flex items-center justify-end gap-2 pt-2">
+								<Button
+									variant="tertiary"
+									onPress={() => onOpenChange(false)}
+									data-testid="button-cancel"
+								>
+									Cancel
+								</Button>
+								<Button
+									type="submit"
+									isDisabled={mutation.isPending}
+									data-testid="button-submit-application"
+								>
+									{mutation.isPending
+										? "Saving…"
+										: editing
+											? "Save changes"
+											: "Add application"}
+								</Button>
+							</div>
+						</form>
+					</Modal.Body>
+				</Modal.Dialog>
+			</Modal.Container>
+		</Modal.Backdrop>
 	);
 }
