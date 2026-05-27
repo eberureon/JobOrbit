@@ -11,6 +11,12 @@ class MockResizeObserver {
 
 globalThis.ResizeObserver = MockResizeObserver;
 
+if (!globalThis.CSS?.escape) {
+	(globalThis.CSS as any) = globalThis.CSS || {};
+	(globalThis.CSS as any).escape = (s: string) =>
+		s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 globalThis.matchMedia =
 	globalThis.matchMedia ||
 	((query: string) => ({

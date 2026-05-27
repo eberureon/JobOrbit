@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
 	ArrowUpDown,
+	Check,
 	ChevronLeft,
 	ChevronRight,
 	Download,
@@ -15,28 +16,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { StatusBadge } from "~/components/StatusBadge";
 import {
 	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-} from "~/components/ui/alert-dialog";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent } from "~/components/ui/card";
-import {
+	Button,
+	Card,
+	CardContent,
+	Dropdown,
+	DropdownItem,
 	DropdownMenu,
-	DropdownMenuCheckboxItem,
-	DropdownMenuContent,
-	DropdownMenuGroup,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
-import { Input } from "~/components/ui/input";
-import { Skeleton } from "~/components/ui/skeleton";
+	DropdownTrigger,
+	Input,
+	Skeleton,
+} from "@heroui/react";
 import type { Application, StatusHistory } from "~/db/schema";
 import { insertApplicationSchema } from "~/db/schema";
 import { useToast } from "~/hooks/use-toast";
@@ -178,6 +167,23 @@ export function ApplicationsPage() {
 		} else {
 			setSortKey(k);
 			setSortDir(k === "applied_date" ? "desc" : "asc");
+		}
+	}
+
+	function handleDataAction(key: string | number) {
+		switch (key) {
+			case "import-csv":
+				fileInputRef.current?.click();
+				break;
+			case "export-csv":
+				handleExportCsv();
+				break;
+			case "import-history":
+				historyFileInputRef.current?.click();
+				break;
+			case "export-history":
+				handleExportHistory();
+				break;
 		}
 	}
 
@@ -502,53 +508,60 @@ export function ApplicationsPage() {
 						data-testid="input-history-csv"
 						onChange={handleHistoryFileImport}
 					/>
-					<DropdownMenu>
-						<DropdownMenuTrigger>
+					<Dropdown>
+						<DropdownTrigger>
 							<Button variant="outline" data-testid="button-data-menu">
 								<Download className="h-4 w-4 mr-1.5" />
 								Data
 							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent className="w-36">
-							<DropdownMenuGroup>
-								<DropdownMenuLabel>Import / Export</DropdownMenuLabel>
-								<DropdownMenuSeparator />
-								<DropdownMenuItem
-									onClick={() => fileInputRef.current?.click()}
-									disabled={importMutation.isPending}
-									data-testid="button-import-csv"
-								>
-									<Upload className="h-4 w-4" />
-									Import CSV
-								</DropdownMenuItem>
-								<DropdownMenuItem
-									onClick={handleExportCsv}
-									data-testid="button-export-csv"
-								>
-									<Download className="h-4 w-4" />
-									Export CSV
-								</DropdownMenuItem>
-								<DropdownMenuItem
-									onClick={() => historyFileInputRef.current?.click()}
-									disabled={importHistoryMutation.isPending}
-									data-testid="button-import-history"
-								>
-									<Upload className="h-4 w-4" />
-									Import History
-								</DropdownMenuItem>
-								<DropdownMenuItem
-									onClick={handleExportHistory}
-									data-testid="button-export-history"
-								>
-									<Download className="h-4 w-4" />
-									Export History
-								</DropdownMenuItem>
-							</DropdownMenuGroup>
-						</DropdownMenuContent>
-					</DropdownMenu>
+						</DropdownTrigger>
+						<DropdownMenu
+							aria-label="Data actions"
+							className="w-36"
+							onAction={handleDataAction}
+						>
+							<DropdownItem
+								id="label"
+								className="text-xs uppercase tracking-wider text-muted-foreground font-semibold"
+								textValue="Import / Export"
+							>
+								Import / Export
+							</DropdownItem>
+							<DropdownItem
+								id="import-csv"
+								data-testid="button-import-csv"
+								isDisabled={importMutation.isPending}
+								startContent={<Upload className="h-4 w-4" />}
+							>
+								Import CSV
+							</DropdownItem>
+							<DropdownItem
+								id="export-csv"
+								data-testid="button-export-csv"
+								startContent={<Download className="h-4 w-4" />}
+							>
+								Export CSV
+							</DropdownItem>
+							<DropdownItem
+								id="import-history"
+								data-testid="button-import-history"
+								isDisabled={importHistoryMutation.isPending}
+								startContent={<Upload className="h-4 w-4" />}
+							>
+								Import History
+							</DropdownItem>
+							<DropdownItem
+								id="export-history"
+								data-testid="button-export-history"
+								startContent={<Download className="h-4 w-4" />}
+							>
+								Export History
+							</DropdownItem>
+						</DropdownMenu>
+					</Dropdown>
 					<Button
 						data-testid="button-add-application"
-						onClick={() => {
+						onPress={() => {
 							setEditing(null);
 							setDialogOpen(true);
 						}}
@@ -572,8 +585,8 @@ export function ApplicationsPage() {
 							suppressHydrationWarning
 						/>
 					</div>
-					<DropdownMenu>
-						<DropdownMenuTrigger>
+					<Dropdown>
+						<DropdownTrigger>
 							<Button variant="outline" data-testid="button-filter-status">
 								<Filter className="h-4 w-4 mr-1.5" />
 								Status
@@ -588,44 +601,85 @@ export function ApplicationsPage() {
 									</span>
 								)}
 							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end">
-							<DropdownMenuGroup>
-								<DropdownMenuLabel>Filter status</DropdownMenuLabel>
-								<DropdownMenuSeparator />
-								{APPLICATION_STATUSES.map((s) => (
-									<DropdownMenuCheckboxItem
-										key={s}
-										checked={statusFilter.has(s)}
-										onCheckedChange={() => toggleStatus(s)}
-										data-testid={`filter-status-${s}`}
-									>
-										{s}
-									</DropdownMenuCheckboxItem>
-								))}
-							</DropdownMenuGroup>
-							<DropdownMenuSeparator />
-							<DropdownMenuGroup>
-								<DropdownMenuLabel>Historical status</DropdownMenuLabel>
-								<DropdownMenuSeparator />
-								{APPLICATION_STATUSES.map((s) => (
-									<DropdownMenuCheckboxItem
-										key={`history-${s}`}
-										checked={historyFilter.has(s)}
-										onCheckedChange={() => toggleHistoryStatus(s)}
-										data-testid={`filter-history-${s}`}
-									>
-										{s}
-									</DropdownMenuCheckboxItem>
-								))}
-							</DropdownMenuGroup>
-						</DropdownMenuContent>
-					</DropdownMenu>
+						</DropdownTrigger>
+						<DropdownMenu
+							aria-label="Filter status"
+							onAction={(key) => {
+								const k = String(key);
+								if (
+									k === "status-filter-label" ||
+									k === "hist-filter-label" ||
+									k === "sep1"
+								)
+									return;
+								if (k.startsWith("history-")) {
+									toggleHistoryStatus(k.slice(8) as ApplicationStatus);
+								} else {
+									toggleStatus(k as ApplicationStatus);
+								}
+							}}
+						>
+							<DropdownItem
+								id="status-filter-label"
+								className="text-xs uppercase tracking-wider text-muted-foreground font-semibold"
+								textValue="Filter status"
+							>
+								Filter status
+							</DropdownItem>
+							{APPLICATION_STATUSES.map((s) => (
+								<DropdownItem
+									key={s}
+									id={s}
+									textValue={s}
+									data-testid={`filter-status-${s}`}
+									startContent={
+										statusFilter.has(s) ? (
+											<Check className="h-4 w-4" />
+										) : (
+											<div className="h-4 w-4" />
+										)
+									}
+								>
+									{s}
+								</DropdownItem>
+							))}
+							<DropdownItem
+								key="sep1"
+								id="sep1"
+								className="h-px bg-border pointer-events-none cursor-default"
+								textValue="separator"
+							/>
+							<DropdownItem
+								id="hist-filter-label"
+								className="text-xs uppercase tracking-wider text-muted-foreground font-semibold"
+								textValue="Historical status"
+							>
+								Historical status
+							</DropdownItem>
+							{APPLICATION_STATUSES.map((s) => (
+								<DropdownItem
+									key={`history-${s}`}
+									id={`history-${s}`}
+									textValue={s}
+									data-testid={`filter-history-${s}`}
+									startContent={
+										historyFilter.has(s) ? (
+											<Check className="h-4 w-4" />
+										) : (
+											<div className="h-4 w-4" />
+										)
+									}
+								>
+									{s}
+								</DropdownItem>
+							))}
+						</DropdownMenu>
+					</Dropdown>
 					{(statusFilter.size > 0 || historyFilter.size > 0) && (
 						<Button
 							variant="ghost"
 							size="sm"
-							onClick={() => {
+							onPress={() => {
 								setStatusFilter(new Set());
 								setHistoryFilter(new Set());
 							}}
@@ -702,7 +756,7 @@ export function ApplicationsPage() {
 													variant="ghost"
 													size="sm"
 													className="uppercase px-0"
-													onClick={() => toggleSort(SORT_KEY.COMPANY)}
+													onPress={() => toggleSort(SORT_KEY.COMPANY)}
 													data-testid="sort-company"
 												>
 													Company
@@ -716,7 +770,7 @@ export function ApplicationsPage() {
 													size="sm"
 													variant="ghost"
 													className="uppercase px-0"
-													onClick={() => toggleSort(SORT_KEY.STATUS)}
+													onPress={() => toggleSort(SORT_KEY.STATUS)}
 													data-testid="sort-status"
 												>
 													Status
@@ -728,7 +782,7 @@ export function ApplicationsPage() {
 													variant="ghost"
 													size="sm"
 													className="uppercase px-0"
-													onClick={() => toggleSort(SORT_KEY.APPLIED_DATE)}
+													onPress={() => toggleSort(SORT_KEY.APPLIED_DATE)}
 													data-testid="sort-date"
 												>
 													Applied
@@ -889,8 +943,8 @@ export function ApplicationsPage() {
 					<Button
 						variant="outline"
 						size="sm"
-						disabled={safePage === 0}
-						onClick={() => setPage(safePage - 1)}
+						isDisabled={safePage === 0}
+						onPress={() => setPage(safePage - 1)}
 						data-testid="button-page-prev"
 					>
 						<ChevronLeft className="h-4 w-4" />
@@ -898,10 +952,10 @@ export function ApplicationsPage() {
 					{Array.from({ length: totalPages }, (_, i) => (
 						<Button
 							key={i}
-							variant={i === safePage ? "default" : "outline"}
+							variant={i === safePage ? "primary" : "outline"}
 							size="sm"
 							className="min-w-8"
-							onClick={() => setPage(i)}
+							onPress={() => setPage(i)}
 							data-testid={`button-page-${i + 1}`}
 						>
 							{i + 1}
@@ -910,8 +964,8 @@ export function ApplicationsPage() {
 					<Button
 						variant="outline"
 						size="sm"
-						disabled={safePage >= totalPages - 1}
-						onClick={() => setPage(safePage + 1)}
+						isDisabled={safePage >= totalPages - 1}
+						onPress={() => setPage(safePage + 1)}
 						data-testid="button-page-next"
 					>
 						<ChevronRight className="h-4 w-4" />
@@ -928,30 +982,40 @@ export function ApplicationsPage() {
 				editing={editing}
 			/>
 
-			<AlertDialog
-				open={deleteId !== null}
+			<AlertDialog.Backdrop
+				isOpen={deleteId !== null}
 				onOpenChange={(o) => !o && setDeleteId(null)}
 			>
-				<AlertDialogContent>
-					<AlertDialogHeader>
-						<AlertDialogTitle>Delete this application?</AlertDialogTitle>
-						<AlertDialogDescription>
-							This can't be undone.
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<AlertDialogFooter>
-						<AlertDialogCancel data-testid="button-cancel-delete">
-							Cancel
-						</AlertDialogCancel>
-						<AlertDialogAction
-							data-testid="button-confirm-delete"
-							onClick={() => deleteId && deleteMutation.mutate(deleteId)}
-						>
-							Delete
-						</AlertDialogAction>
-					</AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
+				<AlertDialog.Container>
+					<AlertDialog.Dialog className="sm:max-w-[400px]">
+						<AlertDialog.Header>
+							<AlertDialog.Heading>
+								Delete this application?
+							</AlertDialog.Heading>
+						</AlertDialog.Header>
+						<AlertDialog.Body>
+							<p>This can't be undone.</p>
+						</AlertDialog.Body>
+						<AlertDialog.Footer>
+							<Button
+								slot="close"
+								variant="tertiary"
+								data-testid="button-cancel-delete"
+							>
+								Cancel
+							</Button>
+							<Button
+								slot="close"
+								variant="danger"
+								data-testid="button-confirm-delete"
+								onPress={() => deleteId && deleteMutation.mutate(deleteId)}
+							>
+								Delete
+							</Button>
+						</AlertDialog.Footer>
+					</AlertDialog.Dialog>
+				</AlertDialog.Container>
+			</AlertDialog.Backdrop>
 		</div>
 	);
 }

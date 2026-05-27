@@ -1,4 +1,4 @@
-import { Toast as ToastPrimitive } from "@base-ui/react/toast";
+import { Toast } from "@heroui/react";
 import type { QueryClient } from "@tanstack/react-query";
 import {
 	createRootRouteWithContext,
@@ -10,8 +10,6 @@ import { useEffect, useState } from "react";
 import { NotFound } from "~/components/NotFound";
 import { RootComponent } from "~/components/RootComponent";
 import { ErrorComponent } from "~/components/ErrorComponent";
-import { Toaster } from "~/components/ui/toaster";
-import { toastManager } from "~/hooks/use-toast";
 import { SettingsProvider } from "~/lib/use-settings";
 import appCss from "~/styles.css?url";
 
@@ -50,12 +48,8 @@ function DocumentShell({ children }: { children: ReactNode }) {
 				/>
 			</head>
 			<body className="font-sans antialiased wrap-anywhere bg-background text-foreground">
-				<ToastPrimitive.Provider toastManager={toastManager}>
-					<SettingsProvider>
-						{children}
-						<Toaster />
-					</SettingsProvider>
-				</ToastPrimitive.Provider>
+				<Toast.Provider />
+				<SettingsProvider>{children}</SettingsProvider>
 				<Devtools />
 				<Scripts />
 			</body>
