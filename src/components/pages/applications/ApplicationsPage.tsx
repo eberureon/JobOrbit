@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
 	ArrowUpDown,
-	Check,
 	ChevronLeft,
 	ChevronRight,
 	Download,
@@ -14,17 +13,18 @@ import {
 import Papa from "papaparse";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { StatusBadge } from "~/components/StatusBadge";
+import type { Selection } from "@heroui/react";
 import {
 	AlertDialog,
+	Header,
 	Button,
 	Card,
 	CardContent,
 	Dropdown,
-	DropdownItem,
-	DropdownMenu,
-	DropdownTrigger,
 	Input,
 	Skeleton,
+	Label,
+	Separator,
 } from "@heroui/react";
 import type { Application, StatusHistory } from "~/db/schema";
 import { insertApplicationSchema } from "~/db/schema";
@@ -95,6 +95,28 @@ export function ApplicationsPage() {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const historyFileInputRef = useRef<HTMLInputElement>(null);
 
+	// Added this helper function to avoid type errors inside Dropdown Component
+	const handleStatusSelection = (keys: Selection) => {
+		setStatusFilter(
+			new Set([...keys].map((k) => String(k) as ApplicationStatus)),
+		);
+	};
+
+	// Added this helper function and variable to make the history filter work
+	// Otherwise the dropdown and filter function will not work together
+	const handleHistoryStatusSelection = (keys: Selection) => {
+		setHistoryFilter(
+			new Set(
+				[...keys].map(
+					(k) => String(k).replace(/^history-/, "") as ApplicationStatus,
+				),
+			),
+		);
+	};
+	const historySelectedKeys = new Set(
+		[...historyFilter].map((s) => `history-${s}`),
+	);
+
 	const locale = getEffectiveLocale(settings);
 
 	const filtered = useMemo(() => {
@@ -142,24 +164,6 @@ export function ApplicationsPage() {
 		safePage * pageSize,
 		(safePage + 1) * pageSize,
 	);
-
-	function toggleStatus(s: ApplicationStatus) {
-		setStatusFilter((prev) => {
-			const next = new Set(prev);
-			if (next.has(s)) next.delete(s);
-			else next.add(s);
-			return next;
-		});
-	}
-
-	function toggleHistoryStatus(s: ApplicationStatus) {
-		setHistoryFilter((prev) => {
-			const next = new Set(prev);
-			if (next.has(s)) next.delete(s);
-			else next.add(s);
-			return next;
-		});
-	}
 
 	function toggleSort(k: SortKey) {
 		if (sortKey === k) {
@@ -509,55 +513,50 @@ export function ApplicationsPage() {
 						onChange={handleHistoryFileImport}
 					/>
 					<Dropdown>
-						<DropdownTrigger>
-							<Button variant="outline" data-testid="button-data-menu">
-								<Download className="h-4 w-4 mr-1.5" />
-								Data
-							</Button>
-						</DropdownTrigger>
-						<DropdownMenu
-							aria-label="Data actions"
-							className="w-36"
-							onAction={handleDataAction}
-						>
-							<DropdownItem
-								id="label"
-								className="text-xs uppercase tracking-wider text-muted-foreground font-semibold"
-								textValue="Import / Export"
+						<Button variant="outline" data-testid="button-data-menu">
+							<Download className="h-4 w-4 mr-1.5" />
+							Data
+						</Button>
+						<Dropdown.Popover>
+							<Dropdown.Menu
+								aria-label="Data actions"
+								onAction={handleDataAction}
 							>
-								Import / Export
-							</DropdownItem>
-							<DropdownItem
-								id="import-csv"
-								data-testid="button-import-csv"
-								isDisabled={importMutation.isPending}
-								startContent={<Upload className="h-4 w-4" />}
-							>
-								Import CSV
-							</DropdownItem>
-							<DropdownItem
-								id="export-csv"
-								data-testid="button-export-csv"
-								startContent={<Download className="h-4 w-4" />}
-							>
-								Export CSV
-							</DropdownItem>
-							<DropdownItem
-								id="import-history"
-								data-testid="button-import-history"
-								isDisabled={importHistoryMutation.isPending}
-								startContent={<Upload className="h-4 w-4" />}
-							>
-								Import History
-							</DropdownItem>
-							<DropdownItem
-								id="export-history"
-								data-testid="button-export-history"
-								startContent={<Download className="h-4 w-4" />}
-							>
-								Export History
-							</DropdownItem>
-						</DropdownMenu>
+								<Dropdown.Section>
+									<Header>Import / Export</Header>
+									<Dropdown.Item
+										id="import-csv"
+										data-testid="button-import-csv"
+										isDisabled={importMutation.isPending}
+									>
+										<Upload className="h-4 w-4" />
+										<Label>Import CSV</Label>
+									</Dropdown.Item>
+									<Dropdown.Item
+										id="export-csv"
+										data-testid="button-export-csv"
+									>
+										<Download className="h-4 w-4" />
+										<Label>Export CSV</Label>
+									</Dropdown.Item>
+									<Dropdown.Item
+										id="import-history"
+										data-testid="button-import-history"
+										isDisabled={importHistoryMutation.isPending}
+									>
+										<Upload className="h-4 w-4" />
+										<Label>Import History</Label>
+									</Dropdown.Item>
+									<Dropdown.Item
+										id="export-history"
+										data-testid="button-export-history"
+									>
+										<Download className="h-4 w-4" />
+										<Label>Export History</Label>
+									</Dropdown.Item>
+								</Dropdown.Section>
+							</Dropdown.Menu>
+						</Dropdown.Popover>
 					</Dropdown>
 					<Button
 						data-testid="button-add-application"
@@ -572,108 +571,75 @@ export function ApplicationsPage() {
 				</div>
 			</div>
 
-			<Card className="card-hairline">
-				<CardContent className="p-4 flex flex-wrap items-center gap-3">
-					<div className="relative flex-1 min-w-50">
+			<Card className="card-hairline border">
+				<CardContent className="flex gap-4 flex-row flex-wrap items-center">
+					<div className="relative flex-1 min-w-50 w-full">
 						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 						<Input
 							data-testid="input-search"
 							placeholder="Search company or role…"
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
-							className="pl-9"
+							className="pl-9 w-full"
 							suppressHydrationWarning
 						/>
 					</div>
 					<Dropdown>
-						<DropdownTrigger>
-							<Button variant="outline" data-testid="button-filter-status">
-								<Filter className="h-4 w-4 mr-1.5" />
-								Status
-								{statusFilter.size > 0 && (
-									<span className="ml-2 rounded bg-primary/15 text-primary px-1.5 py-0.5 text-xs font-mono-num">
-										{statusFilter.size}
-									</span>
-								)}
-								{historyFilter.size > 0 && (
-									<span className="ml-2 rounded bg-muted text-muted-foreground px-1.5 py-0.5 text-xs font-mono-num">
-										{historyFilter.size}
-									</span>
-								)}
-							</Button>
-						</DropdownTrigger>
-						<DropdownMenu
-							aria-label="Filter status"
-							onAction={(key) => {
-								const k = String(key);
-								if (
-									k === "status-filter-label" ||
-									k === "hist-filter-label" ||
-									k === "sep1"
-								)
-									return;
-								if (k.startsWith("history-")) {
-									toggleHistoryStatus(k.slice(8) as ApplicationStatus);
-								} else {
-									toggleStatus(k as ApplicationStatus);
-								}
-							}}
-						>
-							<DropdownItem
-								id="status-filter-label"
-								className="text-xs uppercase tracking-wider text-muted-foreground font-semibold"
-								textValue="Filter status"
-							>
-								Filter status
-							</DropdownItem>
-							{APPLICATION_STATUSES.map((s) => (
-								<DropdownItem
-									key={s}
-									id={s}
-									textValue={s}
-									data-testid={`filter-status-${s}`}
-									startContent={
-										statusFilter.has(s) ? (
-											<Check className="h-4 w-4" />
-										) : (
-											<div className="h-4 w-4" />
-										)
-									}
+						<Button variant="outline" data-testid="button-filter-status">
+							<Filter className="h-4 w-4 mr-1.5" />
+							Status
+							{statusFilter.size > 0 && (
+								<span className="ml-2 rounded bg-primary/15 text-primary px-1.5 py-0.5 text-xs font-mono-num">
+									{statusFilter.size}
+								</span>
+							)}
+							{historyFilter.size > 0 && (
+								<span className="ml-2 rounded bg-background text-muted px-1.5 py-0.5 text-xs font-mono-num">
+									{historyFilter.size}
+								</span>
+							)}
+						</Button>
+						<Dropdown.Popover>
+							<Dropdown.Menu aria-label="Filter status">
+								<Dropdown.Section
+									selectionMode="multiple"
+									selectedKeys={statusFilter}
+									onSelectionChange={handleStatusSelection}
 								>
-									{s}
-								</DropdownItem>
-							))}
-							<DropdownItem
-								key="sep1"
-								id="sep1"
-								className="h-px bg-border pointer-events-none cursor-default"
-								textValue="separator"
-							/>
-							<DropdownItem
-								id="hist-filter-label"
-								className="text-xs uppercase tracking-wider text-muted-foreground font-semibold"
-								textValue="Historical status"
-							>
-								Historical status
-							</DropdownItem>
-							{APPLICATION_STATUSES.map((s) => (
-								<DropdownItem
-									key={`history-${s}`}
-									id={`history-${s}`}
-									textValue={s}
-									data-testid={`filter-history-${s}`}
-									startContent={
-										historyFilter.has(s) ? (
-											<Check className="h-4 w-4" />
-										) : (
-											<div className="h-4 w-4" />
-										)
-									}
+									<Header>Filter status</Header>
+									{APPLICATION_STATUSES.map((s) => (
+										<Dropdown.Item
+											key={s}
+											id={s}
+											textValue={s}
+											data-testid={`filter-status-${s}`}
+										>
+											<Dropdown.ItemIndicator />
+											<Label>{s}</Label>
+										</Dropdown.Item>
+									))}
+								</Dropdown.Section>
+								<Separator />
+								<Dropdown.Section
+									selectionMode="multiple"
+									selectedKeys={historySelectedKeys}
+									onSelectionChange={handleHistoryStatusSelection}
 								>
-									{s}
-								</DropdownItem>
-							))}
-						</DropdownMenu>
+									<Header>Historical status</Header>
+									{APPLICATION_STATUSES.map((s) => (
+										<Dropdown.Item
+											key={`history-${s}`}
+											id={`history-${s}`}
+											textValue={s}
+											data-testid={`filter-history-${s}`}
+										>
+											<Dropdown.ItemIndicator />
+											<Label>{s}</Label>
+										</Dropdown.Item>
+									))}
+								</Dropdown.Section>
+							</Dropdown.Menu>
+						</Dropdown.Popover>
 					</Dropdown>
 					{(statusFilter.size > 0 || historyFilter.size > 0) && (
 						<Button
@@ -692,7 +658,7 @@ export function ApplicationsPage() {
 				</CardContent>
 			</Card>
 
-			<Card className="card-hairline overflow-hidden">
+			<Card className="card-hairline border p-0 overflow-hidden">
 				<CardContent className="p-0">
 					{isLoading ? (
 						<>
@@ -855,7 +821,7 @@ export function ApplicationsPage() {
 										<div
 											key={a.id}
 											data-testid={`card-application-${a.id}`}
-											className="p-4 cursor-pointer hover:bg-muted/30 transition-colors"
+											className="p-4 cursor-pointer hover:bg-default/30 transition-colors"
 											onClick={() => {
 												setEditing(a);
 												setDialogOpen(true);
@@ -987,7 +953,7 @@ export function ApplicationsPage() {
 				onOpenChange={(o) => !o && setDeleteId(null)}
 			>
 				<AlertDialog.Container>
-					<AlertDialog.Dialog className="sm:max-w-[400px]">
+					<AlertDialog.Dialog className="sm:max-w-100">
 						<AlertDialog.Header>
 							<AlertDialog.Heading>
 								Delete this application?

@@ -22,17 +22,17 @@
   --color-secondary: var(--default);
   --color-secondary-foreground: var(--default-foreground);
   --color-secondary-border: var(--border);
-  --color-muted: var(--default);
-  --color-muted-foreground: var(--muted);
-  --color-accent: var(--default);
-  --color-accent-foreground: var(--default-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--danger);
   --color-destructive-foreground: var(--danger-foreground);
   --color-destructive-border: var(--danger);
   --color-border: var(--border);
   --color-input: var(--field-border);
   --color-ring: var(--focus);
-  --color-sidebar: var(--surface);
+  --color-sidebar: var(--background);
   --color-sidebar-foreground: var(--surface-foreground);
   --color-sidebar-border: var(--border);
   --color-sidebar-accent: var(--default);
@@ -54,35 +54,51 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-:root {
-  /* HeroUI light theme overrides — teal/green palette */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --surface: oklch(1 0 0);
-  --surface-foreground: oklch(0.145 0 0);
-  --overlay: oklch(1 0 0);
-  --overlay-foreground: oklch(0.145 0 0);
-  --accent: oklch(0.7546 0.1658 160.51);
-  --accent-foreground: oklch(1 0 0);
-  --default: oklch(0.97 0 0);
-  --default-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.556 0 0);
-  --success: oklch(0.77 0.2 151);
-  --success-foreground: oklch(0.985 0 0);
-  --warning: oklch(0.8 0.15 80);
-  --warning-foreground: oklch(0.205 0 0);
-  --danger: oklch(0.577 0.245 27.325);
-  --danger-foreground: oklch(0.985 0 0);
-  --border: oklch(0.922 0 0);
-  --separator: oklch(0.922 0 0);
-  --focus: oklch(0.8005 0.1559 163.52);
-  --field-background: oklch(1 0 0);
-  --field-foreground: oklch(0.145 0 0);
-  --field-border: oklch(0.922 0 0);
+:root,
+.light,
+.default,
+[data-theme="light"],
+[data-theme="default"] {
+  /* Theme Colors (Light Mode) */
+  --accent: oklch(75.46% 0.1658 160);
+  --accent-foreground: oklch(15% 0.03 160);
+  --background: oklch(97.02% 0 160);
+  --border: oklch(90% 0 160);
+  --danger: oklch(65.32% 0.2335 14.54);
+  --danger-foreground: oklch(99.11% 0 0);
+  --default: oklch(94% 0 160);
+  --default-foreground: oklch(21.03% 0.0059 160);
+  --field-background: oklch(100% 0.0008 160);
+  --field-border: transparent;
+  --field-foreground: oklch(21.03% 0 160);
+  --field-placeholder: oklch(55.17% 0.003 160);
+  --focus: oklch(75.46% 0.1658 160);
+  --foreground: oklch(21.03% 0 160);
+  --muted: oklch(55.17% 0.003 160);
+  --overlay: oklch(100% 0.0004 160);
+  --overlay-foreground: oklch(21.03% 0 160);
+  --scrollbar: oklch(87.1% 0 160);
+  --segment: oklch(100% 0 160);
+  --segment-foreground: oklch(21.03% 0 160);
+  --separator: oklch(92% 0 160);
+  --success: oklch(73.29% 0.1941 139.61);
+  --success-foreground: oklch(21.03% 0.0059 139.61);
+  --surface: oklch(100% 0.0008 160);
+  --surface-foreground: oklch(21.03% 0 160);
+  --surface-secondary: oklch(95.24% 0.0012 160);
+  --surface-secondary-foreground: oklch(21.03% 0 160);
+  --surface-tertiary: oklch(93.73% 0.0012 160);
+  --surface-tertiary-foreground: oklch(21.03% 0 160);
+  --warning: oklch(78.19% 0.159 61.13);
+  --warning-foreground: oklch(21.03% 0.0059 61.13);
 
   /* Border Radius */
   --radius: 0.25rem;
   --field-radius: 0.5rem;
+
+  /* Font Family */
+  /* Make sure to load Inter font in your app */
+  --font-sans: var(--font-inter);
 
   /* Custom decorative (light) */
   --sea-ink: #173a40;
@@ -108,33 +124,41 @@
   --status-withdrawn: 0.6 0.02 250;
 }
 
-.dark {
-  /* HeroUI dark theme overrides */
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --surface: oklch(0.205 0 0);
-  --surface-foreground: oklch(0.985 0 0);
-  --overlay: oklch(0.205 0 0);
-  --overlay-foreground: oklch(0.985 0 0);
-  --accent: oklch(0.62 0.18 155);
-  --accent-foreground: oklch(1 0 0);
-  --default: oklch(0.269 0 0);
-  --default-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.708 0 0);
-  --success: oklch(0.77 0.2 151);
-  --success-foreground: oklch(0.205 0 0);
-  --warning: oklch(0.82 0.14 76);
-  --warning-foreground: oklch(0.205 0 0);
-  --danger: oklch(0.704 0.191 22.216);
-  --danger-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --separator: oklch(0.25 0.006 286.033);
-  --focus: oklch(0.66 0.15 155);
-  --field-background: oklch(0.205 0 0);
-  --field-foreground: oklch(0.985 0 0);
-  --field-border: oklch(1 0 0 / 15%);
-  --field-border-width: 1px;
-  --radius: 0.625rem;
+.dark,
+[data-theme="dark"] {
+  color-scheme: dark;
+  /* Theme Colors (Dark Mode) */
+  --accent: oklch(75.46% 0.1658 160);
+  --accent-foreground: oklch(15% 0 160);
+  --background: oklch(12% 0 160);
+  --border: oklch(28% 0 160);
+  --danger: oklch(59.4% 0.1973 13.43);
+  --danger-foreground: oklch(99.11% 0 0);
+  --default: oklch(27.4% 0 160);
+  --default-foreground: oklch(99.11% 0 0);
+  --field-background: oklch(21.03% 0 160);
+  --field-border: transparent;
+  --field-foreground: oklch(99.11% 0 160);
+  --field-placeholder: oklch(70.5% 0 160);
+  --focus: oklch(75.46% 0.1658 160);
+  --foreground: oklch(99.11% 0 160);
+  --muted: oklch(70.5% 0 160);
+  --overlay: oklch(21.03% 0 160);
+  --overlay-foreground: oklch(99.11% 0 160);
+  --scrollbar: oklch(70.5% 0 160);
+  --segment: oklch(39.64% 0 160);
+  --segment-foreground: oklch(99.11% 0 160);
+  --separator: oklch(25% 0 160);
+  --success: oklch(73.29% 0.1941 139.61);
+  --success-foreground: oklch(21.03% 0 139.61);
+  --surface: oklch(21.03% 0 160);
+  --surface-foreground: oklch(99.11% 0 160);
+  --surface-secondary: oklch(25.7% 0 160);
+  --surface-secondary-foreground: oklch(99.11% 0 160);
+  --surface-tertiary: oklch(27.21% 0 160);
+  --surface-tertiary-foreground: oklch(99.11% 0 160);
+  --warning: oklch(82.03% 0.1392 65.14);
+  --warning-foreground: oklch(21.03% 0 65.14);
 
   /* Custom decorative (dark) */
   --sea-ink: #d7ece8;
@@ -171,19 +195,12 @@ body,
 }
 
 body {
-  margin: 0;
-  color: var(--sea-ink);
   font-family:
     "Geist Variable", "Manrope", ui-sans-serif, system-ui, sans-serif;
-  background-color: var(--bg-base);
   background:
     radial-gradient(1100px 620px at -8% -10%, var(--hero-a), transparent 58%),
     radial-gradient(1050px 620px at 112% -12%, var(--hero-b), transparent 62%),
-    radial-gradient(
-      720px 380px at 50% 115%,
-      rgba(79, 184, 178, 0.1),
-      transparent 68%
-    ),
+    radial-gradient(720px 380px at 50% 115%, #4fb8b21a, transparent 68%),
     linear-gradient(
       180deg,
       color-mix(in oklab, var(--sand) 68%, white) 0%,
@@ -195,56 +212,25 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  opacity: 0.28;
-  background:
-    radial-gradient(
-      circle at 20% 15%,
-      rgba(255, 255, 255, 0.8),
-      transparent 34%
-    ),
-    radial-gradient(
-      circle at 78% 26%,
-      rgba(79, 184, 178, 0.2),
-      transparent 42%
-    ),
-    radial-gradient(circle at 42% 82%, rgba(47, 106, 74, 0.14), transparent 36%);
-}
-
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  opacity: 0.14;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
-  background-size: 28px 28px;
-  mask-image: radial-gradient(circle at 50% 30%, black, transparent 78%);
-}
-
 a {
-  color: var(--lagoon-deep);
-  text-decoration-color: rgba(50, 143, 151, 0.4);
+  color: var(--foreground);
+  text-decoration-color: color-mix(
+    in oklab,
+    var(--foreground) 30%,
+    transparent
+  );
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
 }
 
 a:hover {
-  color: #246f76;
+  color: var(--foreground);
 }
 
 code {
   font-size: 0.9em;
-  border: 1px solid var(--line);
-  background: color-mix(in oklab, var(--glass-surface-strong) 82%, white 18%);
+  border: 1px solid var(--border);
+  background: var(--popover);
   border-radius: 7px;
   padding: 2px 7px;
 }
@@ -296,6 +282,6 @@ pre code {
 
 @layer base {
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground bg-foreground m-0;
   }
 }
