@@ -24,13 +24,13 @@ curl -fsSL https://heroui.com/install | bash -s heroui-react
 
 **This guide is for HeroUI v3 ONLY.** Do NOT apply v2 patterns — the provider, styling, and component API all changed:
 
-| Feature       | v2 (DO NOT USE)                   | v3 (USE THIS)                               |
-| ------------- | --------------------------------- | ------------------------------------------- |
-| Provider      | `<HeroUIProvider>` required       | **No Provider needed**                      |
-| Animations    | `framer-motion` package           | CSS-based, no extra deps                    |
-| Component API | Flat props: `<Card title="x">`    | Compound: `<Card><Card.Header>`             |
-| Styling       | Tailwind v3 + `@heroui/theme`     | Tailwind v4 + `@heroui/styles`         	  |
-| Packages      | `@heroui/system`, `@heroui/theme` | `@heroui/react`, `@heroui/styles` 		  |
+| Feature       | v2 (DO NOT USE)                   | v3 (USE THIS)                     |
+| ------------- | --------------------------------- | --------------------------------- |
+| Provider      | `<HeroUIProvider>` required       | **No Provider needed**            |
+| Animations    | `framer-motion` package           | CSS-based, no extra deps          |
+| Component API | Flat props: `<Card title="x">`    | Compound: `<Card><Card.Header>`   |
+| Styling       | Tailwind v3 + `@heroui/theme`     | Tailwind v4 + `@heroui/styles`    |
+| Packages      | `@heroui/system`, `@heroui/theme` | `@heroui/react`, `@heroui/styles` |
 
 ```tsx
 // DO NOT DO THIS - v2 pattern
