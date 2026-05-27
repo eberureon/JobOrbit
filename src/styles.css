@@ -23,7 +23,7 @@
   --color-secondary-foreground: var(--default-foreground);
   --color-secondary-border: var(--border);
   --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
+  --color-muted-foreground: var(--muted);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--danger);
@@ -45,6 +45,7 @@
   --color-chart-3: oklch(0.439 0 0);
   --color-chart-4: oklch(0.371 0 0);
   --color-chart-5: oklch(0.269 0 0);
+  --color-sea-ink: var(--sea-ink);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -62,7 +63,7 @@
   /* Theme Colors (Light Mode) */
   --accent: oklch(75.46% 0.1658 160);
   --accent-foreground: oklch(15% 0.03 160);
-  --background: oklch(97.02% 0 160);
+  --background: oklch(97% 0 160);
   --border: oklch(90% 0 160);
   --danger: oklch(65.32% 0.2335 14.54);
   --danger-foreground: oklch(99.11% 0 0);
@@ -101,7 +102,7 @@
   --font-sans: var(--font-inter);
 
   /* Custom decorative (light) */
-  --sea-ink: #173a40;
+  --sea-ink: oklch(0.42 0.05 209);
   --lagoon-deep: #328f97;
   --sand: #e7f0e8;
   --foam: #f3faf5;
@@ -161,7 +162,7 @@
   --warning-foreground: oklch(21.03% 0 65.14);
 
   /* Custom decorative (dark) */
-  --sea-ink: #d7ece8;
+  --sea-ink: oklch(0.9265 0.07 183.15);
   --lagoon-deep: #8de5db;
   --sand: #0f1a1e;
   --foam: #101d22;
@@ -189,42 +190,19 @@
 }
 
 html,
-body,
-#app {
+body {
   min-height: 100%;
 }
 
 body {
-  font-family:
-    "Geist Variable", "Manrope", ui-sans-serif, system-ui, sans-serif;
-  background:
-    radial-gradient(1100px 620px at -8% -10%, var(--hero-a), transparent 58%),
-    radial-gradient(1050px 620px at 112% -12%, var(--hero-b), transparent 62%),
-    radial-gradient(720px 380px at 50% 115%, #4fb8b21a, transparent 68%),
-    linear-gradient(
-      180deg,
-      color-mix(in oklab, var(--sand) 68%, white) 0%,
-      var(--foam) 44%,
-      var(--bg-base) 100%
-    );
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  @apply font-sans antialiased wrap-anywhere text-foreground overflow-x-hidden;
 }
 
 a {
-  color: var(--foreground);
-  text-decoration-color: color-mix(
-    in oklab,
-    var(--foreground) 30%,
-    transparent
-  );
+  @apply text-sea-ink hover:text-foreground;
+  text-decoration-color: color-mix(in oklab, var(--sea-ink) 30%, transparent);
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
-}
-
-a:hover {
-  color: var(--foreground);
 }
 
 code {
@@ -278,10 +256,4 @@ pre code {
   );
   background-size: 18px 18px;
   mask-image: radial-gradient(circle at 50% 0%, black, transparent 70%);
-}
-
-@layer base {
-  body {
-    @apply text-foreground bg-foreground m-0;
-  }
 }
