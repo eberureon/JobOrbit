@@ -1,5 +1,6 @@
 import type { Application, StatusHistory } from "../db/schema";
 import type { ApplicationStatus, Stats } from "./types";
+import { toLocalDateString } from "./date";
 
 export function computeStats(
 	rows: Application[],
@@ -76,12 +77,12 @@ export function computeStats(
 		if (isNaN(d.getTime())) continue;
 		const diff = today.getTime() - startOfDay(d).getTime();
 		if (diff < 0 || diff > 90 * dayMs) continue;
-		const key = startOfDay(d).toISOString().slice(0, 10);
+		const key = toLocalDateString(startOfDay(d));
 		tlMap[key] = (tlMap[key] || 0) + 1;
 	}
 	for (let i = 89; i >= 0; i--) {
 		const d = new Date(today.getTime() - i * dayMs);
-		const key = d.toISOString().slice(0, 10);
+		const key = toLocalDateString(d);
 		timeline.push({ date: key, count: tlMap[key] || 0 });
 	}
 

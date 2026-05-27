@@ -50,6 +50,7 @@ import {
 import type { ApplicationStatus, SortOrder, SortKey } from "~/lib/types";
 import { APPLICATION_STATUSES, SORT_KEY } from "~/lib/types";
 import { getEffectiveLocale, useSettings } from "~/lib/use-settings";
+import { toLocalDateString } from "~/lib/date";
 import { ApplicationDialog } from "./ApplicationDialog";
 import { RowActions } from "./RowActions";
 
@@ -214,7 +215,7 @@ export function ApplicationsPage() {
 				},
 			);
 
-			const today = new Date().toISOString().slice(0, 10);
+			const today = toLocalDateString(new Date());
 			const rowErrors: { row: number; reason: string }[] = [];
 			for (const err of parseErrors) {
 				rowErrors.push({ row: err.row! + 1, reason: err.message });

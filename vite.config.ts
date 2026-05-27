@@ -11,9 +11,9 @@ const config = defineConfig({
 	resolve: { tsconfigPaths: true },
 	plugins: [
 		...(process.env.NODE_ENV !== "production" ? [devtools()] : []),
-		tailwindcss(),
 		tanstackStart(),
 		viteReact(),
+		tailwindcss(),
 	],
 	test: {
 		include: ["src/**/*.{test,spec}.{ts,tsx}"],

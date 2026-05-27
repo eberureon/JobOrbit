@@ -27,6 +27,7 @@ import {
 	FormMessage,
 } from "~/components/ui/form";
 import { cn } from "~/lib/utils";
+import { toLocalDateString } from "~/lib/date";
 import { Input } from "~/components/ui/input";
 import {
 	Select,
@@ -53,7 +54,7 @@ import { APPLICATION_STATUSES } from "~/lib/types";
 import { getEffectiveLocale, useSettings } from "~/lib/use-settings";
 
 function todayISO(): string {
-	return new Date().toISOString().slice(0, 10);
+	return toLocalDateString(new Date());
 }
 
 export function ApplicationDialog({
@@ -264,17 +265,19 @@ export function ApplicationDialog({
 											<PopoverContent className="w-auto p-0" align="start">
 												<Calendar
 													mode="single"
-													className="w-full"
 													selected={
 														field.value
 															? new Date(field.value + "T00:00:00")
 															: undefined
 													}
-													onSelect={(date) =>
-														field.onChange(
-															date ? date.toISOString().slice(0, 10) : "",
-														)
-													}
+													onSelect={(date) => {
+														if (!date) {
+															field.onChange("");
+															return;
+														}
+
+														field.onChange(toLocalDateString(date));
+													}}
 													captionLayout="dropdown"
 												/>
 											</PopoverContent>

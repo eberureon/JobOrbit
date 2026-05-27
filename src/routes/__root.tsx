@@ -9,7 +9,7 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { NotFound } from "~/components/NotFound";
 import { RootComponent } from "~/components/RootComponent";
-import { RootError } from "~/components/RootError";
+import { ErrorComponent } from "~/components/ErrorComponent";
 import { Toaster } from "~/components/ui/toaster";
 import { toastManager } from "~/hooks/use-toast";
 import { SettingsProvider } from "~/lib/use-settings";
@@ -33,7 +33,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 	}),
 	shellComponent: DocumentShell,
 	component: RootComponent,
-	errorComponent: RootError,
+	errorComponent: ErrorComponent,
 	notFoundComponent: NotFound,
 });
 

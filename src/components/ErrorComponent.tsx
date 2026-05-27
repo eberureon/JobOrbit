@@ -1,7 +1,7 @@
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import type { ErrorComponentProps } from "@tanstack/react-router";
 
-export function RootError({ error, reset }: ErrorComponentProps) {
+export function ErrorComponent({ error, reset }: ErrorComponentProps) {
 	return (
 		<div className="flex flex-col items-center justify-center py-24 px-4 text-center h-screen">
 			<div className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">

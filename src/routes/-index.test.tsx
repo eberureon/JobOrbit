@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { createWrapper } from "../test/test-utils";
 import { DashboardPage } from "../components/pages/dashboard";
+import { toLocalDateString } from "../lib/date";
 
 const mocks = vi.hoisted(() => ({
 	listApplications: vi.fn<[], any>(),
@@ -34,7 +35,7 @@ describe("Dashboard", () => {
 			},
 			funnel: { applied: 5, interview: 2, offer: 1, accepted: 0, rejected: 1 },
 			timeline: Array.from({ length: 90 }, (_, i) => ({
-				date: new Date(Date.now() - i * 86400000).toISOString().slice(0, 10),
+				date: toLocalDateString(new Date(Date.now() - i * 86400000)),
 				count: 0,
 			})),
 			topCompanies: [{ company: "Acme Inc", count: 3 }],
