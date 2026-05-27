@@ -41,6 +41,7 @@ import { APPLICATION_STATUSES, SORT_KEY } from "~/lib/types";
 import { getEffectiveLocale, useSettings } from "~/lib/use-settings";
 import { toLocalDateString } from "~/lib/date";
 import { ApplicationDialog } from "./ApplicationDialog";
+import { computeApplicationList } from "./applicationList";
 import { RowActions } from "./RowActions";
 
 function sortFromDefault(d: SortOrder): [SortKey, "asc" | "desc"] {
@@ -119,51 +120,37 @@ export function ApplicationsPage() {
 
 	const locale = getEffectiveLocale(settings);
 
-	const filtered = useMemo(() => {
-		let list = [...apps];
-		if (search.trim()) {
-			const q = search.toLowerCase();
-			list = list.filter(
-				(a) =>
-					a.company.toLowerCase().includes(q) ||
-					a.role.toLowerCase().includes(q),
-			);
-		}
-		if (statusFilter.size > 0) {
-			list = list.filter((a) =>
-				statusFilter.has(a.status as ApplicationStatus),
-			);
-		}
-		if (historyFilter.size > 0) {
-			const historyMatches = new Set<number>();
-			for (const entry of history) {
-				if (historyFilter.has(entry.new_status as ApplicationStatus)) {
-					historyMatches.add(entry.application_id);
-				}
-			}
-			list = list.filter((a) => historyMatches.has(a.id));
-		}
-		list.sort((a, b) => {
-			const av = (a as any)[sortKey];
-			const bv = (b as any)[sortKey];
-			if (av < bv) return sortDir === "asc" ? -1 : 1;
-			if (av > bv) return sortDir === "asc" ? 1 : -1;
-			return 0;
-		});
-		return list;
-	}, [apps, history, search, statusFilter, historyFilter, sortKey, sortDir]);
+	const { filtered, paginated, totalPages, safePage } = useMemo(
+		() =>
+			computeApplicationList({
+				apps,
+				history,
+				search,
+				statusFilter,
+				historyFilter,
+				sortKey,
+				sortDir,
+				page,
+				pageSize: settings.pageSize,
+			}),
+		[
+			apps,
+			history,
+			search,
+			statusFilter,
+			historyFilter,
+			sortKey,
+			sortDir,
+			page,
+			settings.pageSize,
+		],
+	);
 
 	useEffect(() => {
 		setPage(0);
 	}, [search, statusFilter, historyFilter, sortKey, sortDir]);
 
 	const pageSize = settings.pageSize;
-	const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-	const safePage = Math.min(page, totalPages - 1);
-	const paginated = filtered.slice(
-		safePage * pageSize,
-		(safePage + 1) * pageSize,
-	);
 
 	function toggleSort(k: SortKey) {
 		if (sortKey === k) {
@@ -577,6 +564,7 @@ export function ApplicationsPage() {
 						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 						<Input
 							data-testid="input-search"
+							aria-label="Search applications"
 							placeholder="Search company or role…"
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
