@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { Application } from "../db/schema";
 import { computeStats } from "./stats";
 
@@ -31,6 +31,7 @@ describe("computeStats", () => {
 			offer: 0,
 			accepted: 0,
 			rejected: 0,
+			withdrawn: 0,
 		});
 		expect(stats.timeline).toHaveLength(90);
 		expect(stats.topCompanies).toEqual([]);
@@ -127,11 +128,14 @@ describe("computeStats", () => {
 			offer: 2,
 			accepted: 1,
 			rejected: 1,
+			withdrawn: 0,
 		});
 	});
 
 	it("counts applications within last 7 and 30 days", () => {
+		vi.useFakeTimers();
 		const today = "2026-05-24";
+		vi.setSystemTime(new Date(`${today}T00:00:00.000Z`));
 		const apps = [
 			makeApp({ applied_date: today }),
 			makeApp({ id: 2, applied_date: "2026-05-20" }),
@@ -141,6 +145,7 @@ describe("computeStats", () => {
 		const stats = computeStats(apps);
 		expect(stats.last7Days).toBe(2);
 		expect(stats.last30Days).toBe(3);
+		vi.useRealTimers();
 	});
 
 	it("returns top 5 companies by count", () => {

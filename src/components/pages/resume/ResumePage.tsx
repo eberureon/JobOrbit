@@ -1,17 +1,8 @@
+import { Button, Input, TextArea, Skeleton } from "@heroui/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Download, Save } from "lucide-react";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-} from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
-import { Skeleton } from "~/components/ui/skeleton";
-import { Textarea } from "~/components/ui/textarea";
+import { Controller, useForm } from "react-hook-form";
 import type { InsertResume, Resume } from "~/db/schema";
 import { useToast } from "~/hooks/use-toast";
 import { exportMarkdown } from "~/lib/export-markdown";
@@ -213,23 +204,23 @@ export function ResumePage() {
 					</p>
 				</div>
 				<div className="flex items-center gap-2">
-					<button
-						onClick={() =>
+					<Button
+						variant="outline"
+						onPress={() =>
 							exportMarkdown(values, skillsList, linksList, buildMarkdown)
 						}
-						className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium border border-[var(--button-outline)] shadow-xs active:shadow-none min-h-9 px-4 py-2 hover-elevate"
 					>
 						<Download className="h-4 w-4" />
 						Export as Markdown
-					</button>
-					<button
-						onClick={form.handleSubmit((d) => saveMutation.mutate(d))}
-						disabled={saveMutation.isPending}
-						className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium bg-primary text-primary-foreground border border-primary-border min-h-9 px-4 py-2 hover-elevate disabled:opacity-50"
+					</Button>
+					<Button
+						color="primary"
+						isDisabled={saveMutation.isPending}
+						onPress={form.handleSubmit((d) => saveMutation.mutate(d))}
 					>
 						<Save className="h-4 w-4" />
 						{saveMutation.isPending ? "Saving..." : "Save"}
-					</button>
+					</Button>
 				</div>
 			</div>
 
@@ -239,175 +230,131 @@ export function ResumePage() {
 						<div className="text-sm font-medium">Edit</div>
 					</div>
 					<div className="p-6 pt-0">
-						<Form {...form}>
-							<form
-								onSubmit={form.handleSubmit((d) => saveMutation.mutate(d))}
-								className="space-y-4"
-							>
-								<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-									<FormField
-										control={form.control}
-										name="full_name"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Full name</FormLabel>
-												<FormControl>
-													<Input data-testid="input-resume-name" {...field} />
-												</FormControl>
-											</FormItem>
-										)}
-									/>
-									<FormField
-										control={form.control}
-										name="headline"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Headline</FormLabel>
-												<FormControl>
-													<Input
-														placeholder="Senior Frontend Engineer"
-														{...field}
-													/>
-												</FormControl>
-											</FormItem>
-										)}
-									/>
-									<FormField
-										control={form.control}
-										name="email"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Email</FormLabel>
-												<FormControl>
-													<Input type="email" {...field} />
-												</FormControl>
-											</FormItem>
-										)}
-									/>
-									<FormField
-										control={form.control}
-										name="phone"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Phone</FormLabel>
-												<FormControl>
-													<Input {...field} />
-												</FormControl>
-											</FormItem>
-										)}
-									/>
-									<div className="sm:col-span-2">
-										<FormField
-											control={form.control}
-											name="location"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Location</FormLabel>
-													<FormControl>
-														<Input {...field} />
-													</FormControl>
-												</FormItem>
-											)}
+						<form
+							onSubmit={form.handleSubmit((d) => saveMutation.mutate(d))}
+							className="space-y-4"
+						>
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+								<Controller
+									control={form.control}
+									name="full_name"
+									render={({ field }) => (
+										<Input
+											data-testid="input-resume-name"
+											label="Full name"
+											{...field}
 										/>
-									</div>
+									)}
+								/>
+								<Controller
+									control={form.control}
+									name="headline"
+									render={({ field }) => (
+										<Input
+											label="Headline"
+											placeholder="Senior Frontend Engineer"
+											{...field}
+										/>
+									)}
+								/>
+								<Controller
+									control={form.control}
+									name="email"
+									render={({ field }) => (
+										<Input label="Email" type="email" {...field} />
+									)}
+								/>
+								<Controller
+									control={form.control}
+									name="phone"
+									render={({ field }) => <Input label="Phone" {...field} />}
+								/>
+								<div className="sm:col-span-2">
+									<Controller
+										control={form.control}
+										name="location"
+										render={({ field }) => (
+											<Input label="Location" {...field} />
+										)}
+									/>
 								</div>
+							</div>
 
-								<FormField
-									control={form.control}
-									name="summary"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Summary</FormLabel>
-											<FormControl>
-												<Textarea
-													rows={4}
-													placeholder="A short professional summary..."
-													{...field}
-												/>
-											</FormControl>
-										</FormItem>
-									)}
-								/>
+							<Controller
+								control={form.control}
+								name="summary"
+								render={({ field }) => (
+									<TextArea
+										label="Summary"
+										minRows={4}
+										placeholder="A short professional summary..."
+										{...field}
+									/>
+								)}
+							/>
 
-								<FormField
-									control={form.control}
-									name="skills"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Skills (one per line)</FormLabel>
-											<FormControl>
-												<Textarea
-													rows={5}
-													className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono-num"
-													placeholder={"TypeScript\nReact\nNode.js"}
-													{...field}
-												/>
-											</FormControl>
-										</FormItem>
-									)}
-								/>
+							<Controller
+								control={form.control}
+								name="skills"
+								render={({ field }) => (
+									<TextArea
+										label="Skills (one per line)"
+										minRows={5}
+										className="font-mono-num"
+										placeholder={"TypeScript\nReact\nNode.js"}
+										{...field}
+									/>
+								)}
+							/>
 
-								<FormField
-									control={form.control}
-									name="experience"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Experience (markdown)</FormLabel>
-											<FormControl>
-												<Textarea
-													rows={8}
-													className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono-num text-xs"
-													placeholder={
-														"### Senior Engineer \u2014 Acme Inc.\n2022 \u2014 Present\n- Built X\n- Led Y"
-													}
-													{...field}
-												/>
-											</FormControl>
-										</FormItem>
-									)}
-								/>
+							<Controller
+								control={form.control}
+								name="experience"
+								render={({ field }) => (
+									<TextArea
+										label="Experience (markdown)"
+										minRows={8}
+										className="font-mono-num text-xs"
+										placeholder={
+											"### Senior Engineer \u2014 Acme Inc.\n2022 \u2014 Present\n- Built X\n- Led Y"
+										}
+										{...field}
+									/>
+								)}
+							/>
 
-								<FormField
-									control={form.control}
-									name="education"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Education (markdown)</FormLabel>
-											<FormControl>
-												<Textarea
-													rows={5}
-													className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono-num text-xs"
-													placeholder={
-														"### BSc Computer Science \u2014 University Name\n2014 \u2014 2018"
-													}
-													{...field}
-												/>
-											</FormControl>
-										</FormItem>
-									)}
-								/>
+							<Controller
+								control={form.control}
+								name="education"
+								render={({ field }) => (
+									<TextArea
+										label="Education (markdown)"
+										minRows={5}
+										className="font-mono-num text-xs"
+										placeholder={
+											"### BSc Computer Science \u2014 University Name\n2014 \u2014 2018"
+										}
+										{...field}
+									/>
+								)}
+							/>
 
-								<FormField
-									control={form.control}
-									name="links"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Links (one per line)</FormLabel>
-											<FormControl>
-												<Textarea
-													rows={4}
-													className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono-num text-xs"
-													placeholder={
-														"https://github.com/you\nhttps://linkedin.com/in/you"
-													}
-													{...field}
-												/>
-											</FormControl>
-										</FormItem>
-									)}
-								/>
-							</form>
-						</Form>
+							<Controller
+								control={form.control}
+								name="links"
+								render={({ field }) => (
+									<TextArea
+										label="Links (one per line)"
+										minRows={4}
+										className="font-mono-num text-xs"
+										placeholder={
+											"https://github.com/you\nhttps://linkedin.com/in/you"
+										}
+										{...field}
+									/>
+								)}
+							/>
+						</form>
 					</div>
 				</div>
 

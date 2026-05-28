@@ -7,7 +7,7 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
-import { Skeleton } from "~/components/ui/skeleton";
+import { Skeleton } from "@heroui/react";
 
 export function TimelineChart({
 	data,
@@ -40,8 +40,8 @@ export function TimelineChart({
 				<AreaChart width={width} height={width / 2} data={data}>
 					<defs>
 						<linearGradient id="g-timeline" x1="0" y1="0" x2="0" y2="1">
-							<stop offset="0%" stopColor="var(--primary)" stopOpacity={0.4} />
-							<stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
+							<stop offset="0%" stopColor="var(--accent)" stopOpacity={0.3} />
+							<stop offset="100%" stopColor="var(--accent)" stopOpacity={0} />
 						</linearGradient>
 					</defs>
 					<CartesianGrid
@@ -52,7 +52,7 @@ export function TimelineChart({
 					<XAxis
 						dataKey="date"
 						tick={{
-							fill: "var(--muted-foreground)",
+							fill: "var(--muted)",
 							fontSize: 11,
 						}}
 						tickFormatter={(d: string) => {
@@ -64,7 +64,7 @@ export function TimelineChart({
 					/>
 					<YAxis
 						tick={{
-							fill: "var(--muted-foreground)",
+							fill: "var(--muted)",
 							fontSize: 11,
 						}}
 						allowDecimals={false}
@@ -83,13 +83,14 @@ export function TimelineChart({
 					<Area
 						type="monotone"
 						dataKey="count"
-						stroke="var(--primary)"
-						strokeWidth={2}
+						stroke="var(--accent)"
+						strokeWidth={1.75}
+						dot={false}
 						fill="url(#g-timeline)"
 					/>
 				</AreaChart>
 			) : (
-				<div className="w-full aspect-[2/1]" />
+				<div className="w-full aspect-2/1" />
 			)}
 		</div>
 	);

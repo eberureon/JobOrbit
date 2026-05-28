@@ -15,13 +15,13 @@ export function FunnelRow({
 	return (
 		<div data-testid={testId} className="space-y-1.5">
 			<div className="flex items-center justify-between text-sm">
-				<span className="text-muted-foreground">{label}</span>
+				<span className="text-muted">{label}</span>
 				<span className="font-mono-num text-foreground">
 					{count}
-					<span className="text-muted-foreground ml-2">{pct}%</span>
+					<span className="text-muted ml-2">{pct}%</span>
 				</span>
 			</div>
-			<div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+			<div className="h-2 w-full rounded-full bg-background overflow-hidden">
 				<div
 					className="h-full rounded-full transition-all"
 					style={{ width: `${pct}%`, backgroundColor: color }}

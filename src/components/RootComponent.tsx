@@ -11,7 +11,7 @@ export function RootComponent() {
 	const toggleMobileMenu = () => setMobileOpen((v) => !v);
 
 	return (
-		<div className="min-h-screen bg-background text-foreground">
+		<div className="min-h-screen">
 			<div className="sticky top-0 z-40 flex items-center justify-between border-b border-sidebar-border bg-sidebar/80 backdrop-blur px-4 py-3 md:hidden">
 				<Logo />
 				<button

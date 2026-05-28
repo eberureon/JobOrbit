@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, Briefcase, Calendar, Target } from "lucide-react";
 import { Pie, PieChart, ResponsiveContainer, Sector, Tooltip } from "recharts";
 import { StatusBadge, statusColor } from "~/components/StatusBadge";
-import { Skeleton } from "~/components/ui/skeleton";
+import { Skeleton } from "@heroui/react";
 import type { Application } from "~/db/schema";
 import type { PieSectorShapeProps } from "recharts";
 import {
@@ -309,7 +309,7 @@ export function DashboardPage() {
 													{c.count}
 												</span>
 											</div>
-											<div className="h-1.5 rounded-full bg-muted overflow-hidden">
+											<div className="h-1.5 rounded-full bg-background overflow-hidden">
 												<div
 													className="h-full bg-primary"
 													style={{ width: `${pct}%` }}

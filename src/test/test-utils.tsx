@@ -1,11 +1,8 @@
-import { Toast } from "@base-ui/react/toast";
+import { Toast } from "@heroui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { toastManager } from "~/hooks/use-toast";
 import { SettingsProvider } from "~/lib/use-settings";
-
-const ToastProvider = Toast.Provider;
 
 export function createWrapper() {
 	return function Wrapper({ children }: { children: ReactNode }) {
@@ -20,7 +17,8 @@ export function createWrapper() {
 		return (
 			<QueryClientProvider client={queryClient}>
 				<SettingsProvider>
-					<ToastProvider toastManager={toastManager}>{children}</ToastProvider>
+					<Toast.Provider />
+					{children}
 				</SettingsProvider>
 			</QueryClientProvider>
 		);
