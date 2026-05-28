@@ -309,7 +309,7 @@ export function DashboardPage() {
 													{c.count}
 												</span>
 											</div>
-											<div className="h-1.5 rounded-full bg-muted overflow-hidden">
+											<div className="h-1.5 rounded-full bg-background overflow-hidden">
 												<div
 													className="h-full bg-primary"
 													style={{ width: `${pct}%` }}
