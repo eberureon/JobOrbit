@@ -73,12 +73,12 @@ export function TimelineChart({
 					/>
 					<Tooltip
 						contentStyle={{
-							background: "var(--popover)",
+							background: "var(--overlay)",
 							border: "1px solid var(--border)",
 							borderRadius: 8,
 							fontSize: 12,
 						}}
-						labelStyle={{ color: "var(--foreground)" }}
+						labelStyle={{ color: "var(--overlay-foreground)" }}
 					/>
 					<Area
 						type="monotone"

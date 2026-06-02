@@ -410,7 +410,6 @@ export function DashboardPage() {
 							</div>
 
 							{/* Mobile Table */}
-
 							<div className="block xl:hidden divide-y divide-border/40">
 								{recent.map((a) => (
 									<div key={a.id}>
