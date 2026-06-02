@@ -705,11 +705,11 @@ export function ApplicationsPage() {
 								<table className="w-full text-sm">
 									<thead>
 										<tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
-											<th className="px-4 py-3 font-medium max-w-52">
+											<th className="px-2 py-3 font-medium max-w-52">
 												<Button
 													variant="ghost"
 													size="sm"
-													className="uppercase px-0"
+													className="uppercase text-xs text-muted-foreground px-2"
 													onPress={() => toggleSort(SORT_KEY.COMPANY)}
 													data-testid="sort-company"
 												>
@@ -719,11 +719,11 @@ export function ApplicationsPage() {
 											</th>
 											<th className="px-4 py-3 font-medium max-w-52">Role</th>
 											<th className="px-4 py-3 font-medium">Location</th>
-											<th className="px-4 py-3 font-medium">
+											<th className="px-2 py-3 font-medium">
 												<Button
 													size="sm"
 													variant="ghost"
-													className="uppercase px-0"
+													className="uppercase text-xs text-muted-foreground px-2"
 													onPress={() => toggleSort(SORT_KEY.STATUS)}
 													data-testid="sort-status"
 												>
@@ -731,11 +731,11 @@ export function ApplicationsPage() {
 													<ArrowUpDown className="h-3 w-3" />
 												</Button>
 											</th>
-											<th className="px-4 py-3 font-medium">
+											<th className="px-2 py-3 font-medium">
 												<Button
 													variant="ghost"
 													size="sm"
-													className="uppercase px-0"
+													className="uppercase text-xs text-muted-foreground px-2"
 													onPress={() => toggleSort(SORT_KEY.APPLIED_DATE)}
 													data-testid="sort-date"
 												>
@@ -753,7 +753,7 @@ export function ApplicationsPage() {
 											<tr
 												key={a.id}
 												data-testid={`row-application-${a.id}`}
-												className="border-b border-border/40 last:border-0 hover:bg-muted/30 cursor-pointer"
+												className="border-b border-border/40 last:border-0 hover:bg-muted/10 cursor-pointer"
 												onClick={() => {
 													setEditing(a);
 													setDialogOpen(true);

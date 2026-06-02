@@ -199,14 +199,14 @@ export function ApplicationDialog({
 									control={form.control}
 									name="status"
 									render={({ field, fieldState }) => (
-										<div className="flex flex-col ">
+										<div className="flex flex-col gap-1">
 											<Label className="text-sm font-medium text-foreground">
 												Status
 											</Label>
 											<Select
 												value={field.value}
 												onChange={(v) => field.onChange(v)}
-												className="w-full"
+												className="w-full reset-input"
 												isInvalid={!!fieldState.error}
 											>
 												<Select.Trigger>
@@ -246,12 +246,13 @@ export function ApplicationDialog({
 												onBlur={field.onBlur}
 												isInvalid={!!fieldState.error}
 												isRequired
+												shouldForceLeadingZeros
 												data-testid="input-applied-date"
 											>
 												<Label className="text-sm font-medium text-foreground">
 													Applied Date
 												</Label>
-												<DateField.Group fullWidth>
+												<DateField.Group fullWidth className="reset-input">
 													<DateField.Input>
 														{(segment) => (
 															<DateField.Segment segment={segment} />
