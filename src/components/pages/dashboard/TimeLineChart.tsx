@@ -78,7 +78,6 @@ export function TimelineChart({
 							borderRadius: 8,
 							fontSize: 12,
 						}}
-						labelStyle={{ color: "var(--overlay-foreground)" }}
 					/>
 					<Area
 						type="monotone"

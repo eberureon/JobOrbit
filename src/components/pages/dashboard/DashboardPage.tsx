@@ -114,7 +114,7 @@ export function DashboardPage() {
 					<div className="p-5 pb-2">
 						<div className="text-sm font-medium text-foreground">
 							Applications Over Time
-							<span className="ml-2 text-xs font-normal text-muted-foreground">
+							<span className="ml-2 text-xs font-normal text-muted">
 								Last 90 days
 							</span>
 						</div>
@@ -160,7 +160,7 @@ export function DashboardPage() {
 										/>
 										<Tooltip
 											contentStyle={{
-												background: "var(--popover)",
+												background: "var(--overlay)",
 												border: "1px solid var(--border)",
 												borderRadius: 8,
 												fontSize: 12,
