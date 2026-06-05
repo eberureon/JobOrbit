@@ -372,7 +372,10 @@ export function ApplicationDialog({
 										<Label className="text-sm font-medium text-foreground">
 											Notes
 										</Label>
-										<TextArea placeholder="Recruiter contact, interview prep, etc." />
+										<TextArea
+											rows={4}
+											placeholder="Recruiter contact, interview prep, etc."
+										/>
 										<FieldError>{fieldState.error?.message}</FieldError>
 									</TextField>
 								)}

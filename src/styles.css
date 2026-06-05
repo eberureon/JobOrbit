@@ -270,6 +270,11 @@ pre code {
   &:focus {
     --tw-ring-offset-width: 2px;
   }
+
+  .dark &,
+  [data-theme="dark"] & {
+    --tw-ring-offset-color: var(--background);
+  }
 }
 
 @layer components {
@@ -279,6 +284,11 @@ pre code {
 
     &:focus {
       --tw-ring-offset-width: 2px;
+    }
+
+    .dark &,
+    [data-theme="dark"] & {
+      --tw-ring-offset-color: var(--background);
     }
   }
 }
