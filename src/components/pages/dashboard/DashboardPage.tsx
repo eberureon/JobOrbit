@@ -111,7 +111,7 @@ export function DashboardPage() {
 
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 				<div className="lg:col-span-2 rounded-xl border border-card-border bg-card card-hairline">
-					<div className="p-5 pb-2">
+					<div className="p-5 pb-0">
 						<div className="text-sm font-medium text-foreground">
 							Applications Over Time
 							<span className="ml-2 text-xs font-normal text-muted">
@@ -119,7 +119,7 @@ export function DashboardPage() {
 							</span>
 						</div>
 					</div>
-					<div className="px-5 pb-5 pt-0">
+					<div className="p-5 pt-2 h-[calc(100%-40px)]">
 						<TimelineChart
 							data={stats?.timeline ?? []}
 							loading={statsLoading}
@@ -128,24 +128,24 @@ export function DashboardPage() {
 				</div>
 
 				<div className="rounded-xl border border-card-border bg-card card-hairline">
-					<div className="p-5 pb-2">
+					<div className="p-5 pb-0">
 						<div className="text-sm font-medium text-foreground">
 							Status Breakdown
 						</div>
 					</div>
-					<div className="p-5 pt-2">
+					<div className="flex flex-col justify-around px-5 pb-5 h-[calc(100%-40px)]">
 						<div
 							className="h-64 flex items-center justify-center"
 							data-testid="chart-status"
 						>
 							{statsLoading ? (
-								<Skeleton className="w-40 h-40 rounded-full" />
+								<Skeleton className="w-40 h-40 items-center rounded-full" />
 							) : pieData.length === 0 ? (
 								<div className="w-full text-center text-sm text-muted-foreground">
 									No data yet
 								</div>
 							) : (
-								<ResponsiveContainer width="100%" height={256}>
+								<ResponsiveContainer width="100%" height="100%">
 									<PieChart>
 										<Pie
 											data={pieData}
@@ -170,7 +170,7 @@ export function DashboardPage() {
 								</ResponsiveContainer>
 							)}
 						</div>
-						<div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
+						<div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
 							{STATUS_ORDER.map((s) => (
 								<div key={s} className="flex items-center justify-between">
 									<div className="flex items-center gap-1.5">
