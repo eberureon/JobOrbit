@@ -20,7 +20,7 @@
 		"lint:fix": "oxlint --fix",
 		"fmt": "oxfmt",
 		"fmt:check": "oxfmt --check",
-		"prepare": "husky"
+		"prepare": "if command -v husky; then husky; fi"
 	},
 	"dependencies": {
 		"@faker-js/faker": "^10.4.0",
