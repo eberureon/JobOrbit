@@ -25,6 +25,7 @@ export function Sidebar({
 				<div
 					className={`flex items-center ${collapsed ? "flex-col gap-3" : "gap-1"}`}
 				>
+					<ThemeToggle />
 					<Button
 						type="button"
 						variant="ghost"
@@ -38,7 +39,6 @@ export function Sidebar({
 							<PanelLeftClose className="h-4 w-4" />
 						)}
 					</Button>
-					<ThemeToggle />
 				</div>
 			</div>
 			<div className="flex-1 overflow-y-auto">

@@ -11,7 +11,6 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 COPY package.json bun.lock ./
-ENV HUSKY=0
 RUN bun install --frozen-lockfile
 
 # ---------- Stage 2: build ----------
@@ -36,7 +35,6 @@ RUN curl -fsSL https://bun.sh/install | bash
 ENV PATH="/root/.bun/bin:${PATH}"
 
 COPY package.json bun.lock ./
-ENV HUSKY=0
 RUN bun install --frozen-lockfile --production
 
 # ---------- Stage 4: runtime ----------
