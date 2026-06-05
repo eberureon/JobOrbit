@@ -1,16 +1,19 @@
 import type { Application, StatusHistory } from "../db/schema";
 import type { ApplicationStatus, Stats } from "./types";
-import { toLocalDateString } from "./date";
 
 export function computeStats(
 	rows: Application[],
 	history: StatusHistory[] = [],
+	locale?: string,
 ): Stats {
 	const now = new Date();
 	const dayMs = 24 * 60 * 60 * 1000;
 	const startOfDay = (d: Date) =>
 		new Date(d.getFullYear(), d.getMonth(), d.getDate());
 	const today = startOfDay(now);
+	const timelineFormatter = new Intl.DateTimeFormat(locale || "de-DE", {
+		dateStyle: "short",
+	});
 
 	let last7 = 0;
 	let last30 = 0;
@@ -77,12 +80,12 @@ export function computeStats(
 		if (isNaN(d.getTime())) continue;
 		const diff = today.getTime() - startOfDay(d).getTime();
 		if (diff < 0 || diff > 90 * dayMs) continue;
-		const key = toLocalDateString(startOfDay(d));
+		const key = timelineFormatter.format(startOfDay(d));
 		tlMap[key] = (tlMap[key] || 0) + 1;
 	}
 	for (let i = 89; i >= 0; i--) {
 		const d = new Date(today.getTime() - i * dayMs);
-		const key = toLocalDateString(d);
+		const key = timelineFormatter.format(d);
 		timeline.push({ date: key, count: tlMap[key] || 0 });
 	}
 

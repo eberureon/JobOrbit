@@ -44,9 +44,11 @@ export const deleteApplication = createServerFn({ method: "POST" })
 		return { success: true };
 	});
 
-export const getStats = createServerFn({ method: "GET" }).handler(async () => {
-	return db.stats();
-});
+export const getStats = createServerFn({ method: "GET" })
+	.inputValidator((data: { locale?: string }) => data)
+	.handler(async ({ data }) => {
+		return db.stats(data.locale);
+	});
 
 export const getStatusHistory = createServerFn({ method: "GET" })
 	.inputValidator((data: { applicationId: number }) => data)

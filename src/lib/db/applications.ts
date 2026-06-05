@@ -73,8 +73,8 @@ export function bulkInsert(rows: InsertApplication[]) {
 	);
 }
 
-export function stats() {
+export function stats(locale?: string) {
 	const rows = listAll();
 	const history = listAllStatusHistory();
-	return computeStats(rows, history) as Stats;
+	return computeStats(rows, history, locale) as Stats;
 }

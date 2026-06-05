@@ -27,7 +27,7 @@ const STATUS_ORDER: ApplicationStatus[] = [
 export function DashboardPage() {
 	const { data: stats, isLoading: statsLoading } = useQuery<Stats>({
 		queryKey: ["stats"],
-		queryFn: () => getStats(),
+		queryFn: () => getStats({ data: { locale } }),
 	});
 	const { data: applications = [] } = useQuery<Application[]>({
 		queryKey: ["applications"],

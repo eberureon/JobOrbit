@@ -8,6 +8,7 @@ import {
 	YAxis,
 } from "recharts";
 import { Skeleton } from "@heroui/react";
+import { formatMonthDay } from "~/lib/date";
 
 export function TimelineChart({
 	data,
@@ -37,7 +38,13 @@ export function TimelineChart({
 					<Skeleton className="w-full h-full rounded-lg" />
 				</div>
 			) : width > 0 ? (
-				<AreaChart width={width} height={width / 2} data={data}>
+				<AreaChart
+					width={width}
+					height={width / 2}
+					data={data}
+					title="Applications Over Time"
+					desc="Shows applied applications over the last 90 days"
+				>
 					<defs>
 						<linearGradient id="g-timeline" x1="0" y1="0" x2="0" y2="1">
 							<stop offset="0%" stopColor="var(--accent)" stopOpacity={0.3} />
@@ -55,10 +62,7 @@ export function TimelineChart({
 							fill: "var(--muted)",
 							fontSize: 11,
 						}}
-						tickFormatter={(d: string) => {
-							const dt = new Date(d);
-							return `${dt.getMonth() + 1}/${dt.getDate()}`;
-						}}
+						tickFormatter={(d: string) => formatMonthDay(d)}
 						interval={Math.max(Math.floor(((data.length ?? 90) - 1) / 6), 0)}
 						stroke="var(--border)"
 					/>
