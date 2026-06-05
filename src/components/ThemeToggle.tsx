@@ -1,16 +1,17 @@
+import { Button } from "@heroui/react";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { type ThemeMode, useSettings } from "~/lib/use-settings";
 
 const NEXT: Record<ThemeMode, ThemeMode> = {
 	system: "dark",
 	dark: "light",
-	light: "system",
+	light: "dark",
 };
 
 const LABELS: Record<ThemeMode, string> = {
 	system: "Switch to dark mode",
 	dark: "Switch to light mode",
-	light: "Switch to system mode",
+	light: "Switch to dark mode",
 };
 
 const ICONS: Record<ThemeMode, typeof Moon> = {
@@ -24,13 +25,14 @@ export function ThemeToggle() {
 	const Icon = ICONS[settings.theme];
 
 	return (
-		<button
+		<Button
 			type="button"
+			isIconOnly
+			variant="ghost"
 			onClick={() => update({ theme: NEXT[settings.theme] })}
-			className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 transition-colors"
 			aria-label={LABELS[settings.theme]}
 		>
 			<Icon className="h-4 w-4" />
-		</button>
+		</Button>
 	);
 }
