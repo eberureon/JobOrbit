@@ -16,7 +16,6 @@
 		"db:push": "drizzle-kit push",
 		"db:pull": "drizzle-kit pull",
 		"db:studio": "drizzle-kit studio",
-		"format": "biome format",
 		"lint": "oxlint",
 		"lint:fix": "oxlint --fix",
 		"fmt": "oxfmt",
