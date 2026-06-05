@@ -24,7 +24,11 @@ export function TimelineChart({
 					<Skeleton className="w-full h-full rounded-lg" />
 				</div>
 			) : (
-				<ResponsiveContainer width="100%" height="100%">
+				<ResponsiveContainer
+					width="100%"
+					height="100%"
+					initialDimension={{ width: 1, height: 1 }}
+				>
 					<AreaChart
 						data={data}
 						title="Applications Over Time"

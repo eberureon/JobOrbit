@@ -145,7 +145,11 @@ export function DashboardPage() {
 									No data yet
 								</div>
 							) : (
-								<ResponsiveContainer width="100%" height="100%">
+								<ResponsiveContainer
+									width="100%"
+									height="100%"
+									initialDimension={{ width: 1, height: 1 }}
+								>
 									<PieChart>
 										<Pie
 											data={pieData}
