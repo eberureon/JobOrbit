@@ -1,8 +1,17 @@
-import { Button, Input, TextArea, Skeleton } from "@heroui/react";
+import {
+	Button,
+	Input,
+	Label,
+	TextArea,
+	TextField,
+	Skeleton,
+} from "@heroui/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Download, Save } from "lucide-react";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import type { InsertResume, Resume } from "~/db/schema";
 import { useToast } from "~/hooks/use-toast";
 import { exportMarkdown } from "~/lib/export-markdown";
@@ -90,17 +99,21 @@ function ResumePreview({
 
 			{values.experience && (
 				<Section title="Experience">
-					<pre className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90 font-sans">
-						{values.experience}
-					</pre>
+					<div className="prose prose-sm prose-p:my-1 max-w-none text-foreground/90 prose-headings:text-foreground prose-strong:text-foreground prose-em:text-foreground prose-code:text-foreground prose-blockquote:text-foreground prose-li:text-foreground prose-a:text-primary">
+						<ReactMarkdown remarkPlugins={[remarkGfm]}>
+							{values.experience}
+						</ReactMarkdown>
+					</div>
 				</Section>
 			)}
 
 			{values.education && (
 				<Section title="Education">
-					<pre className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90 font-sans">
-						{values.education}
-					</pre>
+					<div className="prose prose-sm prose-p:my-1 max-w-none text-foreground/90 prose-headings:text-foreground prose-strong:text-foreground prose-em:text-foreground prose-code:text-foreground prose-blockquote:text-foreground prose-li:text-foreground prose-a:text-primary">
+						<ReactMarkdown remarkPlugins={[remarkGfm]}>
+							{values.education}
+						</ReactMarkdown>
+					</div>
 				</Section>
 			)}
 
@@ -239,42 +252,54 @@ export function ResumePage() {
 									control={form.control}
 									name="full_name"
 									render={({ field }) => (
-										<Input
-											data-testid="input-resume-name"
-											label="Full name"
-											{...field}
-										/>
+										<TextField fullWidth name="full_name" className="gap-2">
+											<Label>Full name</Label>
+											<Input data-testid="input-resume-name" {...field} />
+										</TextField>
 									)}
 								/>
 								<Controller
 									control={form.control}
 									name="headline"
 									render={({ field }) => (
-										<Input
-											label="Headline"
-											placeholder="Senior Frontend Engineer"
-											{...field}
-										/>
+										<TextField fullWidth name="headline" className="gap-2">
+											<Label>Headline</Label>
+											<Input
+												placeholder="Senior Frontend Engineer"
+												{...field}
+											/>
+										</TextField>
 									)}
 								/>
 								<Controller
 									control={form.control}
 									name="email"
 									render={({ field }) => (
-										<Input label="Email" type="email" {...field} />
+										<TextField fullWidth name="email" className="gap-2">
+											<Label>Email</Label>
+											<Input type="email" {...field} />
+										</TextField>
 									)}
 								/>
 								<Controller
 									control={form.control}
 									name="phone"
-									render={({ field }) => <Input label="Phone" {...field} />}
+									render={({ field }) => (
+										<TextField fullWidth name="phone" className="gap-2">
+											<Label>Phone</Label>
+											<Input {...field} />
+										</TextField>
+									)}
 								/>
 								<div className="sm:col-span-2">
 									<Controller
 										control={form.control}
 										name="location"
 										render={({ field }) => (
-											<Input label="Location" {...field} />
+											<TextField fullWidth name="location" className="gap-2">
+												<Label>Location</Label>
+												<Input {...field} />
+											</TextField>
 										)}
 									/>
 								</div>
@@ -284,12 +309,14 @@ export function ResumePage() {
 								control={form.control}
 								name="summary"
 								render={({ field }) => (
-									<TextArea
-										label="Summary"
-										minRows={4}
-										placeholder="A short professional summary..."
-										{...field}
-									/>
+									<TextField fullWidth name="summary" className="gap-2">
+										<Label>Summary</Label>
+										<TextArea
+											rows={6}
+											placeholder="A short professional summary..."
+											{...field}
+										/>
+									</TextField>
 								)}
 							/>
 
@@ -297,13 +324,15 @@ export function ResumePage() {
 								control={form.control}
 								name="skills"
 								render={({ field }) => (
-									<TextArea
-										label="Skills (one per line)"
-										minRows={5}
-										className="font-mono-num"
-										placeholder={"TypeScript\nReact\nNode.js"}
-										{...field}
-									/>
+									<TextField fullWidth name="skills" className="gap-2">
+										<Label>Skills (one per line)</Label>
+										<TextArea
+											rows={4}
+											className="font-mono-num"
+											placeholder={"TypeScript\nReact\nNode.js"}
+											{...field}
+										/>
+									</TextField>
 								)}
 							/>
 
@@ -311,15 +340,17 @@ export function ResumePage() {
 								control={form.control}
 								name="experience"
 								render={({ field }) => (
-									<TextArea
-										label="Experience (markdown)"
-										minRows={8}
-										className="font-mono-num text-xs"
-										placeholder={
-											"### Senior Engineer \u2014 Acme Inc.\n2022 \u2014 Present\n- Built X\n- Led Y"
-										}
-										{...field}
-									/>
+									<TextField fullWidth name="experience" className="gap-2">
+										<Label>Experience (markdown)</Label>
+										<TextArea
+											rows={8}
+											className="font-mono-num"
+											placeholder={
+												"### Senior Engineer \u2014 Acme Inc.\n2022 \u2014 Present\n- Built X\n- Led Y"
+											}
+											{...field}
+										/>
+									</TextField>
 								)}
 							/>
 
@@ -327,15 +358,17 @@ export function ResumePage() {
 								control={form.control}
 								name="education"
 								render={({ field }) => (
-									<TextArea
-										label="Education (markdown)"
-										minRows={5}
-										className="font-mono-num text-xs"
-										placeholder={
-											"### BSc Computer Science \u2014 University Name\n2014 \u2014 2018"
-										}
-										{...field}
-									/>
+									<TextField fullWidth name="education" className="gap-2">
+										<Label>Education (markdown)</Label>
+										<TextArea
+											rows={8}
+											className="font-mono-num"
+											placeholder={
+												"### BSc Computer Science \u2014 University Name\n2014 \u2014 2018"
+											}
+											{...field}
+										/>
+									</TextField>
 								)}
 							/>
 
@@ -343,15 +376,17 @@ export function ResumePage() {
 								control={form.control}
 								name="links"
 								render={({ field }) => (
-									<TextArea
-										label="Links (one per line)"
-										minRows={4}
-										className="font-mono-num text-xs"
-										placeholder={
-											"https://github.com/you\nhttps://linkedin.com/in/you"
-										}
-										{...field}
-									/>
+									<TextField fullWidth name="links" className="gap-2">
+										<Label>Links (one per line)</Label>
+										<TextArea
+											rows={4}
+											className="font-mono-num"
+											placeholder={
+												"https://github.com/you\nhttps://linkedin.com/in/you"
+											}
+											{...field}
+										/>
+									</TextField>
 								)}
 							/>
 						</form>
