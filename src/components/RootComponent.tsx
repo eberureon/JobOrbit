@@ -2,7 +2,7 @@ import { Link, Outlet } from "@tanstack/react-router";
 import { Menu, Settings, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
-import { NavLinks, Sidebar } from "./Sidebar";
+import { Sidebar, NavLinks } from "./sidebar";
 
 export function RootComponent() {
 	const [mobileOpen, setMobileOpen] = useState(false);
