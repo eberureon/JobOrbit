@@ -68,4 +68,20 @@ export const statusHistory = sqliteTable("status_history", {
 		.default(sql`(CURRENT_TIMESTAMP)`),
 });
 
+export const lock = sqliteTable("lock", {
+	id: integer("id").primaryKey(),
+	enabled: integer("enabled", { mode: "boolean" }).notNull().default(false),
+	hash: text("hash"),
+	session_ttl_hours: integer("session_ttl_hours"),
+});
+
+export const insertLockSchema = createInsertSchema(lock, {
+	enabled: z.boolean(),
+	hash: z.string().nullable().optional(),
+	session_ttl_hours: z.number().int().nullable().optional(),
+}).omit({ id: true });
+
+export type InsertLock = z.infer<typeof insertLockSchema>;
+export type Lock = typeof lock.$inferSelect;
+
 export type StatusHistory = typeof statusHistory.$inferSelect;

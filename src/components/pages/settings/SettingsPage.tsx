@@ -1,12 +1,15 @@
-import { useState } from "react";
 import {
 	AlertDialog,
 	Button,
+	Input,
+	Label,
 	ListBox,
 	Select,
 	Separator,
 	Switch,
 } from "@heroui/react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import {
 	LOCALE_OPTIONS,
 	PAGE_SIZE_OPTIONS,
@@ -16,10 +19,110 @@ import {
 	useSettings,
 } from "~/lib/use-settings";
 import { SettingRow, ThemeSelector } from "./index";
+import { getLock, upsertLock } from "~/lib/server/lock.functions";
+
+const TTL_OPTIONS = [
+	{ value: 24, label: "24 hours" },
+	{ value: 48, label: "48 hours" },
+	{ value: 72, label: "72 hours" },
+	{ value: 168, label: "1 week" },
+	{ value: -1, label: "Forever" },
+];
 
 export function SettingsPage() {
 	const { settings, update } = useSettings();
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+	const queryClient = useQueryClient();
+
+	const { data: lock } = useQuery({
+		queryKey: ["lock-config"],
+		queryFn: () => getLock(),
+	});
+
+	const [lockEnabled, setLockEnabled] = useState(false);
+	const [password, setPassword] = useState("");
+	const [confirmPassword, setConfirmPassword] = useState("");
+	const [currentPassword, setCurrentPassword] = useState("");
+	const [sessionTtl, setSessionTtl] = useState<number | null>(null);
+
+	const [lockError, setLockError] = useState("");
+	const [lockSuccess, setLockSuccess] = useState(false);
+
+	useEffect(() => {
+		if (lock) {
+			setLockEnabled(lock.enabled);
+			setSessionTtl(lock.session_ttl_hours);
+		}
+	}, [lock]);
+
+	const upsertMutation = useMutation({
+		mutationFn: async (data: {
+			enabled?: boolean;
+			password?: string;
+			currentPassword?: string;
+			session_ttl_hours?: number | null;
+		}) => upsertLock({ data }),
+		onSuccess: () => {
+			setLockSuccess(true);
+			setLockError("");
+			setPassword("");
+			setConfirmPassword("");
+			setCurrentPassword("");
+			queryClient.invalidateQueries({ queryKey: ["lock-config"] });
+			queryClient.invalidateQueries({ queryKey: ["session"] });
+		},
+		onError: (err: Error) => {
+			setLockError(err.message);
+			setLockSuccess(false);
+		},
+	});
+
+	function handleSaveLock() {
+		setLockError("");
+		setLockSuccess(false);
+
+		if (lockEnabled && password && password !== confirmPassword) {
+			setLockError("Passwords do not match");
+			return;
+		}
+
+		const data: {
+			enabled?: boolean;
+			password?: string;
+			currentPassword?: string;
+			session_ttl_hours?: number | null;
+		} = {};
+
+		if (
+			lock?.enabled &&
+			(password ||
+				lockEnabled !== lock?.enabled ||
+				sessionTtl !== lock?.session_ttl_hours)
+		) {
+			if (!currentPassword) {
+				setLockError("Current password is required to change lock settings");
+				return;
+			}
+			data.currentPassword = currentPassword;
+		}
+
+		if (lockEnabled !== lock?.enabled) {
+			data.enabled = lockEnabled;
+		}
+
+		if (password) {
+			data.password = password;
+		}
+
+		const ttl = sessionTtl === -1 ? null : sessionTtl;
+		if (ttl !== lock?.session_ttl_hours) {
+			data.session_ttl_hours = ttl;
+		}
+
+		if (Object.keys(data).length === 0) return;
+
+		upsertMutation.mutate(data);
+	}
 
 	function handleDeleteToggle(checked: boolean) {
 		if (!checked) {
@@ -188,6 +291,123 @@ export function SettingsPage() {
 						</Switch.Control>
 					</Switch>
 				</SettingRow>
+			</div>
+
+			<div className="rounded-xl border border-card-border bg-card card-hairline">
+				<div className="px-6 pt-6 pb-2">
+					<h2 className="text-sm font-semibold text-foreground">App Lock</h2>
+				</div>
+				<div className="px-6 pb-2">
+					<SettingRow
+						label="Enable lock"
+						description="Require a password to access the app"
+					>
+						<Switch
+							isSelected={lockEnabled}
+							onChange={(checked) => setLockEnabled(checked)}
+						>
+							<Switch.Control>
+								<Switch.Thumb />
+							</Switch.Control>
+						</Switch>
+					</SettingRow>
+				</div>
+				{lockEnabled && (
+					<>
+						<div className="px-6">
+							<Separator />
+						</div>
+						<div className="px-6 pt-2 space-y-4">
+							<div className="space-y-1">
+								<Label className="text-sm font-medium text-foreground">
+									Password
+								</Label>
+								<Input
+									type="password"
+									placeholder={lock?.hash ? "Change password" : "Set password"}
+									value={password}
+									onChange={(e) => setPassword(e.target.value)}
+								/>
+							</div>
+							<div className="space-y-1">
+								<Label className="text-sm font-medium text-foreground">
+									Confirm password
+								</Label>
+								<Input
+									type="password"
+									placeholder="Re-enter password"
+									value={confirmPassword}
+									onChange={(e) => setConfirmPassword(e.target.value)}
+								/>
+							</div>
+							<div className="space-y-1">
+								<Label className="text-sm font-medium text-foreground">
+									Session duration
+								</Label>
+								<Select
+									value={String(sessionTtl ?? -1)}
+									onChange={(v) =>
+										setSessionTtl(Number(v) === -1 ? null : Number(v))
+									}
+									className="w-40"
+								>
+									<Select.Trigger>
+										<Select.Value />
+										<Select.Indicator />
+									</Select.Trigger>
+									<Select.Popover>
+										<ListBox>
+											{TTL_OPTIONS.map((opt) => (
+												<ListBox.Item
+													key={opt.value}
+													id={String(opt.value)}
+													textValue={opt.label}
+												>
+													{opt.label}
+													<ListBox.ItemIndicator />
+												</ListBox.Item>
+											))}
+										</ListBox>
+									</Select.Popover>
+								</Select>
+							</div>
+						</div>
+					</>
+				)}
+				{lock?.enabled && (
+					<>
+						<div className="px-6">
+							<Separator />
+						</div>
+						<div className="px-6 pb-2 pt-2 space-y-1">
+							<Label className="text-sm font-medium text-foreground">
+								Current password
+							</Label>
+							<Input
+								type="password"
+								placeholder="Enter current password to save changes"
+								value={currentPassword}
+								onChange={(e) => setCurrentPassword(e.target.value)}
+							/>
+						</div>
+					</>
+				)}
+				<div className="px-6 pb-6 pt-4">
+					{lockError && (
+						<p className="text-sm text-red-500 mb-2">{lockError}</p>
+					)}
+					{lockSuccess && (
+						<p className="text-sm text-green-500 mb-2">Lock settings saved.</p>
+					)}
+					<Button
+						variant="solid"
+						color="primary"
+						onPress={handleSaveLock}
+						isLoading={upsertMutation.isPending}
+					>
+						Save
+					</Button>
+				</div>
 			</div>
 
 			<AlertDialog.Backdrop
