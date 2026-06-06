@@ -23,7 +23,7 @@ import {
 } from "~/lib/csv";
 import { ApplicationActionBar } from "./ApplicationActionBar";
 import { ApplicationFilterBar } from "./ApplicationFilterBar";
-import { ApplicationsTable } from "./ApplicationsTable";
+import { ApplicationsTable } from "~/components/ApplicationsTable";
 import { ApplicationDialog } from "./ApplicationDialog";
 import { computeApplicationList } from "./applicationList";
 
