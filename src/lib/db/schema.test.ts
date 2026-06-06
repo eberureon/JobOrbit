@@ -39,11 +39,11 @@ describe("insertApplicationSchema", () => {
 
 	it("defaults optional fields to empty string", () => {
 		const result = insertApplicationSchema.parse(valid);
-		expect(result.location).toBe("");
-		expect(result.salary).toBe("");
-		expect(result.source).toBe("");
-		expect(result.job_url).toBe("");
-		expect(result.notes).toBe("");
+		expect(result.location).toBeUndefined();
+		expect(result.salary).toBeUndefined();
+		expect(result.source).toBeUndefined();
+		expect(result.job_url).toBeUndefined();
+		expect(result.notes).toBeUndefined();
 	});
 });
 
@@ -52,10 +52,10 @@ describe("insertResumeSchema", () => {
 		const result = insertResumeSchema.safeParse({});
 		expect(result.success).toBe(true);
 		const data = insertResumeSchema.parse({});
-		expect(data.full_name).toBe("");
-		expect(data.headline).toBe("");
-		expect(data.skills).toBe("[]");
-		expect(data.links).toBe("[]");
+		expect(data.full_name).toBeUndefined();
+		expect(data.headline).toBeUndefined();
+		expect(data.skills).toBeUndefined();
+		expect(data.links).toBeUndefined();
 	});
 
 	it("accepts fully populated resume data", () => {

@@ -4,19 +4,6 @@ import { db as defaultDb } from "~/db/index.ts";
 import type { InsertResume } from "~/db/schema.ts";
 import { insertResumeSchema, resume } from "~/db/schema.ts";
 
-const EMPTY_RESUME = {
-	full_name: "",
-	headline: "",
-	email: "",
-	phone: "",
-	location: "",
-	summary: "",
-	skills: "[]",
-	experience: "",
-	education: "",
-	links: "[]",
-};
-
 export function createResumeRepo(database: DrizzleDb) {
 	return {
 		getResume() {
@@ -26,11 +13,7 @@ export function createResumeRepo(database: DrizzleDb) {
 				.where(eq(resume.id, 1))
 				.get();
 			if (existing) return existing;
-			return database
-				.insert(resume)
-				.values({ id: 1, ...EMPTY_RESUME })
-				.returning()
-				.get();
+			return database.insert(resume).values({ id: 1 }).returning().get();
 		},
 
 		upsertResume(data: InsertResume) {
