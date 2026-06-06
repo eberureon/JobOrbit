@@ -9,7 +9,7 @@ export function SettingsLink({ collapsed }: { collapsed?: boolean }) {
 		<Link
 			to="/settings"
 			onClick={() => {}}
-			className={`group relative flex items-center rounded-md py-2 text-sm font-medium transition-colors ${
+			className={`group relative flex items-center rounded-md py-2 px-3 text-sm font-medium transition-colors ${
 				collapsed ? "justify-center" : "gap-3 px-3"
 			} ${
 				isActive
