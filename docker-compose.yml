@@ -13,7 +13,7 @@ services:
         NODE_ENV: ${NODE_ENV:-production}
         HOST: ${HOST:-0.0.0.0}
         PORT: ${PORT:-9000}
-        DATABASE_URL: ${DATABASE_URL:-/app/data/job-orbit-data.db}
+        DATABASE_URL: ${DATABASE_URL:-/app/data/joborbit.db}
     container_name: job-orbit
     restart: unless-stopped
     ports:
@@ -21,7 +21,7 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: ${PORT:-9000}
-      DATABASE_URL: ${DATABASE_URL:-/app/data/job-orbit-data.db}
+      DATABASE_URL: ${DATABASE_URL:-/app/data/joborbit.db}
       TZ: ${TZ:-Etc/UTC}
     env_file:
       - .env.${NODE_ENV:-production}
