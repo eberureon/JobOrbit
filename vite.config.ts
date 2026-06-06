@@ -11,7 +11,13 @@ const config = defineConfig({
 	resolve: { tsconfigPaths: true },
 	plugins: [
 		...(process.env.NODE_ENV !== "production" ? [devtools()] : []),
-		tanstackStart(),
+		tanstackStart({
+			server: {
+				build: {
+					inlineCss: true,
+				},
+			},
+		}),
 		viteReact(),
 		tailwindcss(),
 	],

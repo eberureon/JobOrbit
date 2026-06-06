@@ -11,7 +11,7 @@ import { NotFound } from "~/components/NotFound";
 import { RootComponent } from "~/components/RootComponent";
 import { ErrorComponent } from "~/components/ErrorComponent";
 import { SettingsProvider } from "~/lib/use-settings";
-import appCss from "~/styles.css?url";
+import "~/styles.css";
 
 interface MyRouterContext {
 	queryClient: QueryClient;
@@ -27,7 +27,6 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			{ name: "viewport", content: "width=device-width, initial-scale=1" },
 			{ title: "JobOrbit — Job Application Tracker" },
 		],
-		links: [{ rel: "stylesheet", href: appCss }],
 	}),
 	shellComponent: DocumentShell,
 	component: RootComponent,
