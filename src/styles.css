@@ -281,8 +281,9 @@ pre code {
 
 @layer components {
   .input,
-  .textarea {
-    @apply border border-border shadow-none;
+  .textarea,
+  .select {
+    @apply border border-border rounded-xl shadow-none;
 
     &:focus {
       --tw-ring-offset-width: 2px;
