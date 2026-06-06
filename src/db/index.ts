@@ -73,13 +73,26 @@ function ensureSchema(
 			);
 
 			for (const file of files) {
-				const sql = readFileSync(join(MIGRATIONS_FOLDER, file), "utf-8");
+				const fileSql = readFileSync(join(MIGRATIONS_FOLDER, file), "utf-8");
 				const hash = createHash("sha256")
-					.update(sql)
+					.update(fileSql)
 					.digest("hex")
 					.slice(0, 32);
 				insert.run(hash, new Date().toISOString());
 			}
+		}
+
+		const hasLock = !!(
+			sqlite
+				.prepare(
+					"SELECT count(*) AS c FROM sqlite_master WHERE type='table' AND name='lock'",
+				)
+				.get() as { c: number }
+		).c;
+		if (!hasLock) {
+			sqlite.exec(
+				"CREATE TABLE IF NOT EXISTS `lock` (`id` integer PRIMARY KEY NOT NULL, `enabled` integer DEFAULT false NOT NULL, `hash` text, `session_ttl_hours` integer)",
+			);
 		}
 	} else {
 		migrate(database, { migrationsFolder: MIGRATIONS_FOLDER });

@@ -1,12 +1,31 @@
 import { Link, Outlet } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { Menu, Settings, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { checkSession } from "~/lib/server/lock.functions";
+import { LockGate } from "./LockGate";
 import { Logo } from "./Logo";
 import { Sidebar, NavLinks } from "./sidebar";
 
 export function RootComponent() {
 	const [mobileOpen, setMobileOpen] = useState(false);
 	const [sidebarOpen, setSidebarOpen] = useState(true);
+	const [isLocked, setIsLocked] = useState<boolean | null>(null);
+
+	const { data: session } = useQuery({
+		queryKey: ["session"],
+		queryFn: () => checkSession(),
+	});
+
+	useEffect(() => {
+		if (session && isLocked === null) {
+			setIsLocked(!session.authenticated);
+		}
+	}, [session, isLocked]);
+
+	if (isLocked === null) return null;
+	if (isLocked) return <LockGate onUnlocked={() => setIsLocked(false)} />;
+
 	const collapsed = !sidebarOpen;
 	const toggleMobileMenu = () => setMobileOpen((v) => !v);
 
@@ -34,6 +53,7 @@ export function RootComponent() {
 				<Sidebar
 					collapsed={collapsed}
 					onToggle={() => setSidebarOpen((v) => !v)}
+					onLock={() => setIsLocked(true)}
 				/>
 
 				{mobileOpen && (
