@@ -1,5 +1,10 @@
 # syntax=docker/dockerfile:1.7
 
+ARG NODE_ENV
+ARG HOST
+ARG PORT
+ARG DATABASE_URL
+
 # ---------- Stage 1: deps ----------
 # Install all dependencies (including dev) needed to build the app.
 FROM oven/bun:1 AS deps
@@ -42,10 +47,10 @@ RUN bun install --frozen-lockfile --production
 FROM node:lts-slim AS runtime
 WORKDIR /app
 
-ENV NODE_ENV=production \
-  PORT=9000 \
-  HOST=0.0.0.0 \
-  DATABASE_URL=/app/data/joborbit.db
+ENV NODE_ENV=${NODE_ENV} \
+  PORT=${PORT} \
+  HOST=${HOST} \
+  DATABASE_URL=${DATABASE_URL}
 
 COPY --chown=node:node package.json ./
 COPY --chown=node:node --from=prod-deps /app/node_modules ./node_modules
@@ -58,7 +63,7 @@ COPY --chown=node:node --from=build /app/drizzle ./dist/drizzle
 RUN install -d -o node -g node /app/data
 USER node
 
-EXPOSE 9000
+EXPOSE ${NODE_ENV}
 VOLUME ["/app/data"]
 
 CMD ["node", "./node_modules/.bin/srvx", "--prod", "-s", "../client", "dist/server/server.js"]
