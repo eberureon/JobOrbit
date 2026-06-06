@@ -4,6 +4,7 @@ import { Logo } from "../Logo";
 import { ThemeToggle } from "../ThemeToggle";
 import { SettingsLink } from "./SettingsLinks";
 import { NavLinks } from "./NavLinks";
+import { Link } from "@tanstack/react-router";
 
 export function Sidebar({
 	collapsed,
@@ -21,7 +22,9 @@ export function Sidebar({
 			<div
 				className={`flex items-center border-b border-sidebar-border ${collapsed ? "flex-col gap-3 p-2" : "justify-between p-4"}`}
 			>
-				<Logo collapsed={collapsed} />
+				<Link to="/">
+					<Logo collapsed={collapsed} />
+				</Link>
 				<div
 					className={`flex items-center ${collapsed ? "flex-col gap-3" : "gap-1"}`}
 				>
