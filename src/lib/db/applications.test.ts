@@ -1,13 +1,30 @@
-import { describe, expect, it } from "vitest";
-import {
-	bulkInsert,
-	getById,
-	insert,
-	listAll,
-	remove,
-	update,
-} from "./applications";
-import { listByApplicationId } from "./status-history";
+import { beforeAll, describe, expect, it } from "vitest";
+import { createDb } from "~/db/index";
+import { createApplicationRepo } from "./applications";
+import { createStatusHistoryRepo } from "./status-history";
+
+let listAll: ReturnType<typeof createApplicationRepo>["listAll"];
+let getById: ReturnType<typeof createApplicationRepo>["getById"];
+let insert: ReturnType<typeof createApplicationRepo>["insert"];
+let update: ReturnType<typeof createApplicationRepo>["update"];
+let remove: ReturnType<typeof createApplicationRepo>["remove"];
+let bulkInsert: ReturnType<typeof createApplicationRepo>["bulkInsert"];
+let listByApplicationId: ReturnType<
+	typeof createStatusHistoryRepo
+>["listByApplicationId"];
+
+beforeAll(() => {
+	const db = createDb(":memory:");
+	const appRepo = createApplicationRepo(db);
+	const historyRepo = createStatusHistoryRepo(db);
+	listAll = appRepo.listAll;
+	getById = appRepo.getById;
+	insert = appRepo.insert;
+	update = appRepo.update;
+	remove = appRepo.remove;
+	bulkInsert = appRepo.bulkInsert;
+	listByApplicationId = historyRepo.listByApplicationId;
+});
 
 const validApp = {
 	company: "Acme Inc",

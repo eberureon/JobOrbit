@@ -1,11 +1,27 @@
-import { describe, expect, it } from "vitest";
-import { insert as insertApp } from "./applications";
-import {
-	deleteByApplicationId,
-	insertEntry,
-	listByApplicationId,
-} from "./status-history";
+import { beforeAll, describe, expect, it } from "vitest";
+import { createDb } from "~/db/index";
+import { createApplicationRepo } from "./applications";
+import { createStatusHistoryRepo } from "./status-history";
 import type { InsertApplication } from "~/db/schema";
+
+let insertApp: ReturnType<typeof createApplicationRepo>["insert"];
+let insertEntry: ReturnType<typeof createStatusHistoryRepo>["insertEntry"];
+let listByApplicationId: ReturnType<
+	typeof createStatusHistoryRepo
+>["listByApplicationId"];
+let deleteByApplicationId: ReturnType<
+	typeof createStatusHistoryRepo
+>["deleteByApplicationId"];
+
+beforeAll(() => {
+	const db = createDb(":memory:");
+	const appRepo = createApplicationRepo(db);
+	const historyRepo = createStatusHistoryRepo(db);
+	insertApp = appRepo.insert;
+	insertEntry = historyRepo.insertEntry;
+	listByApplicationId = historyRepo.listByApplicationId;
+	deleteByApplicationId = historyRepo.deleteByApplicationId;
+});
 
 const validApp: InsertApplication = {
 	company: "Acme Inc",

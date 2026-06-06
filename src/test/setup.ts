@@ -1,8 +1,6 @@
 import { afterEach } from "vitest";
 import { cleanup } from "@testing-library/react";
 
-process.env.DATABASE_URL = ":memory:";
-
 class MockResizeObserver {
 	private callback: ResizeObserverCallback;
 	constructor(callback: ResizeObserverCallback) {
@@ -50,14 +48,4 @@ globalThis.matchMedia =
 
 afterEach(() => {
 	cleanup();
-});
-
-afterEach(async () => {
-	const mod = await import("../db/index.ts");
-	const { statusHistory, applications, resume } =
-		await import("../db/schema.ts");
-
-	mod.db.delete(applications).run();
-	mod.db.delete(statusHistory).run();
-	mod.db.delete(resume).run();
 });

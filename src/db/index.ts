@@ -9,56 +9,81 @@ import { fileURLToPath } from "node:url";
 import * as schema from "./schema.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const MIGRATIONS_FOLDER = resolve(__dirname, "../../drizzle");
 
-const dbPath = process.env.DATABASE_URL || "./data/joborbit.db";
-mkdirSync(dirname(dbPath), { recursive: true });
+export function createDb(dbPath?: string) {
+	const resolvedPath =
+		dbPath ?? process.env.DATABASE_URL ?? "./data/joborbit.db";
+	const isMemory = resolvedPath === ":memory:";
 
-const sqlite = new Database(dbPath);
-sqlite.pragma("journal_mode = WAL");
+	let sqlite: Database.Database;
+	if (isMemory) {
+		sqlite = new Database(":memory:");
+	} else {
+		mkdirSync(dirname(resolvedPath), { recursive: true });
+		sqlite = new Database(resolvedPath);
+		sqlite.pragma("journal_mode = WAL");
+	}
 
-const db = drizzle(sqlite, { schema });
+	const database = drizzle(sqlite, { schema });
+	ensureSchema(sqlite, database, isMemory);
+	return database;
+}
 
-const hasApplications = !!(
-	sqlite
-		.prepare(
-			"SELECT count(*) AS c FROM sqlite_master WHERE type='table' AND name='applications'",
-		)
-		.get() as { c: number }
-).c;
+function ensureSchema(
+	sqlite: Database.Database,
+	database: ReturnType<typeof drizzle<typeof schema>>,
+	isMemory: boolean,
+) {
+	if (isMemory) {
+		migrate(database, { migrationsFolder: MIGRATIONS_FOLDER });
+		return;
+	}
 
-if (hasApplications) {
-	const hasMeta = !!(
+	const hasApplications = !!(
 		sqlite
 			.prepare(
-				"SELECT count(*) AS c FROM sqlite_master WHERE type='table' AND name='__drizzle_migrations'",
+				"SELECT count(*) AS c FROM sqlite_master WHERE type='table' AND name='applications'",
 			)
 			.get() as { c: number }
 	).c;
 
-	if (!hasMeta) {
-		sqlite.exec(`CREATE TABLE __drizzle_migrations (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      hash TEXT NOT NULL UNIQUE,
-      created_at TEXT NOT NULL
-    )`);
+	if (hasApplications) {
+		const hasMeta = !!(
+			sqlite
+				.prepare(
+					"SELECT count(*) AS c FROM sqlite_master WHERE type='table' AND name='__drizzle_migrations'",
+				)
+				.get() as { c: number }
+		).c;
 
-		const migrationDir = resolve(__dirname, "../../drizzle");
-		const files = readdirSync(migrationDir)
-			.filter((f) => f.endsWith(".sql"))
-			.sort();
+		if (!hasMeta) {
+			sqlite.exec(`CREATE TABLE __drizzle_migrations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        hash TEXT NOT NULL UNIQUE,
+        created_at TEXT NOT NULL
+      )`);
 
-		const insert = sqlite.prepare(
-			"INSERT OR IGNORE INTO __drizzle_migrations (hash, created_at) VALUES (?, ?)",
-		);
+			const files = readdirSync(MIGRATIONS_FOLDER)
+				.filter((f) => f.endsWith(".sql"))
+				.sort();
 
-		for (const file of files) {
-			const sql = readFileSync(join(migrationDir, file), "utf-8");
-			const hash = createHash("sha256").update(sql).digest("hex").slice(0, 32);
-			insert.run(hash, new Date().toISOString());
+			const insert = sqlite.prepare(
+				"INSERT OR IGNORE INTO __drizzle_migrations (hash, created_at) VALUES (?, ?)",
+			);
+
+			for (const file of files) {
+				const sql = readFileSync(join(MIGRATIONS_FOLDER, file), "utf-8");
+				const hash = createHash("sha256")
+					.update(sql)
+					.digest("hex")
+					.slice(0, 32);
+				insert.run(hash, new Date().toISOString());
+			}
 		}
+	} else {
+		migrate(database, { migrationsFolder: MIGRATIONS_FOLDER });
 	}
-} else {
-	migrate(db, { migrationsFolder: resolve(__dirname, "../../drizzle") });
 }
 
-export { db };
+export const db = createDb();

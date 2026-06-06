@@ -1,5 +1,16 @@
-import { describe, it, expect } from "vitest";
-import { getResume, upsertResume } from "./resume";
+import { beforeAll, describe, it, expect } from "vitest";
+import { createDb } from "~/db/index";
+import { createResumeRepo } from "./resume";
+
+let getResume: ReturnType<typeof createResumeRepo>["getResume"];
+let upsertResume: ReturnType<typeof createResumeRepo>["upsertResume"];
+
+beforeAll(() => {
+	const db = createDb(":memory:");
+	const repo = createResumeRepo(db);
+	getResume = repo.getResume;
+	upsertResume = repo.upsertResume;
+});
 
 describe("getResume", () => {
 	it("returns a resume with default values when none exists", () => {
