@@ -11,7 +11,7 @@ import {
 } from "~/lib/server/applications.functions";
 import type { ApplicationStatus, Stats } from "~/lib/types";
 import { getEffectiveLocale, useSettings } from "~/lib/use-settings";
-import { ApplicationsTable } from "~/components/ApplicationsTable";
+import { ApplicationsTable } from "~/components/pages/applications/ApplicationsTable";
 import { FunnelRow } from "./FunnelRow";
 import { StatCard } from "./StatCard";
 import { TimelineChart } from "./TimeLineChart";
