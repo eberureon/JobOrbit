@@ -9,6 +9,9 @@ const config = defineConfig({
 		port: 9000,
 	},
 	resolve: { tsconfigPaths: true },
+	ssr: {
+		external: ["better-sqlite3", "drizzle-orm/better-sqlite3"],
+	},
 	plugins: [
 		...(process.env.NODE_ENV !== "production" ? [devtools()] : []),
 		tanstackStart({

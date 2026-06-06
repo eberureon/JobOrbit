@@ -1,98 +1,61 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { db } from "~/db/index.ts";
 import { insertApplicationSchema } from "~/db/schema.ts";
+import { createApplicationRepo } from "~/lib/db/applications.ts";
+import { createStatusHistoryRepo } from "~/lib/db/status-history.ts";
 
-function query<T>(fn: () => T) {
-	return createServerFn({ method: "GET" }).handler(async () => fn());
-}
+const appRepo = createApplicationRepo(db);
+const historyRepo = createStatusHistoryRepo(db);
 
-function mutation<I, O>(input: z.ZodType<I>, fn: (data: I) => O) {
-	return createServerFn({ method: "POST" })
-		.inputValidator(input)
-		.handler(async ({ data }) => fn(data));
-}
-
-export const listApplications = query(async () => {
-	const { createApplicationRepo } = await import("~/lib/db/applications.ts");
-	const { db } = await import("~/db/index.ts");
-	return createApplicationRepo(db).listAll();
-});
-
-export const getApplication = mutation(
-	z.object({ id: z.number() }),
-	async ({ id }) => {
-		const { createApplicationRepo } = await import("~/lib/db/applications.ts");
-		const { db } = await import("~/db/index.ts");
-		return createApplicationRepo(db).getById(id);
-	},
+export const listApplications = createServerFn({ method: "GET" }).handler(
+	async () => appRepo.listAll(),
 );
 
-export const createApplication = mutation(
-	insertApplicationSchema,
-	async (data) => {
-		const { createApplicationRepo } = await import("~/lib/db/applications.ts");
-		const { db } = await import("~/db/index.ts");
-		return createApplicationRepo(db).insert(data);
-	},
-);
+export const getApplication = createServerFn({ method: "GET" })
+	.inputValidator(z.object({ id: z.number() }))
+	.handler(async ({ data }) => appRepo.getById(data.id));
 
-export const updateApplication = mutation(
-	z.object({
-		id: z.number(),
-		data: insertApplicationSchema.partial(),
-	}),
-	async ({ id, data }) => {
-		const { createApplicationRepo } = await import("~/lib/db/applications.ts");
-		const { db } = await import("~/db/index.ts");
-		return createApplicationRepo(db).update(id, data);
-	},
-);
+export const createApplication = createServerFn({ method: "POST" })
+	.inputValidator(insertApplicationSchema)
+	.handler(async ({ data }) => appRepo.insert(data));
 
-export const deleteApplication = mutation(
-	z.object({ id: z.number() }),
-	async ({ id }) => {
-		const { createApplicationRepo } = await import("~/lib/db/applications.ts");
-		const { db } = await import("~/db/index.ts");
-		createApplicationRepo(db).remove(id);
+export const updateApplication = createServerFn({ method: "POST" })
+	.inputValidator(
+		z.object({
+			id: z.number(),
+			data: insertApplicationSchema.partial(),
+		}),
+	)
+	.handler(async ({ data }) => appRepo.update(data.id, data.data));
+
+export const deleteApplication = createServerFn({ method: "POST" })
+	.inputValidator(z.object({ id: z.number() }))
+	.handler(async ({ data }) => {
+		appRepo.remove(data.id);
 		return { success: true as const };
-	},
+	});
+
+export const getStats = createServerFn({ method: "GET" })
+	.inputValidator(z.object({ locale: z.string().optional() }))
+	.handler(async ({ data }) => appRepo.stats(data.locale));
+
+export const getStatusHistory = createServerFn({ method: "GET" })
+	.inputValidator(z.object({ applicationId: z.number() }))
+	.handler(async ({ data }) =>
+		historyRepo.listByApplicationId(data.applicationId),
+	);
+
+export const listStatusHistory = createServerFn({ method: "GET" }).handler(
+	async () => historyRepo.listAllStatusHistory(),
 );
 
-export const getStats = mutation(
-	z.object({ locale: z.string().optional() }),
-	async ({ locale }) => {
-		const { createApplicationRepo } = await import("~/lib/db/applications.ts");
-		const { db } = await import("~/db/index.ts");
-		return createApplicationRepo(db).stats(locale);
-	},
-);
-
-export const getStatusHistory = mutation(
-	z.object({ applicationId: z.number() }),
-	async ({ applicationId }) => {
-		const { createStatusHistoryRepo } =
-			await import("~/lib/db/status-history.ts");
-		const { db } = await import("~/db/index.ts");
-		return createStatusHistoryRepo(db).listByApplicationId(applicationId);
-	},
-);
-
-export const listStatusHistory = query(async () => {
-	const { createStatusHistoryRepo } =
-		await import("~/lib/db/status-history.ts");
-	const { db } = await import("~/db/index.ts");
-	return createStatusHistoryRepo(db).listAllStatusHistory();
-});
-
-export const importApplications = mutation(
-	z.object({ rows: z.array(insertApplicationSchema) }),
-	async ({ rows }) => {
-		const { createApplicationRepo } = await import("~/lib/db/applications.ts");
-		const { db } = await import("~/db/index.ts");
-		const apps = createApplicationRepo(db).bulkInsert(rows);
+export const importApplications = createServerFn({ method: "POST" })
+	.inputValidator(z.object({ rows: z.array(insertApplicationSchema) }))
+	.handler(async ({ data }) => {
+		const apps = appRepo.bulkInsert(data.rows);
 		return { count: apps.length };
-	},
-);
+	});
 
 const importStatusHistorySchema = z.object({
 	rows: z.array(
@@ -104,12 +67,6 @@ const importStatusHistorySchema = z.object({
 	),
 });
 
-export const importStatusHistory = mutation(
-	importStatusHistorySchema,
-	async ({ rows }) => {
-		const { createStatusHistoryRepo } =
-			await import("~/lib/db/status-history.ts");
-		const { db } = await import("~/db/index.ts");
-		return createStatusHistoryRepo(db).bulkInsertValidated(rows);
-	},
-);
+export const importStatusHistory = createServerFn({ method: "POST" })
+	.inputValidator(importStatusHistorySchema)
+	.handler(async ({ data }) => historyRepo.bulkInsertValidated(data.rows));
