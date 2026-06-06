@@ -15,9 +15,9 @@ import {
 	type PageSize,
 	SORT_OPTIONS,
 	type SortOrder,
-	type ThemeMode,
 	useSettings,
 } from "~/lib/use-settings";
+import type { ThemeMode } from "~/lib/theme";
 
 function ThemeSelector({
 	value,

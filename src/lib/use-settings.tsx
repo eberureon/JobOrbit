@@ -8,7 +8,8 @@ import {
 	type ReactNode,
 } from "react";
 
-export type ThemeMode = "system" | "dark" | "light";
+import { type ThemeMode, applyTheme } from "~/lib/theme";
+
 export type SortOrder = "newest" | "a-z" | "follow-up";
 export type PageSize = 10 | 25 | 50 | 100;
 
@@ -71,33 +72,6 @@ export function getEffectiveLocale(settings: Settings): string {
 		return "en-US";
 	}
 	return settings.locale;
-}
-
-export function applyTheme(theme: ThemeMode) {
-	const root = document.documentElement;
-
-	if (theme === "dark") {
-		root.classList.add("dark");
-		root.style.colorScheme = "dark";
-	} else if (theme === "light") {
-		root.classList.remove("dark");
-		root.style.colorScheme = "light";
-	} else {
-		const prefersDark =
-			typeof window.matchMedia === "function" &&
-			window.matchMedia("(prefers-color-scheme: dark)").matches;
-		if (prefersDark) {
-			root.classList.add("dark");
-			root.style.colorScheme = "dark";
-		} else {
-			root.classList.remove("dark");
-			root.style.colorScheme = "light";
-		}
-	}
-
-	try {
-		localStorage.setItem("theme", theme);
-	} catch {}
 }
 
 function loadSettings(): Settings {

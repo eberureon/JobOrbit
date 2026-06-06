@@ -11,14 +11,12 @@ import { NotFound } from "~/components/NotFound";
 import { RootComponent } from "~/components/RootComponent";
 import { ErrorComponent } from "~/components/ErrorComponent";
 import { SettingsProvider } from "~/lib/use-settings";
+import { INLINE_THEME_SCRIPT } from "~/lib/theme";
 import "~/styles.css";
 
 interface MyRouterContext {
 	queryClient: QueryClient;
 }
-
-const INIT_THEME =
-	`(function(){try{var t=localStorage.getItem("theme");if(t==="dark"){document.documentElement.classList.add("dark");document.documentElement.style.colorScheme="dark"}else if(t==="light"){document.documentElement.style.colorScheme="light"}else if(!t||t==="system"){var m=window.matchMedia("(prefers-color-scheme:dark)");if(m.matches){document.documentElement.classList.add("dark");document.documentElement.style.colorScheme="dark"}else{document.documentElement.style.colorScheme="light"}}}catch(e){}})()` as const;
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
 	head: () => ({
@@ -42,7 +40,7 @@ function DocumentShell({ children }: { children: ReactNode }) {
 
 				<script
 					dangerouslySetInnerHTML={{
-						__html: INIT_THEME,
+						__html: INLINE_THEME_SCRIPT,
 					}}
 				/>
 			</head>

@@ -1,6 +1,7 @@
 import { Button } from "@heroui/react";
 import { Monitor, Moon, Sun } from "lucide-react";
-import { type ThemeMode, useSettings } from "~/lib/use-settings";
+import { useSettings } from "~/lib/use-settings";
+import type { ThemeMode } from "~/lib/theme";
 
 const NEXT: Record<ThemeMode, ThemeMode> = {
 	system: "dark",
