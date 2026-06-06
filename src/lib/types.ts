@@ -26,12 +26,12 @@ export interface Stats {
 	topCompanies: { company: string; count: number }[];
 }
 
-export const SORT_ODER = ["newest", "a-z", "follow-up"];
+export const SORT_ORDER = ["newest", "a-z", "follow-up"];
 export enum SORT_KEY {
 	APPLIED_DATE = "applied_date",
 	COMPANY = "company",
 	STATUS = "status",
 }
 
-export type SortOrder = (typeof SORT_ODER)[number];
+export type SortOrder = (typeof SORT_ORDER)[number];
 export type SortKey = (typeof SORT_KEY)[keyof typeof SORT_KEY];
