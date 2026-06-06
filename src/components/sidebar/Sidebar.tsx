@@ -51,7 +51,7 @@ export function Sidebar({
 				<NavLinks collapsed={collapsed} />
 			</div>
 			<div
-				className={`border-t border-sidebar-border ${collapsed ? "py-2" : "py-3"}`}
+				className={`border-t border-sidebar-border ${collapsed ? "p-2" : "p-3"}`}
 			>
 				<div
 					className={
