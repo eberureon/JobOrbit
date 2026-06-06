@@ -1,5 +1,6 @@
 import { desc, eq } from "drizzle-orm";
-import { db } from "~/db/index.ts";
+import type { DrizzleDb } from "./types";
+import { db as defaultDb } from "~/db/index.ts";
 import type { InsertApplication } from "~/db/schema.ts";
 import {
 	applications,
@@ -8,73 +9,86 @@ import {
 } from "~/db/schema.ts";
 import { computeStats } from "~/lib/stats.ts";
 import type { Stats } from "~/lib/types.ts";
-import {
-	deleteByApplicationId,
-	insertEntry,
-	listAllStatusHistory,
-} from "./status-history.ts";
+import { createStatusHistoryRepo } from "./status-history.ts";
 
-export function listAll() {
-	return db
-		.select()
-		.from(applications)
-		.orderBy(desc(applications.applied_date), desc(applications.id))
-		.all();
-}
+export function createApplicationRepo(database: DrizzleDb) {
+	const historyRepo = createStatusHistoryRepo(database);
 
-export function getById(id: number) {
-	return db.select().from(applications).where(eq(applications.id, id)).get();
-}
-
-export function insert(data: InsertApplication) {
-	const app = db.insert(applications).values(data).returning().get();
-	insertEntry(app.id, app.status, null);
-	return app;
-}
-
-export function update(id: number, data: Record<string, unknown>) {
-	const partial = insertApplicationSchema.partial().safeParse(data);
-	if (!partial.success) throw new Error(partial.error.message);
-	if (Object.keys(partial.data).length === 0) {
-		return getById(id);
+	function listAll() {
+		return database
+			.select()
+			.from(applications)
+			.orderBy(desc(applications.applied_date), desc(applications.id))
+			.all();
 	}
-	const old = getById(id);
-	if (!old) throw new Error("Application not found");
-	const updated = db
-		.update(applications)
-		.set(partial.data)
-		.where(eq(applications.id, id))
-		.returning()
-		.get();
-	if (partial.data.status && partial.data.status !== old.status) {
-		insertEntry(id, partial.data.status, old.status);
+
+	function getById(id: number) {
+		return database
+			.select()
+			.from(applications)
+			.where(eq(applications.id, id))
+			.get();
 	}
-	return updated;
-}
 
-export function remove(id: number) {
-	deleteByApplicationId(id);
-	db.delete(applications).where(eq(applications.id, id)).run();
-}
+	return {
+		listAll,
+		getById,
 
-export function bulkInsert(rows: InsertApplication[]) {
-	return db.transaction((tx) =>
-		rows.map((data) => {
-			const app = tx.insert(applications).values(data).returning().get();
-			tx.insert(statusHistory)
-				.values({
-					application_id: app.id,
-					old_status: null,
-					new_status: app.status,
-				})
-				.run();
+		insert(data: InsertApplication) {
+			const app = database.insert(applications).values(data).returning().get();
+			historyRepo.insertEntry(app.id, app.status, null);
 			return app;
-		}),
-	);
+		},
+
+		update(id: number, data: Record<string, unknown>) {
+			const partial = insertApplicationSchema.partial().safeParse(data);
+			if (!partial.success) throw new Error(partial.error.message);
+			if (Object.keys(partial.data).length === 0) {
+				return getById(id);
+			}
+			const old = getById(id);
+			if (!old) throw new Error("Application not found");
+			const updated = database
+				.update(applications)
+				.set(partial.data)
+				.where(eq(applications.id, id))
+				.returning()
+				.get();
+			if (partial.data.status && partial.data.status !== old.status) {
+				historyRepo.insertEntry(id, partial.data.status, old.status);
+			}
+			return updated;
+		},
+
+		remove(id: number) {
+			historyRepo.deleteByApplicationId(id);
+			database.delete(applications).where(eq(applications.id, id)).run();
+		},
+
+		bulkInsert(rows: InsertApplication[]) {
+			return database.transaction((tx) =>
+				rows.map((data) => {
+					const app = tx.insert(applications).values(data).returning().get();
+					tx.insert(statusHistory)
+						.values({
+							application_id: app.id,
+							old_status: null,
+							new_status: app.status,
+						})
+						.run();
+					return app;
+				}),
+			);
+		},
+
+		stats(locale?: string) {
+			const rows = listAll();
+			const history = historyRepo.listAllStatusHistory();
+			return computeStats(rows, history, locale) as Stats;
+		},
+	};
 }
 
-export function stats(locale?: string) {
-	const rows = listAll();
-	const history = listAllStatusHistory();
-	return computeStats(rows, history, locale) as Stats;
-}
+const defaultRepo = createApplicationRepo(defaultDb);
+export const { listAll, getById, insert, update, remove, bulkInsert, stats } =
+	defaultRepo;

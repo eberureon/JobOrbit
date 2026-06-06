@@ -1,62 +1,77 @@
 import { desc, eq } from "drizzle-orm";
-import { db } from "~/db/index.ts";
+import type { DrizzleDb } from "./types";
+import { db as defaultDb } from "~/db/index.ts";
 import type { StatusHistory } from "~/db/schema.ts";
 import { statusHistory } from "~/db/schema.ts";
 
-export function listByApplicationId(applicationId: number) {
-	return db
-		.select()
-		.from(statusHistory)
-		.where(eq(statusHistory.application_id, applicationId))
-		.orderBy(desc(statusHistory.changed_at), desc(statusHistory.id))
-		.all() as StatusHistory[];
+export function createStatusHistoryRepo(database: DrizzleDb) {
+	return {
+		listByApplicationId(applicationId: number) {
+			return database
+				.select()
+				.from(statusHistory)
+				.where(eq(statusHistory.application_id, applicationId))
+				.orderBy(desc(statusHistory.changed_at), desc(statusHistory.id))
+				.all() as StatusHistory[];
+		},
+
+		listAllStatusHistory() {
+			return database
+				.select()
+				.from(statusHistory)
+				.orderBy(desc(statusHistory.changed_at), desc(statusHistory.id))
+				.all() as StatusHistory[];
+		},
+
+		insertEntry(
+			applicationId: number,
+			newStatus: string,
+			oldStatus: string | null,
+		) {
+			return database
+				.insert(statusHistory)
+				.values({
+					application_id: applicationId,
+					old_status: oldStatus,
+					new_status: newStatus,
+				})
+				.returning()
+				.get() as StatusHistory;
+		},
+
+		deleteByApplicationId(applicationId: number) {
+			database
+				.delete(statusHistory)
+				.where(eq(statusHistory.application_id, applicationId))
+				.run();
+		},
+
+		bulkInsertStatusHistory(
+			entries: {
+				application_id: number;
+				old_status: string | null;
+				new_status: string;
+			}[],
+		) {
+			return database.transaction((tx) =>
+				entries.map(
+					(entry) =>
+						tx
+							.insert(statusHistory)
+							.values(entry)
+							.returning()
+							.get() as StatusHistory,
+				),
+			);
+		},
+	};
 }
 
-export function listAllStatusHistory() {
-	return db
-		.select()
-		.from(statusHistory)
-		.orderBy(desc(statusHistory.changed_at), desc(statusHistory.id))
-		.all() as StatusHistory[];
-}
-
-export function insertEntry(
-	applicationId: number,
-	newStatus: string,
-	oldStatus: string | null,
-) {
-	return db
-		.insert(statusHistory)
-		.values({
-			application_id: applicationId,
-			old_status: oldStatus,
-			new_status: newStatus,
-		})
-		.returning()
-		.get() as StatusHistory;
-}
-
-export function deleteByApplicationId(applicationId: number) {
-	db.delete(statusHistory)
-		.where(eq(statusHistory.application_id, applicationId))
-		.run();
-}
-
-export function bulkInsertStatusHistory(
-	entries: {
-		application_id: number;
-		old_status: string | null;
-		new_status: string;
-	}[],
-) {
-	return db.transaction((tx) =>
-		entries.map(
-			(entry) =>
-				tx
-					.insert(statusHistory)
-					.values(entry)
-					.returning()
-					.get() as StatusHistory,
-		),
-	);
-}
+const defaultRepo = createStatusHistoryRepo(defaultDb);
+export const {
+	listByApplicationId,
+	listAllStatusHistory,
+	insertEntry,
+	deleteByApplicationId,
+	bulkInsertStatusHistory,
+} = defaultRepo;

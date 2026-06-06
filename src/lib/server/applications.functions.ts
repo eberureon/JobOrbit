@@ -1,29 +1,29 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { db } from "~/db/index.ts";
 import { insertApplicationSchema } from "~/db/schema.ts";
-import * as db from "~/lib/db/applications.ts";
-import {
-	bulkInsertStatusHistory,
-	listAllStatusHistory,
-	listByApplicationId,
-} from "~/lib/db/status-history.ts";
+import { createApplicationRepo } from "~/lib/db/applications.ts";
+import { createStatusHistoryRepo } from "~/lib/db/status-history.ts";
+
+const appRepo = createApplicationRepo(db);
+const historyRepo = createStatusHistoryRepo(db);
 
 export const listApplications = createServerFn({ method: "GET" }).handler(
 	async () => {
-		return db.listAll();
+		return appRepo.listAll();
 	},
 );
 
 export const getApplication = createServerFn({ method: "GET" })
 	.inputValidator((data: { id: number }) => data)
 	.handler(async ({ data }) => {
-		return db.getById(data.id);
+		return appRepo.getById(data.id);
 	});
 
 export const createApplication = createServerFn({ method: "POST" })
 	.inputValidator(insertApplicationSchema)
 	.handler(async ({ data }) => {
-		return db.insert(data);
+		return appRepo.insert(data);
 	});
 
 export const updateApplication = createServerFn({ method: "POST" })
@@ -34,31 +34,31 @@ export const updateApplication = createServerFn({ method: "POST" })
 		}),
 	)
 	.handler(async ({ data }) => {
-		return db.update(data.id, data.data);
+		return appRepo.update(data.id, data.data);
 	});
 
 export const deleteApplication = createServerFn({ method: "POST" })
 	.inputValidator((data: { id: number }) => data)
 	.handler(async ({ data }) => {
-		db.remove(data.id);
+		appRepo.remove(data.id);
 		return { success: true };
 	});
 
 export const getStats = createServerFn({ method: "GET" })
 	.inputValidator((data: { locale?: string }) => data)
 	.handler(async ({ data }) => {
-		return db.stats(data.locale);
+		return appRepo.stats(data.locale);
 	});
 
 export const getStatusHistory = createServerFn({ method: "GET" })
 	.inputValidator((data: { applicationId: number }) => data)
 	.handler(async ({ data }) => {
-		return listByApplicationId(data.applicationId);
+		return historyRepo.listByApplicationId(data.applicationId);
 	});
 
 export const listStatusHistory = createServerFn({ method: "GET" }).handler(
 	async () => {
-		return listAllStatusHistory();
+		return historyRepo.listAllStatusHistory();
 	},
 );
 
@@ -69,7 +69,7 @@ export const importApplications = createServerFn({ method: "POST" })
 		}),
 	)
 	.handler(async ({ data }) => {
-		const apps = db.bulkInsert(data.rows);
+		const apps = appRepo.bulkInsert(data.rows);
 		return { count: apps.length };
 	});
 
@@ -86,9 +86,10 @@ const importStatusHistorySchema = z.object({
 export const importStatusHistory = createServerFn({ method: "POST" })
 	.inputValidator(importStatusHistorySchema)
 	.handler(async ({ data }) => {
-		const appIds = new Set((db.listAll() as { id: number }[]).map((a) => a.id));
+		const allApps = appRepo.listAll() as { id: number }[];
+		const appIds = new Set(allApps.map((a) => a.id));
 		const valid = data.rows.filter((r) => appIds.has(r.application_id));
 		const skipped = data.rows.length - valid.length;
-		const entries = bulkInsertStatusHistory(valid);
+		const entries = historyRepo.bulkInsertStatusHistory(valid);
 		return { count: entries.length, skipped };
 	});

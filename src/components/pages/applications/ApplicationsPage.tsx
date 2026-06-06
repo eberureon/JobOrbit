@@ -1,33 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-	ArrowUpDown,
-	ChevronLeft,
-	ChevronRight,
-	Download,
-	Filter,
-	Plus,
-	Search,
-	Upload,
-	X,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Papa from "papaparse";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { StatusBadge } from "~/components/StatusBadge";
-import type { Selection } from "@heroui/react";
-import {
-	AlertDialog,
-	Header,
-	Button,
-	Card,
-	CardContent,
-	Dropdown,
-	Input,
-	Skeleton,
-	Label,
-	Separator,
-} from "@heroui/react";
+import { useEffect, useMemo, useState } from "react";
+import { AlertDialog, Button, Card, CardContent } from "@heroui/react";
 import type { Application, StatusHistory } from "~/db/schema";
-import { insertApplicationSchema } from "~/db/schema";
 import { useToast } from "~/hooks/use-toast";
 import {
 	deleteApplication,
@@ -37,12 +13,19 @@ import {
 	listStatusHistory,
 } from "~/lib/server/applications.functions";
 import type { ApplicationStatus, SortOrder, SortKey } from "~/lib/types";
-import { APPLICATION_STATUSES, SORT_KEY } from "~/lib/types";
+import { SORT_KEY } from "~/lib/types";
 import { getEffectiveLocale, useSettings } from "~/lib/use-settings";
-import { toLocalDateString } from "~/lib/date";
+import {
+	parseCsv,
+	parseHistoryCsv,
+	mapToApplicationRow,
+	mapToHistoryRow,
+} from "~/lib/csv";
+import { ApplicationActionBar } from "./ApplicationActionBar";
+import { ApplicationFilterBar } from "./ApplicationFilterBar";
+import { ApplicationsTable } from "./ApplicationsTable";
 import { ApplicationDialog } from "./ApplicationDialog";
 import { computeApplicationList } from "./applicationList";
-import { RowActions } from "./RowActions";
 
 function sortFromDefault(d: SortOrder): [SortKey, "asc" | "desc"] {
 	switch (d) {
@@ -93,30 +76,6 @@ export function ApplicationsPage() {
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [editing, setEditing] = useState<Application | null>(null);
 	const [deleteId, setDeleteId] = useState<number | null>(null);
-	const fileInputRef = useRef<HTMLInputElement>(null);
-	const historyFileInputRef = useRef<HTMLInputElement>(null);
-
-	// Added this helper function to avoid type errors inside Dropdown Component
-	const handleStatusSelection = (keys: Selection) => {
-		setStatusFilter(
-			new Set([...keys].map((k) => String(k) as ApplicationStatus)),
-		);
-	};
-
-	// Added this helper function and variable to make the history filter work
-	// Otherwise the dropdown and filter function will not work together
-	const handleHistoryStatusSelection = (keys: Selection) => {
-		setHistoryFilter(
-			new Set(
-				[...keys].map(
-					(k) => String(k).replace(/^history-/, "") as ApplicationStatus,
-				),
-			),
-		);
-	};
-	const historySelectedKeys = new Set(
-		[...historyFilter].map((s) => `history-${s}`),
-	);
 
 	const locale = getEffectiveLocale(settings);
 
@@ -161,23 +120,6 @@ export function ApplicationsPage() {
 		}
 	}
 
-	function handleDataAction(key: string | number) {
-		switch (key) {
-			case "import-csv":
-				fileInputRef.current?.click();
-				break;
-			case "export-csv":
-				handleExportCsv();
-				break;
-			case "import-history":
-				historyFileInputRef.current?.click();
-				break;
-			case "export-history":
-				handleExportHistory();
-				break;
-		}
-	}
-
 	const deleteMutation = useMutation({
 		mutationFn: async (id: number) => {
 			await deleteApplication({ data: { id } });
@@ -203,71 +145,18 @@ export function ApplicationsPage() {
 	const importMutation = useMutation({
 		mutationFn: async (file: File) => {
 			const text = await file.text();
-			const { data, errors: parseErrors } = Papa.parse<Record<string, string>>(
-				text,
-				{
-					header: true,
-					skipEmptyLines: true,
-					dynamicTyping: false,
-				},
-			);
+			const data = parseCsv(text);
 
-			const today = toLocalDateString(new Date());
 			const rowErrors: { row: number; reason: string }[] = [];
-			for (const err of parseErrors) {
-				rowErrors.push({ row: err.row! + 1, reason: err.message });
-			}
-
-			const validRows: (typeof insertApplicationSchema.type)[] = [];
+			const validRows: Parameters<
+				typeof importApplications
+			>[0]["data"]["rows"] = [];
 			for (let i = 0; i < data.length; i++) {
-				const row = data[i];
-				const rowNum = i + 2;
-				const mapped: Record<string, string> = {};
-				for (const [key, value] of Object.entries(row)) {
-					const lower = key.toLowerCase();
-					if (lower === "company") mapped.company = value ?? "";
-					else if (lower === "role") mapped.role = value ?? "";
-					else if (lower === "location") mapped.location = value ?? "";
-					else if (lower === "status") mapped.status = value ?? "";
-					else if (lower === "salary") mapped.salary = value ?? "";
-					else if (lower === "source") mapped.source = value ?? "";
-					else if (lower === "joburl") mapped.job_url = value ?? "";
-					else if (lower === "notes") mapped.notes = value ?? "";
-					else if (lower === "applieddate") mapped.applied_date = value ?? "";
-					else if (lower === "applied_date") mapped.applied_date = value ?? "";
-					else if (lower === "applied date") mapped.applied_date = value ?? "";
-				}
-
-				let status = mapped.status ?? "";
-				if (!APPLICATION_STATUSES.includes(status as ApplicationStatus)) {
-					status = "Applied";
-				}
-
-				let appliedDate = mapped.applied_date ?? "";
-				if (!/^\d{4}-\d{2}-\d{2}$/.test(appliedDate)) {
-					appliedDate = today;
-				}
-
-				const rowData = {
-					company: mapped.company ?? "",
-					role: mapped.role ?? "",
-					location: mapped.location ?? "",
-					status,
-					applied_date: appliedDate,
-					salary: mapped.salary ?? "",
-					source: mapped.source ?? "",
-					job_url: mapped.job_url ?? "",
-					notes: mapped.notes ?? "",
-				};
-
-				const result = insertApplicationSchema.safeParse(rowData);
-				if (result.success) {
-					validRows.push(result.data);
+				const result = mapToApplicationRow(data[i], i + 2);
+				if (result.error) {
+					rowErrors.push(result.error);
 				} else {
-					rowErrors.push({
-						row: rowNum,
-						reason: result.error.errors.map((e) => e.message).join("; "),
-					});
+					validRows.push(result.data);
 				}
 			}
 
@@ -275,8 +164,8 @@ export function ApplicationsPage() {
 				throw new Error("CSV file is empty or has no valid rows.");
 			}
 
-			const result = await importApplications({ data: { rows: validRows } });
-			return { imported: result.count, total: data.length, errors: rowErrors };
+			const resp = await importApplications({ data: { rows: validRows } });
+			return { imported: resp.count, total: data.length, errors: rowErrors };
 		},
 		onSuccess: ({ imported, total, errors }) => {
 			queryClient.invalidateQueries({ queryKey: ["applications"] });
@@ -316,70 +205,31 @@ export function ApplicationsPage() {
 	const importHistoryMutation = useMutation({
 		mutationFn: async (file: File) => {
 			const text = await file.text();
-			const { data, errors: parseErrors } = Papa.parse<Record<string, string>>(
-				text,
-				{ header: true, skipEmptyLines: true, dynamicTyping: true },
-			);
+			const data = parseHistoryCsv(text);
 
 			const rowErrors: { row: number; reason: string }[] = [];
-			for (const err of parseErrors) {
-				rowErrors.push({ row: err.row! + 1, reason: err.message });
-			}
-
 			const validRows: {
 				application_id: number;
 				old_status: string | null;
 				new_status: string;
 			}[] = [];
 			for (let i = 0; i < data.length; i++) {
-				const row = data[i];
-				const rowNum = i + 2;
-				const appId = Number(
-					row.application_id ?? row["Application ID"] ?? row.applicationId,
-				);
-				if (Number.isNaN(appId) || appId <= 0) {
-					rowErrors.push({
-						row: rowNum,
-						reason: "Invalid or missing application_id",
-					});
-					continue;
+				const result = mapToHistoryRow(data[i], i + 2);
+				if (result.error) {
+					rowErrors.push(result.error);
+				} else if (result.data) {
+					validRows.push(result.data);
 				}
-				const newStatus =
-					row.new_status ?? row["New Status"] ?? row.newStatus ?? "";
-				if (!APPLICATION_STATUSES.includes(newStatus as ApplicationStatus)) {
-					rowErrors.push({
-						row: rowNum,
-						reason: `Invalid new_status: "${newStatus}"`,
-					});
-					continue;
-				}
-				const oldStatus =
-					row.old_status ?? row["Old Status"] ?? row.oldStatus ?? null;
-				if (
-					oldStatus &&
-					!APPLICATION_STATUSES.includes(oldStatus as ApplicationStatus)
-				) {
-					rowErrors.push({
-						row: rowNum,
-						reason: `Invalid old_status: "${oldStatus}"`,
-					});
-					continue;
-				}
-				validRows.push({
-					application_id: appId,
-					old_status: oldStatus || null,
-					new_status: newStatus,
-				});
 			}
 
 			if (validRows.length === 0 && rowErrors.length === 0) {
 				throw new Error("CSV file is empty or has no valid rows.");
 			}
 
-			const result = await importStatusHistory({ data: { rows: validRows } });
+			const resp = await importStatusHistory({ data: { rows: validRows } });
 			return {
-				imported: result.count,
-				skipped: result.skipped,
+				imported: resp.count,
+				skipped: resp.skipped,
 				total: data.length,
 				errors: rowErrors,
 			};
@@ -409,20 +259,6 @@ export function ApplicationsPage() {
 				variant: "destructive",
 			}),
 	});
-
-	function handleFileImport(e: React.ChangeEvent<HTMLInputElement>) {
-		const file = e.target.files?.[0];
-		if (!file) return;
-		importMutation.mutate(file);
-		e.target.value = "";
-	}
-
-	function handleHistoryFileImport(e: React.ChangeEvent<HTMLInputElement>) {
-		const file = e.target.files?.[0];
-		if (!file) return;
-		importHistoryMutation.mutate(file);
-		e.target.value = "";
-	}
 
 	function handleExportHistory() {
 		const rows = history.map((h) => ({
@@ -482,410 +318,57 @@ export function ApplicationsPage() {
 						)}
 					</p>
 				</div>
-				<div className="flex items-center gap-2 sm:justify-end-safe">
-					<input
-						ref={fileInputRef}
-						type="file"
-						accept=".csv"
-						className="hidden"
-						data-testid="input-csv-file"
-						onChange={handleFileImport}
-					/>
-					<input
-						ref={historyFileInputRef}
-						type="file"
-						accept=".csv"
-						className="hidden"
-						data-testid="input-history-csv"
-						onChange={handleHistoryFileImport}
-					/>
-					<Dropdown>
-						<Button variant="outline" data-testid="button-data-menu">
-							<Download className="h-4 w-4 mr-1.5" />
-							Data
-						</Button>
-						<Dropdown.Popover>
-							<Dropdown.Menu
-								aria-label="Data actions"
-								onAction={handleDataAction}
-							>
-								<Dropdown.Section>
-									<Header>Import / Export</Header>
-									<Dropdown.Item
-										id="import-csv"
-										data-testid="button-import-csv"
-										isDisabled={importMutation.isPending}
-									>
-										<Upload className="h-4 w-4" />
-										<Label>Import CSV</Label>
-									</Dropdown.Item>
-									<Dropdown.Item
-										id="export-csv"
-										data-testid="button-export-csv"
-									>
-										<Download className="h-4 w-4" />
-										<Label>Export CSV</Label>
-									</Dropdown.Item>
-									<Dropdown.Item
-										id="import-history"
-										data-testid="button-import-history"
-										isDisabled={importHistoryMutation.isPending}
-									>
-										<Upload className="h-4 w-4" />
-										<Label>Import History</Label>
-									</Dropdown.Item>
-									<Dropdown.Item
-										id="export-history"
-										data-testid="button-export-history"
-									>
-										<Download className="h-4 w-4" />
-										<Label>Export History</Label>
-									</Dropdown.Item>
-								</Dropdown.Section>
-							</Dropdown.Menu>
-						</Dropdown.Popover>
-					</Dropdown>
-					<Button
-						data-testid="button-add-application"
-						onPress={() => {
-							setEditing(null);
-							setDialogOpen(true);
-						}}
-					>
-						<Plus className="h-4 w-4 mr-1.5" />
-						Add Application
-					</Button>
-				</div>
+				<ApplicationActionBar
+					onAddApplication={() => {
+						setEditing(null);
+						setDialogOpen(true);
+					}}
+					onExportCsv={handleExportCsv}
+					onExportHistory={handleExportHistory}
+					onImportCsv={(file) => importMutation.mutate(file)}
+					onImportHistory={(file) => importHistoryMutation.mutate(file)}
+					isImportingCsv={importMutation.isPending}
+					isImportingHistory={importHistoryMutation.isPending}
+				/>
 			</div>
 
 			<Card className="card-hairline border">
-				<CardContent className="flex gap-4 flex-row flex-wrap items-center">
-					<div className="relative flex-1 min-w-50 w-full">
-						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-						<Input
-							data-testid="input-search"
-							aria-label="Search applications"
-							placeholder="Search company or role…"
-							value={search}
-							onChange={(e) => setSearch(e.target.value)}
-							className="pl-9 w-full"
-							suppressHydrationWarning
-						/>
-					</div>
-					<Dropdown>
-						<Button variant="outline" data-testid="button-filter-status">
-							<Filter className="h-4 w-4 mr-1.5" />
-							Status
-							{statusFilter.size > 0 && (
-								<span className="ml-2 rounded bg-primary/15 text-primary px-1.5 py-0.5 text-xs font-mono-num">
-									{statusFilter.size}
-								</span>
-							)}
-							{historyFilter.size > 0 && (
-								<span className="ml-2 rounded bg-background text-muted px-1.5 py-0.5 text-xs font-mono-num">
-									{historyFilter.size}
-								</span>
-							)}
-						</Button>
-						<Dropdown.Popover>
-							<Dropdown.Menu aria-label="Filter status">
-								<Dropdown.Section
-									selectionMode="multiple"
-									selectedKeys={statusFilter}
-									onSelectionChange={handleStatusSelection}
-								>
-									<Header>Filter status</Header>
-									{APPLICATION_STATUSES.map((s) => (
-										<Dropdown.Item
-											key={s}
-											id={s}
-											textValue={s}
-											data-testid={`filter-status-${s}`}
-										>
-											<Dropdown.ItemIndicator />
-											<Label>{s}</Label>
-										</Dropdown.Item>
-									))}
-								</Dropdown.Section>
-								<Separator />
-								<Dropdown.Section
-									selectionMode="multiple"
-									selectedKeys={historySelectedKeys}
-									onSelectionChange={handleHistoryStatusSelection}
-								>
-									<Header>Historical status</Header>
-									{APPLICATION_STATUSES.map((s) => (
-										<Dropdown.Item
-											key={`history-${s}`}
-											id={`history-${s}`}
-											textValue={s}
-											data-testid={`filter-history-${s}`}
-										>
-											<Dropdown.ItemIndicator />
-											<Label>{s}</Label>
-										</Dropdown.Item>
-									))}
-								</Dropdown.Section>
-							</Dropdown.Menu>
-						</Dropdown.Popover>
-					</Dropdown>
-					{(statusFilter.size > 0 || historyFilter.size > 0) && (
-						<Button
-							variant="ghost"
-							size="sm"
-							onPress={() => {
-								setStatusFilter(new Set());
-								setHistoryFilter(new Set());
-							}}
-							data-testid="button-clear-filters"
-						>
-							<X className="h-3.5 w-3.5 mr-1" />
-							Clear
-						</Button>
-					)}
+				<CardContent className="flex gap-3 flex-row flex-wrap items-center">
+					<ApplicationFilterBar
+						search={search}
+						onSearchChange={setSearch}
+						statusFilter={statusFilter}
+						onStatusFilterChange={setStatusFilter}
+						historyFilter={historyFilter}
+						onHistoryFilterChange={setHistoryFilter}
+					/>
 				</CardContent>
 			</Card>
 
 			<Card className="card-hairline border p-0 overflow-hidden">
 				<CardContent className="p-0">
-					{isLoading ? (
-						<>
-							<div className="hidden md:block overflow-x-auto">
-								<table className="w-full text-sm">
-									<thead>
-										<tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
-											<th className="px-4 py-3 font-medium">Company</th>
-											<th className="px-4 py-3 font-medium">Role</th>
-											<th className="px-4 py-3 font-medium">Status</th>
-											<th className="px-4 py-3 font-medium">Applied</th>
-										</tr>
-									</thead>
-									<tbody>
-										{[1, 2, 3, 4, 5].map((i) => (
-											<tr key={i} className="border-b border-border/40">
-												<td className="px-4 py-3">
-													<Skeleton className="h-4 w-28" />
-												</td>
-												<td className="px-4 py-3">
-													<Skeleton className="h-4 w-36" />
-												</td>
-												<td className="px-4 py-3">
-													<Skeleton className="h-5 w-16 rounded-full" />
-												</td>
-												<td className="px-4 py-3">
-													<Skeleton className="h-4 w-16" />
-												</td>
-											</tr>
-										))}
-									</tbody>
-								</table>
-							</div>
-							<div className="block md:hidden p-4 space-y-4">
-								{[1, 2, 3, 4, 5].map((i) => (
-									<div key={i} className="space-y-2">
-										<Skeleton className="h-5 w-40" />
-										<Skeleton className="h-4 w-56" />
-										<Skeleton className="h-3.5 w-20" />
-										<Skeleton className="h-5 w-16 rounded-full" />
-									</div>
-								))}
-							</div>
-						</>
-					) : filtered.length === 0 ? (
-						<div className="p-12 text-center">
-							<div className="text-sm text-muted-foreground">
-								{apps.length === 0
-									? 'No applications yet. Click "Add Application" to get started.'
-									: "No applications match your filters."}
-							</div>
-						</div>
-					) : (
-						<>
-							<div className="hidden xl:block overflow-x-auto">
-								<table className="w-full text-sm">
-									<thead>
-										<tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
-											<th className="px-2 py-3 font-medium max-w-52">
-												<Button
-													variant="ghost"
-													size="sm"
-													className="uppercase text-xs text-muted-foreground px-2"
-													onPress={() => toggleSort(SORT_KEY.COMPANY)}
-													data-testid="sort-company"
-												>
-													Company
-													<ArrowUpDown className="h-3 w-3" />
-												</Button>
-											</th>
-											<th className="px-4 py-3 font-medium max-w-52">Role</th>
-											<th className="px-4 py-3 font-medium">Location</th>
-											<th className="px-2 py-3 font-medium">
-												<Button
-													size="sm"
-													variant="ghost"
-													className="uppercase text-xs text-muted-foreground px-2"
-													onPress={() => toggleSort(SORT_KEY.STATUS)}
-													data-testid="sort-status"
-												>
-													Status
-													<ArrowUpDown className="h-3 w-3" />
-												</Button>
-											</th>
-											<th className="px-2 py-3 font-medium">
-												<Button
-													variant="ghost"
-													size="sm"
-													className="uppercase text-xs text-muted-foreground px-2"
-													onPress={() => toggleSort(SORT_KEY.APPLIED_DATE)}
-													data-testid="sort-date"
-												>
-													Applied
-													<ArrowUpDown className="h-3 w-3" />
-												</Button>
-											</th>
-											<th className="px-4 py-3 font-medium">Salary</th>
-											<th className="px-4 py-3 font-medium">Source</th>
-											<th className="px-4 py-3 font-medium">Actions</th>
-										</tr>
-									</thead>
-									<tbody>
-										{paginated.map((a) => (
-											<tr
-												key={a.id}
-												data-testid={`row-application-${a.id}`}
-												className="border-b border-border/40 last:border-0 hover:bg-muted/10 cursor-pointer"
-												onClick={() => {
-													setEditing(a);
-													setDialogOpen(true);
-												}}
-											>
-												<td className="px-4 py-3 text-foreground font-medium max-w-52">
-													{a.company}
-												</td>
-												<td className="px-4 py-3 text-foreground/90 max-w-52">
-													{a.role}
-												</td>
-												<td className="px-4 py-3 text-muted-foreground">
-													{a.location || "\u2014"}
-												</td>
-												<td className="px-4 py-3">
-													<StatusBadge status={a.status} />
-												</td>
-												<td className="px-4 py-3 font-mono-num text-muted-foreground text-xs">
-													{new Intl.DateTimeFormat(locale, {
-														dateStyle: "medium",
-													}).format(new Date(a.applied_date))}
-												</td>
-												<td className="px-4 py-3 font-mono-num text-foreground/90 text-xs">
-													{a.salary || "\u2014"}
-												</td>
-												<td className="px-4 py-3 text-muted-foreground">
-													{a.source || "\u2014"}
-												</td>
-												<td
-													className="px-4 py-3 text-right"
-													onClick={(e) => e.stopPropagation()}
-													onKeyDown={(e) => e.stopPropagation()}
-												>
-													<RowActions
-														id={a.id}
-														jobUrl={a.job_url}
-														onEdit={() => {
-															setEditing(a);
-															setDialogOpen(true);
-														}}
-														onDelete={() => handleDelete(a.id)}
-													/>
-												</td>
-											</tr>
-										))}
-									</tbody>
-								</table>
-							</div>
-
-							<div className="block xl:hidden divide-y divide-border/40">
-								{paginated.map((a) => {
-									return (
-										<div
-											key={a.id}
-											data-testid={`card-application-${a.id}`}
-											className="p-4 cursor-pointer hover:bg-default/30 transition-colors"
-											onClick={() => {
-												setEditing(a);
-												setDialogOpen(true);
-											}}
-											onKeyDown={(e) => {
-												if (e.key === "Enter" || e.key === " ") {
-													e.preventDefault();
-													setEditing(a);
-													setDialogOpen(true);
-												}
-											}}
-											role="button"
-											tabIndex={0}
-										>
-											<p className="mb-1.5">
-												<StatusBadge status={a.status} />
-											</p>
-											<p className="text-foreground font-medium">{a.company}</p>
-											<p className="text-foreground/90 text-sm mt-0.5">
-												{a.role}
-											</p>
-											<div className="space-y-1 text-xs font-mono-num text-muted-foreground mt-2">
-												<p>
-													<span className="text-muted-foreground/50">
-														Date Aplied:{" "}
-													</span>
-													{new Intl.DateTimeFormat(locale, {
-														dateStyle: "medium",
-													}).format(new Date(a.applied_date))}
-												</p>
-												{a.location && (
-													<p>
-														<span className="text-muted-foreground/50">
-															Location:
-														</span>{" "}
-														{a.location}
-													</p>
-												)}
-												{a.salary && (
-													<p>
-														<span className="text-muted-foreground/50">
-															Salary:
-														</span>{" "}
-														<span className="font-mono-num">{a.salary}</span>
-													</p>
-												)}
-												{a.source && (
-													<p>
-														<span className="text-muted-foreground/50">
-															Source:
-														</span>{" "}
-														{a.source}
-													</p>
-												)}
-											</div>
-											<div
-												className="flex items-center gap-1 mt-2"
-												onClick={(e) => e.stopPropagation()}
-												onKeyDown={(e) => e.stopPropagation()}
-											>
-												<RowActions
-													id={a.id}
-													jobUrl={a.job_url}
-													onEdit={() => {
-														setEditing(a);
-														setDialogOpen(true);
-													}}
-													onDelete={() => handleDelete(a.id)}
-												/>
-											</div>
-										</div>
-									);
-								})}
-							</div>
-						</>
-					)}
+					<ApplicationsTable
+						applications={paginated}
+						isLoading={isLoading}
+						locale={locale}
+						sortKey={sortKey}
+						sortDir={sortDir}
+						onSort={toggleSort}
+						onRowClick={(a) => {
+							setEditing(a);
+							setDialogOpen(true);
+						}}
+						onEdit={(a) => {
+							setEditing(a);
+							setDialogOpen(true);
+						}}
+						onDelete={(a) => handleDelete(a.id)}
+						emptyMessage={
+							apps.length === 0
+								? 'No applications yet. Click "Add Application" to get started.'
+								: "No applications match your filters."
+						}
+					/>
 				</CardContent>
 			</Card>
 

@@ -1,13 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
+import { db } from "~/db/index.ts";
 import { insertResumeSchema } from "~/db/schema.ts";
-import * as db from "~/lib/db/resume.ts";
+import { createResumeRepo } from "~/lib/db/resume.ts";
+
+const resumeRepo = createResumeRepo(db);
 
 export const getResume = createServerFn({ method: "GET" }).handler(async () => {
-	return db.getResume();
+	return resumeRepo.getResume();
 });
 
 export const upsertResume = createServerFn({ method: "POST" })
 	.inputValidator(insertResumeSchema)
 	.handler(async ({ data }) => {
-		return db.upsertResume(data);
+		return resumeRepo.upsertResume(data);
 	});

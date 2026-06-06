@@ -12,7 +12,7 @@ export const formatMonthDay = (value: string) => {
 	if (!match) return value;
 
 	const day = match[1].padStart(2, "0");
-	const seperator = match[2];
+	const separator = match[2];
 	const month = match[3].padStart(2, "0");
-	return `${day}${seperator}${month}`;
+	return `${day}${separator}${month}`;
 };

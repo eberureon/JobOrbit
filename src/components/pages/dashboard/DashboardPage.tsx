@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, Briefcase, Calendar, Target } from "lucide-react";
 import { Pie, PieChart, ResponsiveContainer, Sector, Tooltip } from "recharts";
-import { StatusBadge, statusColor } from "~/components/StatusBadge";
+import { statusColor } from "~/components/StatusBadge";
 import { Skeleton } from "@heroui/react";
 import type { Application } from "~/db/schema";
 import type { PieSectorShapeProps } from "recharts";
@@ -11,6 +11,7 @@ import {
 } from "~/lib/server/applications.functions";
 import type { ApplicationStatus, Stats } from "~/lib/types";
 import { getEffectiveLocale, useSettings } from "~/lib/use-settings";
+import { ApplicationsTable } from "~/components/ApplicationsTable";
 import { FunnelRow } from "./FunnelRow";
 import { StatCard } from "./StatCard";
 import { TimelineChart } from "./TimeLineChart";
@@ -335,103 +336,14 @@ export function DashboardPage() {
 					</div>
 				</div>
 				<div className="p-5 pt-0">
-					{statsLoading ? (
-						<div className="hidden xl:block overflow-x-auto">
-							<table className="w-full text-sm">
-								<thead>
-									<tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
-										<th className="pb-2 pr-3 font-medium">Company</th>
-										<th className="pb-2 pr-3 font-medium">Role</th>
-										<th className="pb-2 pr-3 font-medium">Status</th>
-										<th className="pb-2 font-medium">Applied</th>
-									</tr>
-								</thead>
-								<tbody>
-									{[1, 2, 3, 4, 5].map((i) => (
-										<tr
-											key={i}
-											className="border-b border-border/40 last:border-0"
-										>
-											<td className="py-2.5 pr-3">
-												<Skeleton className="h-4 w-28" />
-											</td>
-											<td className="py-2.5 pr-3">
-												<Skeleton className="h-4 w-36" />
-											</td>
-											<td className="py-2.5 pr-3">
-												<Skeleton className="h-5 w-16 rounded-full" />
-											</td>
-											<td className="py-2.5">
-												<Skeleton className="h-4 w-16" />
-											</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						</div>
-					) : recent.length === 0 ? (
-						<div className="text-sm text-muted-foreground py-6 text-center">
-							No applications yet. Add your first one on the Applications page.
-						</div>
-					) : (
-						// TODO: This Table is a candidate for outsourcing into a seperate component, same logic exists in ApplicationPage:453
-						<>
-							<div className="hidden xl:block overflow-x-auto">
-								<table className="w-full text-sm">
-									<thead>
-										<tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
-											<th className="pb-2 pr-3 font-medium">Company</th>
-											<th className="pb-2 pr-3 font-medium">Role</th>
-											<th className="pb-2 pr-3 font-medium">Status</th>
-											<th className="pb-2 font-medium">Applied</th>
-										</tr>
-									</thead>
-									<tbody>
-										{recent.map((a) => (
-											<tr
-												key={a.id}
-												className="border-b border-border/40 last:border-0"
-												data-testid={`recent-row-${a.id}`}
-											>
-												<td className="py-2.5 pr-3 text-foreground">
-													{a.company}
-												</td>
-												<td className="py-2.5 pr-3 text-muted-foreground">
-													{a.role}
-												</td>
-												<td className="py-2.5 pr-3">
-													<StatusBadge status={a.status} />
-												</td>
-												<td className="py-2.5 font-mono-num text-muted-foreground text-xs">
-													{new Intl.DateTimeFormat(locale, {
-														dateStyle: "medium",
-													}).format(new Date(a.applied_date))}
-												</td>
-											</tr>
-										))}
-									</tbody>
-								</table>
-							</div>
-
-							{/* Mobile Table */}
-							<div className="block xl:hidden divide-y divide-border/40">
-								{recent.map((a) => (
-									<div key={a.id}>
-										<p className="pb-0.5 py-2">
-											<StatusBadge status={a.status} />
-										</p>
-										<p className="py-0.5 text-foreground">{a.company}</p>
-										<p className="py-0.5 text-muted-foreground">{a.role}</p>
-										<p className="pb-2.5 pt-0.5 font-mono-num text-muted-foreground text-xs">
-											{new Intl.DateTimeFormat(locale, {
-												dateStyle: "medium",
-											}).format(new Date(a.applied_date))}
-										</p>
-									</div>
-								))}
-							</div>
-						</>
-					)}
+					<ApplicationsTable
+						applications={recent}
+						isLoading={statsLoading}
+						compact
+						locale={locale}
+						emptyMessage="No applications yet. Add your first one on the Applications page."
+						testIdPrefix="recent-row"
+					/>
 				</div>
 			</div>
 		</div>
