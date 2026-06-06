@@ -314,11 +314,24 @@ export function SettingsPage() {
 				</div>
 				{lockEnabled && (
 					<>
-						<div className="px-6">
-							<Separator />
-						</div>
 						<div className="px-6 pt-2 space-y-4">
-							<div className="space-y-1">
+							{lock?.enabled && (
+								<>
+									<Separator className="px-6" />
+									<div className="flex flex-col space-y-1">
+										<Label className="text-sm font-medium text-foreground">
+											Current password
+										</Label>
+										<Input
+											type="password"
+											placeholder="Enter current password to save changes"
+											value={currentPassword}
+											onChange={(e) => setCurrentPassword(e.target.value)}
+										/>
+									</div>
+								</>
+							)}
+							<div className="flex flex-col space-y-1">
 								<Label className="text-sm font-medium text-foreground">
 									Password
 								</Label>
@@ -329,7 +342,7 @@ export function SettingsPage() {
 									onChange={(e) => setPassword(e.target.value)}
 								/>
 							</div>
-							<div className="space-y-1">
+							<div className="flex flex-col space-y-1">
 								<Label className="text-sm font-medium text-foreground">
 									Confirm password
 								</Label>
@@ -340,6 +353,7 @@ export function SettingsPage() {
 									onChange={(e) => setConfirmPassword(e.target.value)}
 								/>
 							</div>
+							<Separator className="px-6" />
 							<div className="space-y-1">
 								<Label className="text-sm font-medium text-foreground">
 									Session duration
@@ -374,24 +388,6 @@ export function SettingsPage() {
 						</div>
 					</>
 				)}
-				{lock?.enabled && (
-					<>
-						<div className="px-6">
-							<Separator />
-						</div>
-						<div className="px-6 pb-2 pt-2 space-y-1">
-							<Label className="text-sm font-medium text-foreground">
-								Current password
-							</Label>
-							<Input
-								type="password"
-								placeholder="Enter current password to save changes"
-								value={currentPassword}
-								onChange={(e) => setCurrentPassword(e.target.value)}
-							/>
-						</div>
-					</>
-				)}
 				<div className="px-6 pb-6 pt-4">
 					{lockError && (
 						<p className="text-sm text-red-500 mb-2">{lockError}</p>
@@ -399,12 +395,7 @@ export function SettingsPage() {
 					{lockSuccess && (
 						<p className="text-sm text-green-500 mb-2">Lock settings saved.</p>
 					)}
-					<Button
-						variant="solid"
-						color="primary"
-						onPress={handleSaveLock}
-						isLoading={upsertMutation.isPending}
-					>
+					<Button onPress={handleSaveLock} isPending={upsertMutation.isPending}>
 						Save
 					</Button>
 				</div>
