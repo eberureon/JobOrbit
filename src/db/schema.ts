@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
+import z from "zod";
 import { APPLICATION_STATUSES } from "~/lib/types";
 
 export const applications = sqliteTable("applications", {
