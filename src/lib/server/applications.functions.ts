@@ -8,70 +8,63 @@ import { createStatusHistoryRepo } from "~/lib/db/status-history.ts";
 const appRepo = createApplicationRepo(db);
 const historyRepo = createStatusHistoryRepo(db);
 
-export const listApplications = createServerFn({ method: "GET" }).handler(
-	async () => {
-		return appRepo.listAll();
+function query<T>(fn: () => T) {
+	return createServerFn({ method: "GET" }).handler(async () => fn());
+}
+
+function mutation<I, O>(input: z.ZodType<I>, fn: (data: I) => O) {
+	return createServerFn({ method: "POST" })
+		.inputValidator(input)
+		.handler(async ({ data }) => fn(data));
+}
+
+export const listApplications = query(() => appRepo.listAll());
+
+export const getApplication = mutation(z.object({ id: z.number() }), ({ id }) =>
+	appRepo.getById(id),
+);
+
+export const createApplication = mutation(insertApplicationSchema, (data) =>
+	appRepo.insert(data),
+);
+
+export const updateApplication = mutation(
+	z.object({
+		id: z.number(),
+		data: insertApplicationSchema.partial(),
+	}),
+	({ id, data }) => appRepo.update(id, data),
+);
+
+export const deleteApplication = mutation(
+	z.object({ id: z.number() }),
+	({ id }) => {
+		appRepo.remove(id);
+		return { success: true as const };
 	},
 );
 
-export const getApplication = createServerFn({ method: "GET" })
-	.inputValidator((data: { id: number }) => data)
-	.handler(async ({ data }) => {
-		return appRepo.getById(data.id);
-	});
-
-export const createApplication = createServerFn({ method: "POST" })
-	.inputValidator(insertApplicationSchema)
-	.handler(async ({ data }) => {
-		return appRepo.insert(data);
-	});
-
-export const updateApplication = createServerFn({ method: "POST" })
-	.inputValidator(
-		z.object({
-			id: z.number(),
-			data: insertApplicationSchema.partial(),
-		}),
-	)
-	.handler(async ({ data }) => {
-		return appRepo.update(data.id, data.data);
-	});
-
-export const deleteApplication = createServerFn({ method: "POST" })
-	.inputValidator((data: { id: number }) => data)
-	.handler(async ({ data }) => {
-		appRepo.remove(data.id);
-		return { success: true };
-	});
-
-export const getStats = createServerFn({ method: "GET" })
-	.inputValidator((data: { locale?: string }) => data)
-	.handler(async ({ data }) => {
-		return appRepo.stats(data.locale);
-	});
-
-export const getStatusHistory = createServerFn({ method: "GET" })
-	.inputValidator((data: { applicationId: number }) => data)
-	.handler(async ({ data }) => {
-		return historyRepo.listByApplicationId(data.applicationId);
-	});
-
-export const listStatusHistory = createServerFn({ method: "GET" }).handler(
-	async () => {
-		return historyRepo.listAllStatusHistory();
-	},
+export const getStats = mutation(
+	z.object({ locale: z.string().optional() }),
+	({ locale }) => appRepo.stats(locale),
 );
 
-export const importApplications = createServerFn({ method: "POST" })
-	.inputValidator(
-		z.object({
-			rows: z.array(insertApplicationSchema),
-		}),
-	)
-	.handler(async ({ data }) => {
-		const apps = appRepo.bulkInsert(data.rows);
+export const getStatusHistory = mutation(
+	z.object({ applicationId: z.number() }),
+	({ applicationId }) => historyRepo.listByApplicationId(applicationId),
+);
+
+export const listStatusHistory = query(() =>
+	historyRepo.listAllStatusHistory(),
+);
+
+export const importApplications = mutation(
+	z.object({ rows: z.array(insertApplicationSchema) }),
+	({ rows }) => {
+		const apps = appRepo.bulkInsert(rows);
 		return { count: apps.length };
-	});
+	},
+);
 
 const importStatusHistorySchema = z.object({
 	rows: z.array(
@@ -83,13 +76,7 @@ const importStatusHistorySchema = z.object({
 	),
 });
 
-export const importStatusHistory = createServerFn({ method: "POST" })
-	.inputValidator(importStatusHistorySchema)
-	.handler(async ({ data }) => {
-		const allApps = appRepo.listAll() as { id: number }[];
-		const appIds = new Set(allApps.map((a) => a.id));
-		const valid = data.rows.filter((r) => appIds.has(r.application_id));
-		const skipped = data.rows.length - valid.length;
-		const entries = historyRepo.bulkInsertStatusHistory(valid);
-		return { count: entries.length, skipped };
-	});
+export const importStatusHistory = mutation(
+	importStatusHistorySchema,
+	({ rows }) => historyRepo.bulkInsertValidated(rows),
+);
