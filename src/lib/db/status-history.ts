@@ -27,8 +27,10 @@ export function createStatusHistoryRepo(database: DrizzleDb) {
 			applicationId: number,
 			newStatus: string,
 			oldStatus: string | null,
+			txOverride?: DrizzleDb,
 		) {
-			return database
+			const db = txOverride ?? database;
+			return db
 				.insert(statusHistory)
 				.values({
 					application_id: applicationId,

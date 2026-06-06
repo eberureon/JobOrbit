@@ -2,17 +2,34 @@ import { desc, eq } from "drizzle-orm";
 import type { DrizzleDb } from "./types";
 import { db as defaultDb } from "~/db/index.ts";
 import type { InsertApplication } from "~/db/schema.ts";
-import {
-	applications,
-	insertApplicationSchema,
-	statusHistory,
-} from "~/db/schema.ts";
+import { applications, insertApplicationSchema } from "~/db/schema.ts";
 import { computeStats } from "~/lib/stats.ts";
 import type { Stats } from "~/lib/types.ts";
 import { createStatusHistoryRepo } from "./status-history.ts";
 
+function withHistory(repo: ReturnType<typeof createStatusHistoryRepo>) {
+	return {
+		onInsert(app: { id: number; status: string }, tx?: DrizzleDb) {
+			repo.insertEntry(app.id, app.status, null, tx);
+		},
+		onUpdate(
+			id: number,
+			newStatus: string | undefined,
+			oldStatus: string | null | undefined,
+		) {
+			if (newStatus && newStatus !== oldStatus) {
+				repo.insertEntry(id, newStatus, oldStatus ?? null);
+			}
+		},
+		onDelete(id: number) {
+			repo.deleteByApplicationId(id);
+		},
+	};
+}
+
 export function createApplicationRepo(database: DrizzleDb) {
 	const historyRepo = createStatusHistoryRepo(database);
+	const history = withHistory(historyRepo);
 
 	function listAll() {
 		return database
@@ -36,7 +53,7 @@ export function createApplicationRepo(database: DrizzleDb) {
 
 		insert(data: InsertApplication) {
 			const app = database.insert(applications).values(data).returning().get();
-			historyRepo.insertEntry(app.id, app.status, null);
+			history.onInsert(app);
 			return app;
 		},
 
@@ -54,28 +71,20 @@ export function createApplicationRepo(database: DrizzleDb) {
 				.where(eq(applications.id, id))
 				.returning()
 				.get();
-			if (partial.data.status && partial.data.status !== old.status) {
-				historyRepo.insertEntry(id, partial.data.status, old.status);
-			}
+			history.onUpdate(id, partial.data.status, old.status);
 			return updated;
 		},
 
 		remove(id: number) {
-			historyRepo.deleteByApplicationId(id);
+			history.onDelete(id);
 			database.delete(applications).where(eq(applications.id, id)).run();
 		},
 
 		bulkInsert(rows: InsertApplication[]) {
-			return database.transaction((tx) =>
+			return database.transaction((tx: DrizzleDb) =>
 				rows.map((data) => {
 					const app = tx.insert(applications).values(data).returning().get();
-					tx.insert(statusHistory)
-						.values({
-							application_id: app.id,
-							old_status: null,
-							new_status: app.status,
-						})
-						.run();
+					history.onInsert(app, tx);
 					return app;
 				}),
 			);
