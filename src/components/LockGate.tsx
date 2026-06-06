@@ -55,16 +55,15 @@ export function LockGate({ onUnlocked }: { onUnlocked: () => void }) {
 							placeholder="Password"
 							value={password}
 							onChange={(e) => setPassword(e.target.value)}
-							isRequired
+							required
+							fullWidth
 							autoFocus
 						/>
 						{error && <p className="text-sm text-red-500">{error}</p>}
 						<Button
 							type="submit"
-							variant="solid"
-							color="primary"
-							className="w-full"
-							isLoading={unlockMutation.isPending}
+							fullWidth
+							isPending={unlockMutation.isPending}
 						>
 							Unlock
 						</Button>
