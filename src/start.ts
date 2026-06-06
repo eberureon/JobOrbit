@@ -11,14 +11,21 @@ const csrfMiddleware = createCsrfMiddleware({
 	filter: (ctx) => ctx.handlerType === "serverFn",
 });
 
-const AUTH_WHITELIST = ["/checkSession", "/unlock", "/getLock"];
+const AUTH_WHITELIST = [
+	"checkSession",
+	"unlock",
+	"getLock",
+	"upsertLock",
+	"lockApp",
+];
 
 const sessionMiddleware = createMiddleware().server(
 	async ({ next, request, handlerType }) => {
 		if (handlerType !== "serverFn") return next();
 
-		const url = request?.url ?? "";
-		if (AUTH_WHITELIST.some((p) => url.includes(p))) return next();
+		const url = new URL(request?.url ?? "http://localhost");
+		const serverFnId = url.pathname.split("/").pop() ?? "";
+		if (AUTH_WHITELIST.some((p) => serverFnId === p)) return next();
 
 		const lockRepo = createLockRepo(db);
 		const lock = lockRepo.getLock();
