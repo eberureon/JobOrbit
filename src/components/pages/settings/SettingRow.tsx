@@ -15,7 +15,7 @@ export function SettingRow({
 	return (
 		<div
 			className={cn(
-				"flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-3",
+				"flex flex-wrap sm:items-center justify-between gap-4 py-3",
 				className,
 			)}
 		>
