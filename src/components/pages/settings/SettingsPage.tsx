@@ -181,7 +181,7 @@ export function SettingsPage() {
 						<AlertDialog.Body>
 							<p className="text-sm text-muted-foreground">
 								When turned off, applications will be deleted immediately
-								without asking for confirmation. This action cannot be undone.
+								without asking for confirmation. Deletion cannot be undone.
 							</p>
 						</AlertDialog.Body>
 						<AlertDialog.Footer>
