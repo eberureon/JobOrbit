@@ -394,7 +394,13 @@ export function ApplicationDialog({
 												<span className="font-mono-num text-xs text-muted-foreground shrink-0">
 													{new Intl.DateTimeFormat(locale, {
 														dateStyle: "medium",
-													}).format(new Date(entry.changed_at))}
+													}).format(
+														new Date(
+															entry.old_status
+																? entry.changed_at
+																: editing!.applied_date,
+														),
+													)}
 												</span>
 												<span className="text-muted-foreground/60">|</span>
 												{entry.old_status ? (
