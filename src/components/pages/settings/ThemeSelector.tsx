@@ -15,7 +15,11 @@ export function ThemeSelector({
 	];
 
 	return (
-		<div className="inline-flex rounded-lg border border-input bg-background p-0.5 gap-0.5">
+		<div
+			className="inline-flex rounded-lg border border-input bg-background p-0.5 gap-0.5"
+			role="radiogroup"
+			aria-label="Theme"
+		>
 			{options.map((opt) => {
 				const Icon = opt.icon;
 				const active = value === opt.value;
@@ -23,6 +27,9 @@ export function ThemeSelector({
 					<button
 						key={opt.value}
 						type="button"
+						role="radio"
+						aria-checked={active}
+						aria-label={`${opt.label} theme`}
 						onClick={() => onChange(opt.value)}
 						className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-all ${
 							active

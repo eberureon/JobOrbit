@@ -15,6 +15,7 @@ export function Sidebar({
 }) {
 	return (
 		<aside
+			aria-label="Sidebar navigation"
 			className={`hidden md:flex md:flex-col md:fixed md:inset-y-0 border-r border-sidebar-border bg-sidebar transition-[width] duration-200 ease-in-out ${
 				collapsed ? "w-14" : "w-60"
 			}`}

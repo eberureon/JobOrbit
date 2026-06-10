@@ -25,3 +25,12 @@ Per-device configuration stored in `localStorage` under the `joborbit-settings` 
 Settings include Theme (system/dark/light), Locale, default sort order, page size,
 and delete confirmation toggle. The `theme` value is also mirrored to a separate
 `localStorage` key for an inline `<script>` in `__root.tsx` that prevents FOUC.
+
+## Accessibility
+
+The app uses semantic HTML landmarks (`<nav>`, `<aside>`, `<main>`, `<section>`),
+`role="region"` with `aria-labelledby`/`aria-label` for content sections,
+`aria-label` on interactive controls, `aria-pressed`/`aria-checked` for toggle
+states, and keyboard-event handlers on clickable table rows (`tabIndex`, `onKeyDown`).
+Theme selector uses `role="radiogroup"` with `role="radio"` buttons.
+No dedicated a11y testing or linting rules are configured yet.

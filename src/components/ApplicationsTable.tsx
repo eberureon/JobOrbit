@@ -159,6 +159,7 @@ export function ApplicationsTable({
 									className="uppercase text-xs text-muted-foreground px-2"
 									onPress={() => onSort?.(SORT_KEY.COMPANY)}
 									data-testid="sort-company"
+									aria-label="Sort by company"
 								>
 									Company
 									<ArrowUpDown className="h-3 w-3" />
@@ -173,6 +174,7 @@ export function ApplicationsTable({
 									className="uppercase text-xs text-muted-foreground px-2"
 									onPress={() => onSort?.(SORT_KEY.STATUS)}
 									data-testid="sort-status"
+									aria-label="Sort by status"
 								>
 									Status
 									<ArrowUpDown className="h-3 w-3" />
@@ -185,6 +187,7 @@ export function ApplicationsTable({
 									className="uppercase text-xs text-muted-foreground px-2"
 									onPress={() => onSort?.(SORT_KEY.APPLIED_DATE)}
 									data-testid="sort-date"
+									aria-label="Sort by date"
 								>
 									Applied
 									<ArrowUpDown className="h-3 w-3" />

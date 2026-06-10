@@ -238,9 +238,12 @@ export function ResumePage() {
 			</div>
 
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-				<div className="rounded-xl border bg-card border-card-border text-card-foreground shadow-sm card-hairline">
+				<section
+					aria-label="Edit resume"
+					className="rounded-xl border bg-card border-card-border text-card-foreground shadow-sm card-hairline"
+				>
 					<div className="flex flex-col space-y-1.5 p-6 pb-3">
-						<div className="text-sm font-medium">Edit</div>
+						<h2 className="text-sm font-medium">Edit</h2>
 					</div>
 					<div className="p-6 pt-0">
 						<form
@@ -391,11 +394,14 @@ export function ResumePage() {
 							/>
 						</form>
 					</div>
-				</div>
+				</section>
 
-				<div className="rounded-xl border bg-card border-card-border text-card-foreground shadow-sm card-hairline lg:sticky lg:top-6 h-fit">
+				<section
+					aria-label="Resume preview"
+					className="rounded-xl border bg-card border-card-border text-card-foreground shadow-sm card-hairline lg:sticky lg:top-6 h-fit"
+				>
 					<div className="flex flex-row items-center justify-between space-y-0 p-6 pb-3">
-						<div className="text-sm font-medium">Preview</div>
+						<h2 className="text-sm font-medium">Preview</h2>
 						<span className="text-xs text-muted-foreground font-mono-num">
 							live
 						</span>
@@ -449,7 +455,7 @@ export function ResumePage() {
 							/>
 						)}
 					</div>
-				</div>
+				</section>
 			</div>
 		</div>
 	);

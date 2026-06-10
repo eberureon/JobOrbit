@@ -16,7 +16,11 @@ export function StatCard({
 	loading?: boolean;
 }) {
 	return (
-		<div className="rounded-xl border border-card-border bg-card card-hairline relative overflow-hidden p-5">
+		<div
+			className="rounded-xl border border-card-border bg-card card-hairline relative overflow-hidden p-5"
+			role="region"
+			aria-label={label}
+		>
 			<div className="flex items-start justify-between">
 				<div className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
 					{label}

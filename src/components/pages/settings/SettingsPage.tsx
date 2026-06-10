@@ -48,8 +48,17 @@ export function SettingsPage() {
 				</div>
 			</div>
 
-			<div className="rounded-xl border border-card-border bg-card card-hairline p-6">
-				<h2 className="text-sm font-semibold text-foreground">Appearance</h2>
+			<div
+				role="region"
+				aria-labelledby="section-appearance"
+				className="rounded-xl border border-card-border bg-card card-hairline p-6"
+			>
+				<h2
+					id="section-appearance"
+					className="text-sm font-semibold text-foreground"
+				>
+					Appearance
+				</h2>
 				<SettingRow
 					label="Theme"
 					description="Choose your preferred color scheme"
@@ -66,9 +75,11 @@ export function SettingsPage() {
 					className="pb-0"
 				>
 					<Select
+						id="locale"
 						value={settings.locale}
 						onChange={(locale) => update({ locale: locale as string })}
 						className="w-full sm:w-52"
+						aria-label="Locale"
 					>
 						<Select.Trigger>
 							<Select.Value />
@@ -92,8 +103,17 @@ export function SettingsPage() {
 				</SettingRow>
 			</div>
 
-			<div className="rounded-xl border border-card-border bg-card card-hairline p-6">
-				<h2 className="text-sm font-semibold text-foreground">Applications</h2>
+			<div
+				role="region"
+				aria-labelledby="section-applications"
+				className="rounded-xl border border-card-border bg-card card-hairline p-6"
+			>
+				<h2
+					id="section-applications"
+					className="text-sm font-semibold text-foreground"
+				>
+					Applications
+				</h2>
 				<SettingRow
 					label="Default sort"
 					description="How applications are ordered"
@@ -102,6 +122,7 @@ export function SettingsPage() {
 						value={settings.defaultSort}
 						onChange={(v) => update({ defaultSort: v as SortOrder })}
 						className="w-full sm:w-40"
+						aria-label="Default sort"
 					>
 						<Select.Trigger>
 							<Select.Value />
@@ -129,6 +150,7 @@ export function SettingsPage() {
 						value={String(settings.pageSize)}
 						onChange={(v) => update({ pageSize: Number(v) as PageSize })}
 						className="w-full sm:w-20"
+						aria-label="Page size"
 					>
 						<Select.Trigger>
 							<Select.Value />
@@ -159,6 +181,7 @@ export function SettingsPage() {
 					<Switch
 						isSelected={settings.askBeforeDelete}
 						onChange={handleDeleteToggle}
+						aria-label="Ask before deleting"
 					>
 						<Switch.Control>
 							<Switch.Thumb />
