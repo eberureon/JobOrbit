@@ -30,7 +30,7 @@ export function RootComponent() {
 				</button>
 			</div>
 
-			<div className="flex">
+			<>
 				<Sidebar
 					collapsed={collapsed}
 					onToggle={() => setSidebarOpen((v) => !v)}
@@ -63,7 +63,7 @@ export function RootComponent() {
 						<Outlet />
 					</div>
 				</main>
-			</div>
+			</>
 		</div>
 	);
 }

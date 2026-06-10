@@ -30,7 +30,7 @@ export function SettingsPage() {
 	}
 
 	return (
-		<div className="space-y-6 max-w-2xl">
+		<div className="space-y-6 max-w-2xl m-auto">
 			<div className="relative overflow-hidden rounded-xl border border-card-border bg-card card-hairline">
 				<div className="absolute inset-0 bg-dot-grid opacity-60 pointer-events-none" />
 				<div className="relative px-6 py-7">
