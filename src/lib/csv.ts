@@ -83,7 +83,7 @@ export function mapToApplicationRow(
 		data: rowData as never,
 		error: {
 			row: rowNum,
-			reason: result.error.errors.map((e) => e.message).join("; "),
+			reason: result.error.issues.map((e) => e.message).join("; "),
 		},
 	};
 }

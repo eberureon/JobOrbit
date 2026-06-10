@@ -121,17 +121,22 @@ export function ApplicationDialog({
 	return (
 		<Modal.Backdrop isOpen={open} onOpenChange={onOpenChange}>
 			<Modal.Container size="lg">
-				<Modal.Dialog className="w-[95%] max-w-2xl max-h-[90vh] overflow-y-auto">
+				<Modal.Dialog
+					aria-labelledby="dialog-heading"
+					aria-describedby="dialog-description"
+					className="w-[95%] max-w-2xl max-h-[90vh] overflow-y-auto"
+				>
 					<Modal.Header className="gap-0">
-						<Modal.Heading>
+						<Modal.Heading id="dialog-heading">
 							{editing ? "Edit Application" : "Add Application"}
 						</Modal.Heading>
-						<Description className="text-sm">
+						<Description id="dialog-description" className="text-sm">
 							Track a new job application with company, role, status and notes.
 						</Description>
 					</Modal.Header>
 					<Modal.Body>
 						<form
+							aria-label={editing ? "Edit application" : "Add application"}
 							onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
 							className="space-y-4"
 						>
@@ -204,6 +209,7 @@ export function ApplicationDialog({
 												Status
 											</Label>
 											<Select
+												aria-label="Status"
 												value={field.value}
 												onChange={(v) => field.onChange(v)}
 												className="w-full reset-input"
@@ -421,6 +427,7 @@ export function ApplicationDialog({
 							)}
 							<div className="flex items-center justify-end gap-2 pt-2">
 								<Button
+									type="button"
 									variant="outline"
 									onPress={() => onOpenChange(false)}
 									data-testid="button-cancel"
