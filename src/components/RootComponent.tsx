@@ -18,10 +18,10 @@ export function RootComponent() {
 	});
 
 	useEffect(() => {
-		if (session && isLocked === null) {
+		if (session) {
 			setIsLocked(!session.authenticated);
 		}
-	}, [session, isLocked]);
+	}, [session]);
 
 	if (isLocked === null) return null;
 	if (isLocked) return <LockGate onUnlocked={() => setIsLocked(false)} />;

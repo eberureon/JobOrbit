@@ -173,7 +173,7 @@ export function ApplicationDialog({
 												Company
 											</Label>
 											<ComboBox.InputGroup>
-												<Input placeholder="Acme Inc." />
+												<Input placeholder="Acme Inc." autoFocus />
 												<ComboBox.Trigger />
 											</ComboBox.InputGroup>
 											<ComboBox.Popover className="w-(--trigger-width)">

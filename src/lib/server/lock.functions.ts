@@ -8,7 +8,12 @@ import { scryptSync, randomBytes, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { db } from "~/db/index.ts";
 import { createLockRepo } from "~/lib/db/lock.ts";
-import { createSession, destroySession, getSession } from "./session-store.ts";
+import {
+	createSession,
+	destroyAllSessions,
+	destroySession,
+	getSession,
+} from "./session-store.ts";
 
 const lockRepo = createLockRepo(db);
 
@@ -103,13 +108,27 @@ export const upsertLock = createServerFn({ method: "POST" })
 			}
 		}
 
+		if (data.enabled === true && !current.hash && !data.password) {
+			throw new Error("Password is required to enable the lock");
+		}
+
+		if (data.password !== undefined && data.password.length < 4) {
+			throw new Error("Password must be at least 4 characters");
+		}
+
 		const update: {
 			enabled?: boolean;
 			hash?: string | null;
 			session_ttl_hours?: number | null;
 		} = {};
 
-		if (data.enabled !== undefined) update.enabled = data.enabled;
+		if (current.enabled && data.enabled === false) {
+			update.enabled = false;
+			update.hash = null;
+			destroyAllSessions();
+		} else if (data.enabled !== undefined) {
+			update.enabled = data.enabled;
+		}
 
 		if (data.password !== undefined) {
 			update.hash = data.password ? hashPassword(data.password) : null;
