@@ -156,7 +156,7 @@ export function ApplicationDialog({
 											<Label className="text-sm font-medium text-foreground">
 												Company
 											</Label>
-											<Input placeholder="Acme Inc." />
+											<Input placeholder="Acme Inc." autoFocus />
 											<FieldError>{fieldState.error?.message}</FieldError>
 										</TextField>
 									)}

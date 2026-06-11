@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
+import z from "zod";
 import { APPLICATION_STATUSES } from "~/lib/types";
 
 export const applications = sqliteTable("applications", {
@@ -67,5 +67,21 @@ export const statusHistory = sqliteTable("status_history", {
 		.notNull()
 		.default(sql`(CURRENT_TIMESTAMP)`),
 });
+
+export const lock = sqliteTable("lock", {
+	id: integer("id").primaryKey(),
+	enabled: integer("enabled", { mode: "boolean" }).notNull().default(false),
+	hash: text("hash"),
+	session_ttl_hours: integer("session_ttl_hours"),
+});
+
+export const insertLockSchema = createInsertSchema(lock, {
+	enabled: z.boolean(),
+	hash: z.string().nullable().optional(),
+	session_ttl_hours: z.number().int().nullable().optional(),
+}).omit({ id: true });
+
+export type InsertLock = z.infer<typeof insertLockSchema>;
+export type Lock = typeof lock.$inferSelect;
 
 export type StatusHistory = typeof statusHistory.$inferSelect;

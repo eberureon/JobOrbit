@@ -168,7 +168,9 @@ describe("Applications", () => {
 		render(<ApplicationsPage />, { wrapper: Wrapper });
 		await screen.findAllByText("Acme Inc");
 
-		const searchInput = screen.getByPlaceholderText("Search company or role…");
+		const searchInput = screen.getByPlaceholderText(
+			"Search company or role...",
+		);
 		fireEvent.input(searchInput, { target: { value: "ZZZ_NoMatch" } });
 
 		await waitFor(async () => {

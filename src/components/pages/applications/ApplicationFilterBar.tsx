@@ -1,11 +1,11 @@
-import { Filter, Search, X } from "lucide-react";
+import { Filter, X } from "lucide-react";
 import type { Selection } from "@heroui/react";
 import {
 	Button,
 	Dropdown,
 	Header,
-	Input,
 	Label,
+	SearchField,
 	Separator,
 } from "@heroui/react";
 import type { ApplicationStatus } from "~/lib/types";
@@ -51,24 +51,24 @@ export function ApplicationFilterBar({
 	return (
 		<>
 			<div className="relative flex-1 min-w-50 w-full">
-				<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
-				<Input
-					data-testid="input-search"
-					aria-label="Search applications"
-					placeholder="Search company or role…"
+				<SearchField
+					fullWidth
+					name="applications-search"
 					value={search}
-					onChange={(e) => onSearchChange(e.target.value)}
-					className="pl-9 w-full"
-					suppressHydrationWarning
-				/>
-				{search !== "" ? (
-					<X
-						className="absolute right-3 top-1/2 -translate-y-1/2 text-muted cursor-pointer"
-						onClick={() => onSearchChange("")}
-					/>
-				) : (
-					<></>
-				)}
+					onChange={onSearchChange}
+					onClear={() => onSearchChange("")}
+					aria-label="Search applications"
+				>
+					<SearchField.Group className="reset-input">
+						<SearchField.SearchIcon />
+						<SearchField.Input
+							data-testid="input-search"
+							placeholder="Search company or role..."
+							suppressHydrationWarning
+						/>
+						<SearchField.ClearButton />
+					</SearchField.Group>
+				</SearchField>
 			</div>
 			<Dropdown>
 				<Button variant="outline" data-testid="button-filter-status">

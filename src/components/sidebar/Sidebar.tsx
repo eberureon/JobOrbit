@@ -2,16 +2,18 @@ import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { Button } from "@heroui/react";
 import { Logo } from "../Logo";
 import { ThemeToggle } from "../ThemeToggle";
-import { SettingsLink } from "./SettingsLinks";
+import { LockToggle, SettingsLink } from ".";
 import { NavLinks } from "./NavLinks";
 import { Link } from "@tanstack/react-router";
 
 export function Sidebar({
 	collapsed,
 	onToggle,
+	onLock,
 }: {
 	collapsed: boolean;
 	onToggle: () => void;
+	onLock?: () => void;
 }) {
 	return (
 		<aside
@@ -51,7 +53,14 @@ export function Sidebar({
 			<div
 				className={`border-t border-sidebar-border ${collapsed ? "p-2" : "p-3"}`}
 			>
-				<SettingsLink collapsed={collapsed} />
+				<div
+					className={
+						collapsed ? "flex flex-col items-center gap-2" : "space-y-1"
+					}
+				>
+					<LockToggle collapsed={collapsed} onLocked={onLock} />
+					<SettingsLink collapsed={collapsed} />
+				</div>
 			</div>
 		</aside>
 	);
