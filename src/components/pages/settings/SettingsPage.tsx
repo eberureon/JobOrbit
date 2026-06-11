@@ -1,6 +1,7 @@
 import {
 	AlertDialog,
 	Button,
+	Description,
 	Input,
 	Label,
 	ListBox,
@@ -35,7 +36,7 @@ export function SettingsPage() {
 	const queryClient = useQueryClient();
 
 	const { data: lock } = useQuery({
-		queryKey: ["lock-config"],
+		queryKey: ["lock"],
 		queryFn: () => getLock(),
 	});
 
@@ -68,7 +69,7 @@ export function SettingsPage() {
 			setPassword("");
 			setConfirmPassword("");
 			setCurrentPassword("");
-			queryClient.invalidateQueries({ queryKey: ["lock-config"] });
+			queryClient.invalidateQueries({ queryKey: ["lock"] });
 			queryClient.invalidateQueries({ queryKey: ["session"] });
 		},
 		onError: (err: Error) => {
@@ -81,9 +82,19 @@ export function SettingsPage() {
 		setLockError("");
 		setLockSuccess(false);
 
-		if (lockEnabled && password && password !== confirmPassword) {
-			setLockError("Passwords do not match");
-			return;
+		if (lockEnabled) {
+			if (!lock?.hash && !password) {
+				setLockError("Password is required to enable the lock");
+				return;
+			}
+			if (password && password.length < 4) {
+				setLockError("Password must be at least 4 characters");
+				return;
+			}
+			if (password && password !== confirmPassword) {
+				setLockError("Passwords do not match");
+				return;
+			}
 		}
 
 		const data: {
@@ -293,11 +304,9 @@ export function SettingsPage() {
 				</SettingRow>
 			</div>
 
-			<div className="rounded-xl border border-card-border bg-card card-hairline">
-				<div className="px-6 pt-6 pb-2">
-					<h2 className="text-sm font-semibold text-foreground">App Lock</h2>
-				</div>
-				<div className="px-6 pb-2">
+			<div className="rounded-xl border border-card-border bg-card card-hairline p-6">
+				<h2 className="text-sm font-semibold text-foreground">App Lock</h2>
+				<>
 					<SettingRow
 						label="Enable lock"
 						description="Require a password to access the app"
@@ -311,59 +320,77 @@ export function SettingsPage() {
 							</Switch.Control>
 						</Switch>
 					</SettingRow>
-				</div>
-				{lockEnabled && (
-					<>
-						<div className="px-6 pt-2 space-y-4">
-							{lock?.enabled && (
-								<>
-									<Separator className="px-6" />
-									<div className="flex flex-col space-y-1">
-										<Label className="text-sm font-medium text-foreground">
-											Current password
-										</Label>
-										<Input
-											type="password"
-											placeholder="Enter current password to save changes"
-											value={currentPassword}
-											onChange={(e) => setCurrentPassword(e.target.value)}
-										/>
-									</div>
-								</>
-							)}
-							<div className="flex flex-col space-y-1">
+					{lock?.enabled && (
+						<>
+							<div className="flex flex-col space-y-1 mb-3">
 								<Label className="text-sm font-medium text-foreground">
-									Password
+									Current password
 								</Label>
 								<Input
 									type="password"
+									placeholder="Enter current password to save changes"
+									value={currentPassword}
+									onChange={(e) => setCurrentPassword(e.target.value)}
+								/>
+							</div>
+						</>
+					)}
+					<Separator />
+				</>
+				{lockEnabled && (
+					<>
+						<div className="mt-3 space-y-4">
+							<div className="flex flex-col gap-1">
+								<Label
+									htmlFor="password"
+									className="text-sm font-medium text-foreground"
+								>
+									Password
+								</Label>
+								<Input
+									id="password"
+									type="password"
+									aria-describedby="password-description"
 									placeholder={lock?.hash ? "Change password" : "Set password"}
 									value={password}
 									onChange={(e) => setPassword(e.target.value)}
 								/>
+								<Description id="password-description">
+									Must be at least 4 characters
+								</Description>
 							</div>
 							<div className="flex flex-col space-y-1">
-								<Label className="text-sm font-medium text-foreground">
+								<Label
+									htmlFor="confirmPassword"
+									className="text-sm font-medium text-foreground"
+								>
 									Confirm password
 								</Label>
 								<Input
+									id="confirmPassword"
 									type="password"
 									placeholder="Re-enter password"
+									aria-label="Confirm Password"
 									value={confirmPassword}
 									onChange={(e) => setConfirmPassword(e.target.value)}
 								/>
 							</div>
-							<Separator className="px-6" />
+							<Separator />
 							<div className="space-y-1">
-								<Label className="text-sm font-medium text-foreground">
+								<Label
+									htmlFor="sessionDuration"
+									className="text-sm font-medium text-foreground"
+								>
 									Session duration
 								</Label>
 								<Select
+									id="sessionDuration"
 									value={String(sessionTtl ?? -1)}
 									onChange={(v) =>
 										setSessionTtl(Number(v) === -1 ? null : Number(v))
 									}
 									className="w-40"
+									aria-label="Session duration"
 								>
 									<Select.Trigger>
 										<Select.Value />
@@ -388,17 +415,19 @@ export function SettingsPage() {
 						</div>
 					</>
 				)}
-				<div className="px-6 pb-6 pt-4">
-					{lockError && (
-						<p className="text-sm text-red-500 mb-2">{lockError}</p>
-					)}
+				<>
+					{lockError && <p className="text-sm text-danger mt-2">{lockError}</p>}
 					{lockSuccess && (
-						<p className="text-sm text-green-500 mb-2">Lock settings saved.</p>
+						<p className="text-sm text-success mt-2">Lock settings saved.</p>
 					)}
-					<Button onPress={handleSaveLock} isPending={upsertMutation.isPending}>
+					<Button
+						className="mt-3"
+						onPress={handleSaveLock}
+						isPending={upsertMutation.isPending}
+					>
 						Save
 					</Button>
-				</div>
+				</>
 			</div>
 
 			<AlertDialog.Backdrop
