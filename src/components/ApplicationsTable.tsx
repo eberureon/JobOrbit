@@ -166,7 +166,7 @@ export function ApplicationsTable({
 								</Button>
 							</th>
 							<th className="px-4 py-3 font-medium max-w-52">Role</th>
-							<th className="px-4 py-3 font-medium">Location</th>
+							<th className="px-4 py-3 font-medium max-w-52">Location</th>
 							<th className="px-2 py-3 font-medium">
 								<Button
 									size="sm"

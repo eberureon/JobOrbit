@@ -9,6 +9,22 @@ export const APPLICATION_STATUSES = [
 
 export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 
+export const APPLICATION_SOURCES = [
+	"LinkedIn",
+	"Referral",
+	"Recruiter/Agency",
+	"Company Website",
+	"Direct Email",
+	"Networking",
+	"Glassdoor",
+	"Indeed",
+	"DEVjobs",
+	"StepStone",
+	"Monster",
+] as const;
+
+export type ApplicationSource = (typeof APPLICATION_SOURCES)[number];
+
 export interface Stats {
 	total: number;
 	last7Days: number;

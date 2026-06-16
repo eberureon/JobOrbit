@@ -26,6 +26,15 @@ Settings include Theme (system/dark/light), Locale, default sort order, page siz
 and delete confirmation toggle. The `theme` value is also mirrored to a separate
 `localStorage` key for an inline `<script>` in `__root.tsx` that prevents FOUC.
 
+## Source
+
+The channel through which a job application was discovered or initiated. Stored as
+free text in the database. The UI presents a curated list of common sources
+(LinkedIn, Referral, Recruiter/Agency, Company Website, Direct Email, Networking,
+Glassdoor, Indeed, DEVjobs, StepStone, Monster) via a ComboBox that also accepts
+arbitrary custom values, so the list is a UX convenience rather than a validation
+constraint.
+
 ## Accessibility
 
 The app uses semantic HTML landmarks (`<nav>`, `<aside>`, `<main>`, `<section>`),

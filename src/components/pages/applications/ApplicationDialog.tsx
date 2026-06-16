@@ -6,6 +6,7 @@ import { parseDate } from "@internationalized/date";
 import {
 	Button,
 	Calendar,
+	ComboBox,
 	DateField,
 	DatePicker,
 	FieldError,
@@ -33,7 +34,7 @@ import {
 	updateApplication,
 } from "~/lib/server/applications.functions";
 import type { ApplicationStatus } from "~/lib/types";
-import { APPLICATION_STATUSES } from "~/lib/types";
+import { APPLICATION_SOURCES, APPLICATION_STATUSES } from "~/lib/types";
 import { getEffectiveLocale, useSettings } from "~/lib/use-settings";
 
 function todayISO(): string {
@@ -329,19 +330,38 @@ export function ApplicationDialog({
 									control={form.control}
 									name="source"
 									render={({ field, fieldState }) => (
-										<TextField
-											value={field.value}
-											onChange={field.onChange}
-											onBlur={field.onBlur}
+										<ComboBox
+											allowsCustomValue
+											inputValue={field.value}
+											onInputChange={field.onChange}
 											isInvalid={!!fieldState.error}
+											className="w-full"
 											data-testid="input-source"
 										>
 											<Label className="text-sm font-medium text-foreground">
 												Source
 											</Label>
-											<Input placeholder="LinkedIn / Referral / Indeed" />
+											<ComboBox.InputGroup>
+												<Input placeholder="LinkedIn / Referral / Indeed" />
+												<ComboBox.Trigger />
+											</ComboBox.InputGroup>
+											<ComboBox.Popover>
+												<ListBox>
+													{APPLICATION_SOURCES.map((s) => (
+														<ListBox.Item
+															key={s}
+															id={s}
+															textValue={s}
+															data-testid={`option-source-${s}`}
+														>
+															{s}
+															<ListBox.ItemIndicator />
+														</ListBox.Item>
+													))}
+												</ListBox>
+											</ComboBox.Popover>
 											<FieldError>{fieldState.error?.message}</FieldError>
-										</TextField>
+										</ComboBox>
 									)}
 								/>
 								<Controller
