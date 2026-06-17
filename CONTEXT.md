@@ -4,6 +4,12 @@
 
 A tracked job application with company, role, status, and metadata.
 
+## Company
+
+The organisation a job application is submitted to. Stored as free text; the UI
+provides a ComboBox that suggests previously-used company names as the user types,
+while still allowing entry of a new company not seen before.
+
 ## Status History
 
 A chronological log of status changes for an Application. Each entry records

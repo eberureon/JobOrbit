@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
@@ -31,6 +32,7 @@ import { useToast } from "~/hooks/use-toast";
 import {
 	createApplication,
 	getStatusHistory,
+	listApplications,
 	updateApplication,
 } from "~/lib/server/applications.functions";
 import type { ApplicationStatus } from "~/lib/types";
@@ -89,6 +91,17 @@ export function ApplicationDialog({
 		enabled: !!editing,
 	});
 
+	const { data: allApps = [] } = useQuery<Application[]>({
+		queryKey: ["applications"],
+		queryFn: () => listApplications({}),
+		staleTime: 1000 * 60 * 5,
+	});
+
+	const companyOptions = useMemo(() => {
+		const unique = new Set(allApps.map((a) => a.company).filter(Boolean));
+		return [...unique].sort((a, b) => a.localeCompare(b));
+	}, [allApps]);
+
 	const mutation = useMutation({
 		mutationFn: async (data: InsertApplication) => {
 			if (editing) {
@@ -146,20 +159,40 @@ export function ApplicationDialog({
 									control={form.control}
 									name="company"
 									render={({ field, fieldState }) => (
-										<TextField
-											value={field.value}
-											onChange={field.onChange}
-											onBlur={field.onBlur}
+										<ComboBox
+											allowsCustomValue
+											menuTrigger="input"
+											inputValue={field.value}
+											onInputChange={field.onChange}
 											isInvalid={!!fieldState.error}
 											isRequired
+											className="w-full"
 											data-testid="input-company"
 										>
 											<Label className="text-sm font-medium text-foreground">
 												Company
 											</Label>
-											<Input placeholder="Acme Inc." />
+											<ComboBox.InputGroup>
+												<Input placeholder="Acme Inc." />
+												<ComboBox.Trigger />
+											</ComboBox.InputGroup>
+											<ComboBox.Popover className="w-(--trigger-width)">
+												<ListBox>
+													{companyOptions.map((company) => (
+														<ListBox.Item
+															key={company}
+															id={company}
+															textValue={company}
+															data-testid={`option-company-${company}`}
+														>
+															{company}
+															<ListBox.ItemIndicator />
+														</ListBox.Item>
+													))}
+												</ListBox>
+											</ComboBox.Popover>
 											<FieldError>{fieldState.error?.message}</FieldError>
-										</TextField>
+										</ComboBox>
 									)}
 								/>
 								<Controller
@@ -345,7 +378,7 @@ export function ApplicationDialog({
 												<Input placeholder="LinkedIn / Referral / Indeed" />
 												<ComboBox.Trigger />
 											</ComboBox.InputGroup>
-											<ComboBox.Popover>
+											<ComboBox.Popover className="w-(--trigger-width)">
 												<ListBox>
 													{APPLICATION_SOURCES.map((s) => (
 														<ListBox.Item
