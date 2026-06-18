@@ -32,17 +32,17 @@ export function NavLinks({
 						to={item.to}
 						activeOptions={item.activeOptions}
 						onClick={onNavigate}
-						className={`group relative flex items-center rounded-md py-2 text-sm font-medium transition-colors ${
+						className={`group relative flex items-center py-1.5 text-sm font-medium transition-colors ${
 							collapsed ? "justify-center" : "gap-3 px-3"
 						} ${
 							isActive
 								? "bg-sidebar-accent text-sidebar-accent-foreground"
-								: "text-muted-foreground hover:text-foreground"
+								: "text-sidebar-foreground/65 hover:text-lagoon-deep hover:bg-default"
 						}`}
 						title={collapsed ? item.label : undefined}
 					>
 						<Icon
-							className={`h-4 w-4 shrink-0 ${isActive ? "text-primary" : "text-muted-foreground"}`}
+							className={`h-4 w-4 shrink-0 ${isActive ? "text-primary" : ""}`}
 						/>
 						<span
 							className={`transition-opacity duration-200 ${collapsed ? "opacity-0 w-0 overflow-hidden inline-block whitespace-nowrap" : ""}`}

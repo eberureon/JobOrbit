@@ -51,16 +51,10 @@ export function Sidebar({
 				<NavLinks collapsed={collapsed} />
 			</div>
 			<div
-				className={`border-t border-sidebar-border ${collapsed ? "p-2" : "p-3"}`}
+				className={`border-t border-sidebar-border ${collapsed ? "flex flex-col items-center gap-2 p-2" : "space-y-1 p-3"}`}
 			>
-				<div
-					className={
-						collapsed ? "flex flex-col items-center gap-2" : "space-y-1"
-					}
-				>
-					<LockToggle collapsed={collapsed} onLocked={onLock} />
-					<SettingsLink collapsed={collapsed} />
-				</div>
+				<LockToggle collapsed={collapsed} onLocked={onLock} />
+				<SettingsLink collapsed={collapsed} />
 			</div>
 		</aside>
 	);

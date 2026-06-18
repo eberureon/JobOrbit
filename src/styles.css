@@ -20,7 +20,7 @@
   --color-primary-foreground: var(--accent-foreground);
   --color-primary-border: var(--accent);
   --color-secondary: var(--default);
-  --color-secondary-foreground: var(--default-foreground);
+  --color-secondary-foreground: var(--foreground);
   --color-secondary-border: var(--border);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted);
@@ -36,7 +36,7 @@
   --color-sidebar-foreground: var(--surface-foreground);
   --color-sidebar-border: var(--border);
   --color-sidebar-accent: var(--default);
-  --color-sidebar-accent-foreground: var(--default-foreground);
+  --color-sidebar-accent-foreground: var(--foreground);
   --color-sidebar-primary: var(--accent);
   --color-sidebar-primary-foreground: var(--accent-foreground);
   --color-sidebar-ring: var(--focus);
@@ -70,7 +70,6 @@
   --danger: oklch(65.32% 0.2335 14.54);
   --danger-foreground: oklch(99.11% 0 0);
   --default: oklch(94% 0 160);
-  --default-foreground: oklch(21.03% 0.0059 160);
   --field-background: oklch(100% 0 160);
   --field-border: transparent;
   --field-foreground: oklch(21.03% 0 160);
@@ -139,7 +138,6 @@
   --danger: oklch(59.4% 0.1973 13.43);
   --danger-foreground: oklch(99.11% 0 0);
   --default: oklch(27.4% 0 160);
-  --default-foreground: oklch(99.11% 0 0);
   --field-background: oklch(21.03% 0 160);
   --field-border: transparent;
   --field-foreground: oklch(99.11% 0 160);
@@ -202,12 +200,13 @@ body {
 }
 
 a {
-  @apply text-lagoon-deep hover:text-sea-ink;
-  text-decoration-color: color-mix(
-    in oklab,
-    var(--lagoon-deep) 30%,
-    transparent
-  );
+  @apply rounded-lg;
+  /* @apply text-lagoon-deep hover:text-sea-ink; */
+  /* text-decoration-color: color-mix( */
+  /*   in oklab, */
+  /*   var(--lagoon-deep) 30%, */
+  /*   transparent */
+  /* ); */
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
 }
@@ -293,5 +292,9 @@ pre code {
     [data-theme="dark"] & {
       --tw-ring-offset-color: var(--background);
     }
+  }
+
+  .button {
+    @apply rounded-lg;
   }
 }
