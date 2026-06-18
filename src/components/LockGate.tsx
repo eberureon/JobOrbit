@@ -27,7 +27,7 @@ export function LockGate({ onUnlocked }: { onUnlocked: () => void }) {
 		},
 	});
 
-	function handleSubmit(e: React.FormEvent) {
+	function handleSubmit(e: React.ChangeEvent) {
 		e.preventDefault();
 		setError("");
 		unlockMutation.mutate(password);

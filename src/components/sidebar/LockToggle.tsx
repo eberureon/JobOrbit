@@ -41,12 +41,12 @@ export function LockToggle({
 			isIconOnly={collapsed}
 			onPress={() => lockMutation.mutate()}
 			className={`group text-sidebar-foreground/65 hover:text-lagoon-deep ${collapsed ? "" : "justify-start gap-2.5 px-3"}`}
-			aria-label="Lock"
+			aria-label="Lock Page"
 		>
 			<LockKeyhole className="h-4 w-4 shrink-0" />
 			{!collapsed && (
 				<span className="transition-opacity duration-200 inline-block">
-					Lock
+					Lock Page
 				</span>
 			)}
 		</Button>
