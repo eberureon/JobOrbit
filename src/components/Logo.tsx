@@ -7,43 +7,26 @@ export function Logo({
 }) {
 	return (
 		<div
-			className={`flex items-center ${collapsed ? "gap-0" : "gap-2"} ${className}`}
+			className={`flex items-center ${collapsed ? "w-8 justify-center" : "gap-2"} ${className}`}
 		>
 			<svg
-				width="24"
-				height="24"
-				viewBox="0 0 24 24"
+				viewBox="0 0 397 418"
 				fill="none"
-				aria-hidden="true"
-				className="text-foreground shrink-0"
-				aria-label="JobOrbit"
+				xmlns="http://www.w3.org/2000/svg"
+				className={`shrink-0 ${collapsed ? "h-7 w-7" : "h-10 w-auto"}`}
 			>
-				<rect
-					x="3"
-					y="3"
-					width="18"
-					height="18"
-					rx="4"
-					stroke="currentColor"
-					strokeWidth="1.5"
+				<path
+					d="M396.323 196.076L198.162 0L0 196.076L12.7449 208.591L0 221.107L198.162 417.182L396.323 221.107L383.578 208.591L396.323 196.076ZM5.90313 196.076L198.162 5.84055L390.42 196.076L380.637 205.754L198.162 25.2187L15.6861 205.671L5.90313 196.076ZM377.675 208.591L198.162 386.144L18.6481 208.591L198.162 31.0384L377.675 208.591ZM390.42 221.107L198.162 411.342L5.90313 221.107L15.6861 211.428L198.162 391.964L380.637 211.511L390.42 221.107Z"
+					fill="currentColor"
+					className="text-accent-foreground"
 				/>
 				<path
-					d="M8 8v4a4 4 0 0 0 8 0V8"
-					stroke="currentColor"
-					strokeWidth="1.5"
-					strokeLinecap="round"
+					d="M167.975 266.957V257.37H161.98V273.354C193.948 273.354 220.134 247.38 220.134 215.22V137.49H230.124V131.496H214.14V215.22C214.14 222.405 212.737 228.995 210.144 235.2V131.496H204.15V245.786C202.939 247.572 201.556 249.186 200.154 250.781V131.496H184.17V137.49H194.16V256.179C186.763 261.962 177.772 265.766 167.975 266.957Z"
+					fill="currentColor"
+					className="text-accent-foreground"
 				/>
-				<circle cx="18" cy="6" r="2" fill="var(--primary)" />
 			</svg>
-			<span
-				className={`font-semibold tracking-tight text-foreground text-base transition-opacity duration-200 ${
-					collapsed
-						? "opacity-0 w-0 overflow-hidden inline-block whitespace-nowrap"
-						: ""
-				}`}
-			>
-				Job<span className="text-primary">Orbit</span>
-			</span>
+			{!collapsed && <span className="sr-only">JobOrbit</span>}
 		</div>
 	);
 }
