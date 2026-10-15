@@ -10,5 +10,5 @@ export const getResume = createServerFn({ method: "GET" }).handler(async () =>
 );
 
 export const upsertResume = createServerFn({ method: "POST" })
-	.inputValidator(insertResumeSchema)
+	.validator(insertResumeSchema)
 	.handler(async ({ data }) => resumeRepo.upsertResume(data));

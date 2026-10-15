@@ -66,7 +66,7 @@ export const checkSession = createServerFn({ method: "GET" }).handler(
 );
 
 export const unlock = createServerFn({ method: "POST" })
-	.inputValidator(z.object({ password: z.string() }))
+	.validator(z.object({ password: z.string() }))
 	.handler(async ({ data }) => {
 		const lock = lockRepo.getLock();
 		if (!lock.enabled || !lock.hash) {
@@ -88,7 +88,7 @@ export const lockApp = createServerFn({ method: "POST" }).handler(async () => {
 });
 
 export const upsertLock = createServerFn({ method: "POST" })
-	.inputValidator(
+	.validator(
 		z.object({
 			enabled: z.boolean().optional(),
 			password: z.string().optional(),

@@ -5,15 +5,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Resume } from "~/db/schema";
 import { createWrapper } from "~/test/test-utils";
 import { ResumePage } from "./ResumePage";
-import * as resumeFns from "~/lib/server/resume.functions";
 
-vi.mock("~/lib/server/resume.functions", async (importOriginal) => {
-	const actual = (await importOriginal()) as typeof resumeFns;
-	return {
-		...actual,
-		getResume: vi.fn(),
-		upsertResume: vi.fn(),
-	};
+const resumeFns = vi.hoisted(() => ({
+	getResume: vi.fn(),
+	upsertResume: vi.fn(),
+}));
+
+vi.mock("~/lib/server/resume.functions", () => {
+	return resumeFns;
 });
 
 const emptyResume: Resume = {

@@ -13,15 +13,15 @@ export const listApplications = createServerFn({ method: "GET" }).handler(
 );
 
 export const getApplication = createServerFn({ method: "GET" })
-	.inputValidator(z.object({ id: z.number() }))
+	.validator(z.object({ id: z.number() }))
 	.handler(async ({ data }) => appRepo.getById(data.id));
 
 export const createApplication = createServerFn({ method: "POST" })
-	.inputValidator(insertApplicationSchema)
+	.validator(insertApplicationSchema)
 	.handler(async ({ data }) => appRepo.insert(data));
 
 export const updateApplication = createServerFn({ method: "POST" })
-	.inputValidator(
+	.validator(
 		z.object({
 			id: z.number(),
 			data: insertApplicationSchema.partial(),
@@ -30,18 +30,18 @@ export const updateApplication = createServerFn({ method: "POST" })
 	.handler(async ({ data }) => appRepo.update(data.id, data.data));
 
 export const deleteApplication = createServerFn({ method: "POST" })
-	.inputValidator(z.object({ id: z.number() }))
+	.validator(z.object({ id: z.number() }))
 	.handler(async ({ data }) => {
 		appRepo.remove(data.id);
 		return { success: true as const };
 	});
 
 export const getStats = createServerFn({ method: "GET" })
-	.inputValidator(z.object({ locale: z.string().optional() }))
+	.validator(z.object({ locale: z.string().optional() }))
 	.handler(async ({ data }) => appRepo.stats(data.locale));
 
 export const getStatusHistory = createServerFn({ method: "GET" })
-	.inputValidator(z.object({ applicationId: z.number() }))
+	.validator(z.object({ applicationId: z.number() }))
 	.handler(async ({ data }) =>
 		historyRepo.listByApplicationId(data.applicationId),
 	);
@@ -51,7 +51,7 @@ export const listStatusHistory = createServerFn({ method: "GET" }).handler(
 );
 
 export const importApplications = createServerFn({ method: "POST" })
-	.inputValidator(z.object({ rows: z.array(insertApplicationSchema) }))
+	.validator(z.object({ rows: z.array(insertApplicationSchema) }))
 	.handler(async ({ data }) => {
 		const apps = appRepo.bulkInsert(data.rows);
 		return { count: apps.length };
@@ -68,5 +68,5 @@ const importStatusHistorySchema = z.object({
 });
 
 export const importStatusHistory = createServerFn({ method: "POST" })
-	.inputValidator(importStatusHistorySchema)
+	.validator(importStatusHistorySchema)
 	.handler(async ({ data }) => historyRepo.bulkInsertValidated(data.rows));
